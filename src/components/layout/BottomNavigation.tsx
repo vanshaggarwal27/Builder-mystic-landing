@@ -9,6 +9,7 @@ import {
   Users,
   Star,
   CheckCircle,
+  Bell,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -24,14 +25,14 @@ interface NavItem {
 const studentNavItems: NavItem[] = [
   { icon: Home, label: "Home", path: "/student/dashboard" },
   { icon: Calendar, label: "Schedule", path: "/student/schedule" },
-  { icon: UserCheck, label: "Attendance", path: "/student/attendance" },
+  { icon: Bell, label: "Notices", path: "/student/notices" },
   { icon: User, label: "Profile", path: "/student/profile" },
 ];
 
 const teacherNavItems: NavItem[] = [
   { icon: Home, label: "Home", path: "/teacher/dashboard" },
   { icon: ClipboardList, label: "Classes", path: "/teacher/classes" },
-  { icon: UserCheck, label: "Attendance", path: "/teacher/attendance" },
+  { icon: Bell, label: "Notices", path: "/teacher/notices" },
   { icon: User, label: "Profile", path: "/teacher/profile" },
 ];
 

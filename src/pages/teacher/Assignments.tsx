@@ -1,5 +1,5 @@
-import React from "react";
-import { Plus, Star } from "lucide-react";
+import React, { useState } from "react";
+import { Plus, Star, Upload, Download, File } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
@@ -7,8 +7,27 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TeacherAssignments() {
+  const { toast } = useToast();
+
+  const handleFileUpload = (assignmentId: string) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".pdf,.doc,.docx,.txt,.jpg,.png";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        toast({
+          title: "Assignment Material Uploaded",
+          description: `${file.name} has been added to the assignment.`,
+        });
+      }
+    };
+    input.click();
+  };
+
   const assignments = [
     {
       id: "1",
@@ -18,6 +37,10 @@ export default function TeacherAssignments() {
       status: "pending" as const,
       submissions: 25,
       totalStudents: 30,
+      materials: [
+        { name: "Algebra_Chapter5_Exercises.pdf", size: "2.1 MB" },
+        { name: "Answer_Sheet_Template.docx", size: "156 KB" },
+      ],
     },
     {
       id: "2",
@@ -27,6 +50,7 @@ export default function TeacherAssignments() {
       status: "active" as const,
       submissions: 12,
       totalStudents: 28,
+      materials: [{ name: "Triangle_Properties_Guide.pdf", size: "1.8 MB" }],
     },
     {
       id: "3",
@@ -36,6 +60,10 @@ export default function TeacherAssignments() {
       status: "completed" as const,
       submissions: 25,
       totalStudents: 25,
+      materials: [
+        { name: "Calculus_Problems.pdf", size: "2.5 MB" },
+        { name: "Solution_Guide.pdf", size: "1.2 MB" },
+      ],
     },
   ];
 
@@ -117,6 +145,35 @@ export default function TeacherAssignments() {
                   </div>
                 </div>
 
+                {/* Assignment Materials */}
+                {assignment.materials && assignment.materials.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">
+                      Assignment Materials:
+                    </h4>
+                    <div className="space-y-2">
+                      {assignment.materials.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                        >
+                          <div className="flex items-center gap-2">
+                            <File className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {file.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {file.size}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="mb-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-gray-600">Submissions</span>
@@ -132,7 +189,7 @@ export default function TeacherAssignments() {
                   />
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   {assignment.status === "pending" && (
                     <>
                       <Button
@@ -140,6 +197,14 @@ export default function TeacherAssignments() {
                         className="bg-purple-600 hover:bg-purple-700"
                       >
                         Review Submissions
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleFileUpload(assignment.id)}
+                      >
+                        <Upload className="h-3 w-3 mr-1" />
+                        Add Material
                       </Button>
                       <Button size="sm" variant="outline">
                         Send Reminder

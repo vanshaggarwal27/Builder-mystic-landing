@@ -1,5 +1,13 @@
-import React from "react";
-import { Clock, BookOpen, CheckCircle } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Clock,
+  BookOpen,
+  CheckCircle,
+  Upload,
+  Download,
+  File,
+  Plus,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
@@ -7,8 +15,54 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FadeTransition } from "@/components/layout/PageTransition";
+import { useToast } from "@/hooks/use-toast";
 
 export default function StudentAssignments() {
+  const { toast } = useToast();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileUpload = (assignmentId: string) => {
+    if (!selectedFile) {
+      // Trigger file input click
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".pdf,.doc,.docx,.txt,.jpg,.png";
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          setSelectedFile(file);
+          toast({
+            title: "File Selected",
+            description: `Ready to upload: ${file.name}`,
+          });
+          // Simulate upload
+          setTimeout(() => {
+            toast({
+              title: "File Uploaded Successfully!",
+              description: `Your assignment "${file.name}" has been submitted.`,
+            });
+            setSelectedFile(null);
+          }, 1000);
+        }
+      };
+      input.click();
+    }
+  };
+
+  const handleDownload = (fileName: string) => {
+    toast({
+      title: "Download Started",
+      description: `Downloading ${fileName}...`,
+    });
+    // Simulate download
+    setTimeout(() => {
+      toast({
+        title: "Download Complete",
+        description: `${fileName} has been downloaded.`,
+      });
+    }, 1000);
+  };
+
   const assignments = [
     {
       id: "1",
@@ -18,6 +72,11 @@ export default function StudentAssignments() {
       status: "pending" as const,
       priority: "urgent" as const,
       description: "Complete exercises 1-20 from Algebra Chapter 5",
+      attachments: [
+        { name: "Algebra_Chapter5_Exercises.pdf", size: "2.1 MB" },
+        { name: "Answer_Sheet.docx", size: "156 KB" },
+      ],
+      canUpload: true,
     },
     {
       id: "2",
@@ -27,6 +86,11 @@ export default function StudentAssignments() {
       status: "pending" as const,
       priority: "normal" as const,
       description: "Write a report on Newton's Laws of Motion",
+      attachments: [
+        { name: "Physics_Project_Guidelines.pdf", size: "1.8 MB" },
+        { name: "Template.docx", size: "245 KB" },
+      ],
+      canUpload: true,
     },
     {
       id: "3",
@@ -36,6 +100,15 @@ export default function StudentAssignments() {
       status: "completed" as const,
       priority: "normal" as const,
       description: "Essay on Shakespeare's Romeo and Juliet",
+      attachments: [{ name: "Essay_Requirements.pdf", size: "890 KB" }],
+      submittedFiles: [
+        {
+          name: "Romeo_Juliet_Essay.docx",
+          size: "1.2 MB",
+          uploadDate: "March 19, 2024",
+        },
+      ],
+      canUpload: false,
     },
   ];
 
@@ -132,6 +205,75 @@ export default function StudentAssignments() {
                     </div>
                   </div>
 
+                  {/* File Attachments */}
+                  {assignment.attachments &&
+                    assignment.attachments.length > 0 && (
+                      <div className="mt-3 mb-4">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">
+                          Assignment Files:
+                        </h4>
+                        <div className="space-y-2">
+                          {assignment.attachments.map((file, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                            >
+                              <div className="flex items-center gap-2">
+                                <File className="h-4 w-4 text-blue-600" />
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {file.name}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {file.size}
+                                  </div>
+                                </div>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownload(file.name)}
+                                className="btn-animate"
+                              >
+                                <Download className="h-3 w-3 mr-1" />
+                                Download
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Submitted Files */}
+                  {assignment.submittedFiles &&
+                    assignment.submittedFiles.length > 0 && (
+                      <div className="mt-3 mb-4">
+                        <h4 className="text-sm font-medium text-green-700 mb-2">
+                          Your Submissions:
+                        </h4>
+                        <div className="space-y-2">
+                          {assignment.submittedFiles.map((file, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between p-2 bg-green-50 rounded-lg"
+                            >
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {file.name}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {file.size} • Submitted on {file.uploadDate}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                   <div className="flex gap-2">
                     {assignment.status === "pending" && (
                       <>
@@ -139,6 +281,17 @@ export default function StudentAssignments() {
                           <BookOpen className="h-4 w-4 mr-1" />
                           Start Work
                         </Button>
+                        {assignment.canUpload && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="btn-animate"
+                            onClick={() => handleFileUpload(assignment.id)}
+                          >
+                            <Upload className="h-4 w-4 mr-1" />
+                            Upload Work
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="outline"

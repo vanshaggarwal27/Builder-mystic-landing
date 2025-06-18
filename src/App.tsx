@@ -17,6 +17,7 @@ import StudentSchedule from "./pages/student/Schedule";
 import StudentAttendance from "./pages/student/Attendance";
 import StudentProfile from "./pages/student/Profile";
 import StudentAssignments from "./pages/student/Assignments";
+import StudentNotices from "./pages/student/Notices";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/Dashboard";
@@ -24,6 +25,7 @@ import TeacherClasses from "./pages/teacher/Classes";
 import TeacherAttendance from "./pages/teacher/Attendance";
 import TeacherAssignments from "./pages/teacher/Assignments";
 import TeacherProfile from "./pages/teacher/Profile";
+import TeacherNotices from "./pages/teacher/Notices";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -65,6 +67,7 @@ const App = () => (
               path="/student/assignments"
               element={<StudentAssignments />}
             />
+            <Route path="/student/notices" element={<StudentNotices />} />
 
             {/* Teacher Routes */}
             <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
@@ -75,6 +78,7 @@ const App = () => (
               element={<TeacherAssignments />}
             />
             <Route path="/teacher/profile" element={<TeacherProfile />} />
+            <Route path="/teacher/notices" element={<TeacherNotices />} />
 
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
