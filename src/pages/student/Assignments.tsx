@@ -212,16 +212,16 @@ export default function StudentAssignments() {
                         <h4 className="text-sm font-medium text-gray-700 mb-2">
                           Assignment Files:
                         </h4>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {assignment.attachments.map((file, index) => (
                             <div
                               key={index}
-                              className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                              className="p-3 bg-gray-50 rounded-lg"
                             >
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 mb-2">
                                 <File className="h-4 w-4 text-blue-600" />
-                                <div>
-                                  <div className="text-sm font-medium text-gray-900">
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium text-gray-900 truncate">
                                     {file.name}
                                   </div>
                                   <div className="text-xs text-gray-500">
@@ -233,7 +233,7 @@ export default function StudentAssignments() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleDownload(file.name)}
-                                className="btn-animate"
+                                className="btn-animate w-full"
                               >
                                 <Download className="h-3 w-3 mr-1" />
                                 Download

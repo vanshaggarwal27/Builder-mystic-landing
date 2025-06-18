@@ -197,22 +197,49 @@ export default function TeacherAssignments() {
                     <>
                       <Button
                         size="sm"
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-purple-600 hover:bg-purple-700 btn-animate"
+                        onClick={() => {
+                          toast({
+                            title: "Reviewing Submissions",
+                            description: `Opening ${assignment.submissions}/${assignment.totalStudents} submissions`,
+                          });
+                        }}
                       >
                         Review Submissions
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
+                        className="btn-animate"
                         onClick={() => handleFileUpload(assignment.id)}
                       >
                         <Upload className="h-3 w-3 mr-1" />
                         Add Material
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="btn-animate"
+                        onClick={() => {
+                          toast({
+                            title: "Reminder Sent",
+                            description: `Reminder sent to all students in ${assignment.subject}`,
+                          });
+                        }}
+                      >
                         Send Reminder
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="btn-animate"
+                        onClick={() => {
+                          toast({
+                            title: "Edit Assignment",
+                            description: "Opening assignment editor...",
+                          });
+                        }}
+                      >
                         Edit
                       </Button>
                     </>
@@ -221,23 +248,55 @@ export default function TeacherAssignments() {
                     <>
                       <Button
                         size="sm"
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-blue-600 hover:bg-blue-700 btn-animate"
+                        onClick={() => {
+                          toast({
+                            title: "Viewing Submissions",
+                            description: `Opening submissions for ${assignment.title}`,
+                          });
+                        }}
                       >
                         View Submissions
                       </Button>
                       <Button
                         size="sm"
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-green-600 hover:bg-green-700 btn-animate"
+                        onClick={() => {
+                          toast({
+                            title: "Reminder Sent",
+                            description: `Reminder sent to students for ${assignment.title}`,
+                          });
+                        }}
                       >
                         Send Reminder
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="btn-animate"
+                        onClick={() => {
+                          toast({
+                            title: "Edit Assignment",
+                            description: "Opening assignment editor...",
+                          });
+                        }}
+                      >
                         Edit
                       </Button>
                     </>
                   )}
                   {assignment.status === "completed" && (
-                    <Button size="sm" variant="outline">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="btn-animate"
+                      onClick={() => {
+                        toast({
+                          title: "Assignment Results",
+                          description: `Viewing results for ${assignment.title}`,
+                        });
+                      }}
+                    >
                       View Results
                     </Button>
                   )}
