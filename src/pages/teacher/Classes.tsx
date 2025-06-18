@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
@@ -8,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function TeacherClasses() {
+  const navigate = useNavigate();
+
   const classes = [
     {
       id: "1",
@@ -114,6 +117,7 @@ export default function TeacherClasses() {
                             <Button
                               size="sm"
                               className="bg-green-600 hover:bg-green-700"
+                              onClick={() => navigate("/teacher/attendance")}
                             >
                               Mark Attendance
                             </Button>

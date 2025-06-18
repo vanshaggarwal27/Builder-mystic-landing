@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import { Menu } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TeacherAttendance() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const [attendanceData, setAttendanceData] = useState([
     {
       id: "001",
@@ -75,8 +80,6 @@ export default function TeacherAttendance() {
       <MobileLayout
         title="Attendance"
         subtitle="Grade 10-A • Mathematics - Today"
-        showBack
-        showMenu
         headerGradient="from-blue-500 to-green-500"
         className="pb-20"
       >
@@ -88,7 +91,11 @@ export default function TeacherAttendance() {
                 <h3 className="font-semibold text-gray-900">Grade 10-A</h3>
                 <p className="text-sm text-gray-600">Mathematics - Today</p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/teacher/classes")}
+              >
                 Change Class
               </Button>
             </div>
@@ -171,7 +178,16 @@ export default function TeacherAttendance() {
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            <Button className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600">
+            <Button
+              className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600"
+              onClick={() => {
+                toast({
+                  title: "Attendance Saved",
+                  description: "Attendance has been successfully recorded.",
+                });
+                setTimeout(() => navigate("/teacher/dashboard"), 1000);
+              }}
+            >
               Save Attendance
             </Button>
             <Button variant="outline" className="w-full">

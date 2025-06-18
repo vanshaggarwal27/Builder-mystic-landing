@@ -42,12 +42,12 @@ export function MobileLayout({
   };
 
   return (
-    <div className={cn("min-h-screen bg-gray-50 pt-safe", className)}>
+    <div className={cn("min-h-screen bg-gray-50", className)}>
       {/* Header */}
       {(title || showBack || showMenu || showStar || showBell) && (
         <div
           className={cn(
-            "bg-gradient-to-br text-white p-4 pb-6 pt-12",
+            "bg-gradient-to-br text-white px-4 pt-14 pb-6",
             headerGradient,
           )}
         >

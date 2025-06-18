@@ -1,5 +1,6 @@
 import React from "react";
 import { CheckCircle, Star, Bell } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
@@ -7,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export default function TeacherDashboard() {
+  const navigate = useNavigate();
+
   const todaysClasses = [
     {
       name: "Grade 10-A Math",
@@ -40,7 +43,6 @@ export default function TeacherDashboard() {
   return (
     <>
       <MobileLayout
-        showBell
         headerGradient="from-green-500 to-blue-600"
         className="pb-20"
       >
@@ -61,7 +63,10 @@ export default function TeacherDashboard() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/10 rounded-xl p-4 text-center">
+              <div
+                className="bg-white/10 rounded-xl p-4 text-center cursor-pointer hover:bg-white/20 transition-all"
+                onClick={() => navigate("/teacher/attendance")}
+              >
                 <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-2">
                   <CheckCircle className="h-5 w-5 text-white" />
                 </div>
@@ -69,7 +74,10 @@ export default function TeacherDashboard() {
                   Mark Attendance
                 </span>
               </div>
-              <div className="bg-white/10 rounded-xl p-4 text-center">
+              <div
+                className="bg-white/10 rounded-xl p-4 text-center cursor-pointer hover:bg-white/20 transition-all"
+                onClick={() => navigate("/teacher/assignments")}
+              >
                 <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
                   <Star className="h-5 w-5 text-white" />
                 </div>

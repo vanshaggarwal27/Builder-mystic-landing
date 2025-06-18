@@ -7,12 +7,15 @@ import {
   BarChart3,
   UserCheck,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
+
   const quickActions = [
     {
       title: "Manage Users",
@@ -62,7 +65,6 @@ export default function AdminDashboard() {
   return (
     <>
       <MobileLayout
-        showStar
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >
@@ -107,8 +109,26 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-2 gap-4">
               {quickActions.map((action, index) => {
                 const IconComponent = action.icon;
+                const getNavigationPath = (title: string) => {
+                  switch (title) {
+                    case "Manage Users":
+                      return "/admin/users";
+                    case "View Reports":
+                      return "/admin/reports";
+                    case "Send Notice":
+                      return "/admin/announcements";
+                    case "Attendance":
+                      return "/teacher/attendance";
+                    default:
+                      return "/admin/dashboard";
+                  }
+                };
                 return (
-                  <Card key={index} className={`p-4 ${action.bg} border-0`}>
+                  <Card
+                    key={index}
+                    className={`p-4 ${action.bg} border-0 cursor-pointer hover:scale-105 transition-all`}
+                    onClick={() => navigate(getNavigationPath(action.title))}
+                  >
                     <div className="text-center">
                       <div
                         className={`w-12 h-12 ${action.iconBg} rounded-xl flex items-center justify-center mx-auto mb-3`}

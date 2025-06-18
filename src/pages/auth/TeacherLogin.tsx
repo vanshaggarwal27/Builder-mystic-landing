@@ -6,13 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,7 +16,6 @@ export default function TeacherLogin() {
   const { toast } = useToast();
   const [teacherId, setTeacherId] = useState("");
   const [password, setPassword] = useState("");
-  const [department, setDepartment] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -96,25 +89,6 @@ export default function TeacherLogin() {
               />
               <Lock className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="department">Department</Label>
-            <Select value={department} onValueChange={setDepartment} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select your department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="mathematics">Mathematics</SelectItem>
-                <SelectItem value="english">English Literature</SelectItem>
-                <SelectItem value="science">Science</SelectItem>
-                <SelectItem value="physics">Physics</SelectItem>
-                <SelectItem value="chemistry">Chemistry</SelectItem>
-                <SelectItem value="biology">Biology</SelectItem>
-                <SelectItem value="history">History</SelectItem>
-                <SelectItem value="geography">Geography</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="flex items-center justify-between">
