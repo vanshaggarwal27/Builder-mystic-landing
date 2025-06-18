@@ -46,44 +46,60 @@ export default function TeacherDashboard() {
         headerGradient="from-green-500 to-blue-600"
         className="pb-20"
       >
-        <div className="px-6 py-6">
-          {/* Profile Header */}
-          <div className="bg-gradient-to-br from-green-500 to-blue-600 text-white p-6 rounded-2xl mb-6 -mt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-lg font-semibold">MJ</span>
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold">Ms. Johnson</h2>
-                  <p className="text-white/80 text-sm">Mathematics Teacher</p>
-                </div>
-              </div>
-              <Bell className="h-6 w-6 text-white" />
-            </div>
+        <div className="px-6 py-6 pt-8">
+          {/* Enhanced Profile Header */}
+          <div className="relative bg-gradient-to-br from-green-500 via-emerald-500 to-blue-600 text-white p-8 rounded-3xl mb-6 mt-4 overflow-hidden shadow-xl">
+            {/* Decorative background elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-10"></div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div
-                className="bg-white/10 rounded-xl p-4 text-center cursor-pointer hover:bg-white/20 transition-all"
-                onClick={() => navigate("/teacher/attendance")}
-              >
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                  <CheckCircle className="h-5 w-5 text-white" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white/25 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
+                    <span className="text-2xl font-bold">MJ</span>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold mb-1">Ms. Johnson</h2>
+                    <p className="text-white/90 text-sm flex items-center gap-2">
+                      <div className="w-2 h-2 bg-emerald-300 rounded-full"></div>
+                      Mathematics Teacher
+                    </p>
+                  </div>
                 </div>
-                <span className="text-sm text-white/80 block">
-                  Mark Attendance
-                </span>
+                <div className="relative">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                    <Bell className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-semibold text-white">3</span>
+                  </div>
+                </div>
               </div>
-              <div
-                className="bg-white/10 rounded-xl p-4 text-center cursor-pointer hover:bg-white/20 transition-all"
-                onClick={() => navigate("/teacher/assignments")}
-              >
-                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                  <Star className="h-5 w-5 text-white" />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div
+                  className="bg-white/15 backdrop-blur-sm rounded-2xl p-5 text-center cursor-pointer hover:bg-white/25 hover:scale-105 transition-all duration-300 shadow-lg"
+                  onClick={() => navigate("/teacher/attendance")}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <CheckCircle className="h-6 w-6 text-white" />
+                  </div>
+                  <span className="text-sm font-semibold text-white block">
+                    Mark Attendance
+                  </span>
                 </div>
-                <span className="text-sm text-white/80 block">
-                  Upload Homework
-                </span>
+                <div
+                  className="bg-white/15 backdrop-blur-sm rounded-2xl p-5 text-center cursor-pointer hover:bg-white/25 hover:scale-105 transition-all duration-300 shadow-lg"
+                  onClick={() => navigate("/teacher/assignments")}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <Star className="h-6 w-6 text-white" />
+                  </div>
+                  <span className="text-sm font-semibold text-white block">
+                    Upload Homework
+                  </span>
+                </div>
               </div>
             </div>
           </div>

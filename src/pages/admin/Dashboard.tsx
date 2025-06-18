@@ -116,7 +116,7 @@ export default function AdminDashboard() {
                     case "View Reports":
                       return "/admin/reports";
                     case "Send Notice":
-                      return "/admin/announcements";
+                      return "/admin/send-notice";
                     case "Attendance":
                       return "/teacher/attendance";
                     default:

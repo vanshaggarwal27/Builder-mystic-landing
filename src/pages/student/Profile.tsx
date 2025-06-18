@@ -97,7 +97,7 @@ export default function StudentProfile() {
           </Card>
 
           {/* Academic Information */}
-          <Card className="p-6">
+          <Card className="p-6 mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Academic Information
             </h3>

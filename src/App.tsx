@@ -29,6 +29,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminUsers from "./pages/admin/Users";
 import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
+import AdminSendNotice from "./pages/admin/SendNotice";
 
 import NotFound from "./pages/NotFound";
 
@@ -74,6 +75,7 @@ const App = () => (
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/reports" element={<AdminReports />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/send-notice" element={<AdminSendNotice />} />
 
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

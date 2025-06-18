@@ -137,15 +137,6 @@ export default function StudentAttendance() {
               ))}
             </div>
           </div>
-
-          {/* Legend */}
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-3">Legend</h3>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-200 rounded"></div>
-              <span className="text-sm text-gray-600">Present</span>
-            </div>
-          </div>
         </div>
       </MobileLayout>
       <BottomNavigation />

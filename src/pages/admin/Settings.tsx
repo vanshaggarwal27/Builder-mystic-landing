@@ -77,20 +77,7 @@ export default function AdminSettings() {
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >
-        <div className="px-6 py-6">
-          {/* Admin Info */}
-          <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-6 rounded-2xl mb-6 -mt-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                <Star className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold">System Settings</h2>
-                <p className="text-white/80">SHKVA Administration</p>
-              </div>
-            </div>
-          </div>
-
+        <div className="px-6 py-6 pt-8">
           {/* Settings Categories */}
           <div className="space-y-6">
             {settingsCategories.map((category, categoryIndex) => {
