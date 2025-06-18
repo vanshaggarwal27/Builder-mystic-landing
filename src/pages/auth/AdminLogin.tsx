@@ -40,11 +40,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <MobileLayout
-      showBack
-      headerGradient="from-purple-600 to-blue-600"
-      onBack={() => navigate("/auth/role-selection")}
-    >
+    <MobileLayout headerGradient="from-purple-600 to-blue-600">
       <div className="px-6 py-8">
         {/* Header */}
         <div className="text-center mb-8">

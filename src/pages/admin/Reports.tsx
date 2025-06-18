@@ -56,8 +56,6 @@ export default function AdminReports() {
     <>
       <MobileLayout
         title="Reports & Analytics"
-        showBack
-        showStar
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >

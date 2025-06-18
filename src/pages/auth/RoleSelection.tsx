@@ -38,7 +38,7 @@ export default function RoleSelection() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 flex flex-col pt-14">
       {/* Header */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         {/* Logo */}

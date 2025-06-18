@@ -84,8 +84,6 @@ export default function AdminUsers() {
     <>
       <MobileLayout
         title="User Management"
-        showBack
-        showStar
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >

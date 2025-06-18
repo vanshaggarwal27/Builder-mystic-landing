@@ -30,8 +30,6 @@ export default function StudentProfile() {
     <>
       <MobileLayout
         title="Profile"
-        showBack
-        showMenu
         headerGradient="from-blue-500 to-purple-600"
         className="pb-20"
       >

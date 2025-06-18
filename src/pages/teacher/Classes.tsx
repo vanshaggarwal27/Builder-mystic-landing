@@ -46,8 +46,6 @@ export default function TeacherClasses() {
       <MobileLayout
         title="My Classes"
         subtitle="Ms. Johnson • Mathematics Department"
-        showBack
-        showStar
         headerGradient="from-green-500 to-blue-600"
         className="pb-20"
       >

@@ -47,12 +47,10 @@ export default function AdminAnnouncements() {
     <>
       <MobileLayout
         title="Announcements"
-        showBack
-        showStar
         headerGradient="from-blue-500 to-green-500"
         className="pb-20"
       >
-        <div className="px-6 py-6">
+        <div className="px-6 py-6 pt-8">
           {/* Header Actions */}
           <div className="flex justify-between items-center mb-6">
             <Tabs defaultValue="all" className="flex-1">

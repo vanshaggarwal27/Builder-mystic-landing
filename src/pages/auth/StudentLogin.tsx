@@ -38,11 +38,7 @@ export default function StudentLogin() {
   };
 
   return (
-    <MobileLayout
-      showBack
-      headerGradient="from-blue-500 to-purple-600"
-      onBack={() => navigate("/auth/role-selection")}
-    >
+    <MobileLayout headerGradient="from-blue-500 to-purple-600">
       <div className="px-6 py-8">
         {/* Header */}
         <div className="text-center mb-8">

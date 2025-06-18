@@ -68,8 +68,6 @@ export default function StudentAttendance() {
       <MobileLayout
         title="My Attendance"
         subtitle="John Smith • Grade 10-A"
-        showBack
-        showStar
         headerGradient="from-green-500 to-blue-600"
         className="pb-20"
       >

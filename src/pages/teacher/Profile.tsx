@@ -31,8 +31,6 @@ export default function TeacherProfile() {
     <>
       <MobileLayout
         title="Profile"
-        showBack
-        showMenu
         headerGradient="from-green-500 to-blue-600"
         className="pb-20"
       >

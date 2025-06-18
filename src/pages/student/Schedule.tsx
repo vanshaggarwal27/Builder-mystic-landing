@@ -50,8 +50,6 @@ export default function StudentSchedule() {
       <MobileLayout
         title="Timetable"
         subtitle={`Grade 10-A • ${selectedWeek}`}
-        showBack
-        showStar
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >

@@ -74,8 +74,6 @@ export default function AdminSettings() {
     <>
       <MobileLayout
         title="Settings"
-        showBack
-        showStar
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >
