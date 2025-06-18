@@ -6,6 +6,7 @@ import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SlideTransition } from "@/components/layout/PageTransition";
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ export default function TeacherDashboard() {
   ];
 
   return (
-    <>
+    <SlideTransition>
       <MobileLayout
         headerGradient="from-green-500 to-blue-600"
         className="pb-20"
@@ -177,6 +178,6 @@ export default function TeacherDashboard() {
         </div>
       </MobileLayout>
       <BottomNavigation />
-    </>
+    </SlideTransition>
   );
 }

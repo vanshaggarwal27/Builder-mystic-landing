@@ -1,14 +1,17 @@
 import React from "react";
 import { CheckCircle, Calendar, AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export default function StudentDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const schedule = [
     {
@@ -42,7 +45,7 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <>
+    <PageTransition>
       <MobileLayout
         headerGradient="from-blue-500 to-purple-600"
         className="pb-20"
@@ -125,7 +128,11 @@ export default function StudentDashboard() {
               <h3 className="text-lg font-semibold text-gray-900">
                 Upcoming Assignments
               </h3>
-              <Button variant="link" className="text-blue-600 p-0">
+              <Button
+                variant="link"
+                className="text-blue-600 p-0 btn-animate"
+                onClick={() => navigate("/student/assignments")}
+              >
                 View All
               </Button>
             </div>
@@ -157,6 +164,6 @@ export default function StudentDashboard() {
         </div>
       </MobileLayout>
       <BottomNavigation />
-    </>
+    </PageTransition>
   );
 }

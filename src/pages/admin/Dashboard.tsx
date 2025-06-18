@@ -12,6 +12,7 @@ import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <>
+    <PageTransition>
       <MobileLayout
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
@@ -179,6 +180,6 @@ export default function AdminDashboard() {
         </div>
       </MobileLayout>
       <BottomNavigation />
-    </>
+    </PageTransition>
   );
 }

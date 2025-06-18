@@ -16,6 +16,7 @@ import StudentDashboard from "./pages/student/Dashboard";
 import StudentSchedule from "./pages/student/Schedule";
 import StudentAttendance from "./pages/student/Attendance";
 import StudentProfile from "./pages/student/Profile";
+import StudentAssignments from "./pages/student/Assignments";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/Dashboard";
@@ -59,6 +60,10 @@ const App = () => (
             <Route path="/student/schedule" element={<StudentSchedule />} />
             <Route path="/student/attendance" element={<StudentAttendance />} />
             <Route path="/student/profile" element={<StudentProfile />} />
+            <Route
+              path="/student/assignments"
+              element={<StudentAssignments />}
+            />
 
             {/* Teacher Routes */}
             <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
