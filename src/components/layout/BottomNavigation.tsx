@@ -55,7 +55,7 @@ export function BottomNavigation() {
   else if (user.role === "admin") navItems = adminNavItems;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 safe-area-pb">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 px-4 py-3 pb-8 safe-area-pb shadow-lg">
       <div className="flex justify-around items-center max-w-md mx-auto">
         {navItems.map((item) => {
           const IconComponent = item.icon;
@@ -68,28 +68,35 @@ export function BottomNavigation() {
               size="sm"
               onClick={() => navigate(item.path)}
               className={cn(
-                "flex flex-col items-center gap-1 h-auto py-2 px-3 min-w-0",
+                "flex flex-col items-center gap-1.5 h-auto py-3 px-4 min-w-0 rounded-xl transition-all duration-300 transform",
                 isActive
-                  ? "text-blue-600"
-                  : "text-gray-600 hover:text-blue-600",
+                  ? "bg-blue-50 text-blue-600 scale-105 shadow-sm"
+                  : "text-gray-600 hover:text-blue-600 hover:bg-gray-50 hover:scale-105 active:scale-95",
               )}
             >
-              <IconComponent
+              <div
                 className={cn(
-                  "h-5 w-5",
-                  isActive ? "text-blue-600" : "text-gray-600",
+                  "p-1.5 rounded-lg transition-all duration-300",
+                  isActive ? "bg-blue-100" : "group-hover:bg-gray-100",
                 )}
-              />
+              >
+                <IconComponent
+                  className={cn(
+                    "h-5 w-5 transition-all duration-300",
+                    isActive ? "text-blue-600" : "text-gray-600",
+                  )}
+                />
+              </div>
               <span
                 className={cn(
-                  "text-xs font-medium",
+                  "text-xs font-medium transition-all duration-300",
                   isActive ? "text-blue-600" : "text-gray-600",
                 )}
               >
                 {item.label}
               </span>
               {isActive && (
-                <CheckCircle className="h-1 w-1 text-blue-600 fill-current" />
+                <div className="w-1 h-1 bg-blue-600 rounded-full animate-pulse" />
               )}
             </Button>
           );

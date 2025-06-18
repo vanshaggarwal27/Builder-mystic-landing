@@ -73,9 +73,9 @@ export default function StudentAttendance() {
         headerGradient="from-green-500 to-blue-600"
         className="pb-20"
       >
-        <div className="px-6 py-6">
+        <div className="px-6 py-6 pt-8">
           {/* Statistics */}
-          <div className="bg-gradient-to-br from-green-500 to-blue-600 text-white p-6 rounded-2xl mb-6 -mt-6">
+          <div className="bg-gradient-to-br from-green-500 to-blue-600 text-white p-6 rounded-2xl mb-6 mt-4">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-3xl font-bold">

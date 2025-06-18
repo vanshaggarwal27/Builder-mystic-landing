@@ -35,9 +35,9 @@ export default function StudentProfile() {
         headerGradient="from-blue-500 to-purple-600"
         className="pb-20"
       >
-        <div className="px-6 py-6">
+        <div className="px-6 py-6 pt-8">
           {/* Profile Header */}
-          <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-6 rounded-2xl mb-6 -mt-6">
+          <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-6 rounded-2xl mb-6 mt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">

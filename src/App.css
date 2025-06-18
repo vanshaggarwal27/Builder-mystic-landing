@@ -10,7 +10,19 @@
 
 /* Mobile viewport handling */
 .safe-area-pb {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: max(env(safe-area-inset-bottom), 16px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Enhanced bottom navigation styles */
+.bottom-nav-enhanced {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* Custom gradient backgrounds */

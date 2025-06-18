@@ -55,7 +55,7 @@ export default function StudentSchedule() {
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >
-        <div className="px-6 py-6">
+        <div className="px-6 py-6 pt-8">
           {/* Week Navigation */}
           <div className="bg-white rounded-xl p-4 mb-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
