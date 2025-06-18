@@ -61,10 +61,10 @@ export default function TeacherDashboard() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold mb-1">Ms. Johnson</h2>
-                    <p className="text-white/90 text-sm flex items-center gap-2">
+                    <div className="text-white/90 text-sm flex items-center gap-2">
                       <div className="w-2 h-2 bg-emerald-300 rounded-full"></div>
-                      Mathematics Teacher
-                    </p>
+                      <span>Mathematics Teacher</span>
+                    </div>
                   </div>
                 </div>
                 <div className="relative">
