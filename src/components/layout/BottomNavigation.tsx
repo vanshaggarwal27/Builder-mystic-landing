@@ -68,9 +68,9 @@ export function BottomNavigation() {
               size="sm"
               onClick={() => navigate(item.path)}
               className={cn(
-                "flex flex-col items-center gap-1.5 h-auto py-3 px-4 min-w-0 rounded-xl transition-all duration-300 transform",
+                "flex flex-col items-center gap-1.5 h-auto py-3 px-4 min-w-0 rounded-xl transition-all duration-300 transform btn-animate",
                 isActive
-                  ? "bg-blue-50 text-blue-600 scale-105 shadow-sm"
+                  ? "bg-blue-50 text-blue-600 scale-105 shadow-lg"
                   : "text-gray-600 hover:text-blue-600 hover:bg-gray-50 hover:scale-105 active:scale-95",
               )}
             >

@@ -114,7 +114,7 @@ export default function TeacherDashboard() {
               {todaysClasses.map((cls, index) => (
                 <Card
                   key={index}
-                  className={`p-4 ${cls.status === "current" ? "bg-green-50 border-green-200" : ""}`}
+                  className={`p-4 card-hover ${cls.status === "current" ? "bg-green-50 border-green-200" : ""}`}
                 >
                   <div className="flex items-center gap-3">
                     <div
@@ -156,7 +156,7 @@ export default function TeacherDashboard() {
             </h3>
             <div className="space-y-3">
               {recentActivities.map((activity, index) => (
-                <Card key={index} className="p-4">
+                <Card key={index} className="p-4 card-hover">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                       <CheckCircle className="h-5 w-5 text-blue-600" />

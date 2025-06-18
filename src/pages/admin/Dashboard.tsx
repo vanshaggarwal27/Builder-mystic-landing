@@ -127,7 +127,7 @@ export default function AdminDashboard() {
                 return (
                   <Card
                     key={index}
-                    className={`p-4 ${action.bg} border-0 cursor-pointer hover:scale-105 transition-all`}
+                    className={`p-4 ${action.bg} border-0 cursor-pointer card-hover btn-animate`}
                     onClick={() => navigate(getNavigationPath(action.title))}
                   >
                     <div className="text-center">

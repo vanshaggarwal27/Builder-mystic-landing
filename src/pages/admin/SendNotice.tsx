@@ -212,7 +212,7 @@ export default function AdminSendNotice() {
           <div className="space-y-3">
             <Button
               onClick={handleSendNotice}
-              className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600"
+              className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 btn-animate"
               size="lg"
             >
               <Send className="h-5 w-5 mr-2" />
@@ -220,7 +220,7 @@ export default function AdminSendNotice() {
             </Button>
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full btn-animate"
               onClick={() => navigate("/admin/dashboard")}
             >
               Cancel

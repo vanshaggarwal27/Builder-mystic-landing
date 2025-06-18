@@ -31,6 +31,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
 import AdminSendNotice from "./pages/admin/SendNotice";
+import AdminTestButtons from "./pages/admin/TestButtons";
 
 import NotFound from "./pages/NotFound";
 
@@ -81,6 +82,7 @@ const App = () => (
             <Route path="/admin/reports" element={<AdminReports />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/send-notice" element={<AdminSendNotice />} />
+            <Route path="/admin/test-buttons" element={<AdminTestButtons />} />
 
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

@@ -5,6 +5,7 @@ import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FadeTransition } from "@/components/layout/PageTransition";
 
 export default function StudentSchedule() {
   const [selectedWeek, setSelectedWeek] = useState("March 18-22, 2024");
@@ -46,7 +47,7 @@ export default function StudentSchedule() {
   ];
 
   return (
-    <>
+    <FadeTransition>
       <MobileLayout
         title="Timetable"
         subtitle={`Grade 10-A • ${selectedWeek}`}
@@ -131,6 +132,6 @@ export default function StudentSchedule() {
         </div>
       </MobileLayout>
       <BottomNavigation />
-    </>
+    </FadeTransition>
   );
 }

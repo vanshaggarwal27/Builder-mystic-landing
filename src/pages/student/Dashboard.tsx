@@ -91,7 +91,7 @@ export default function StudentDashboard() {
             </h3>
             <div className="space-y-3">
               {schedule.map((item, index) => (
-                <Card key={index} className="p-4">
+                <Card key={index} className="p-4 card-hover">
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-3 h-3 rounded-full ${
@@ -138,7 +138,7 @@ export default function StudentDashboard() {
             </div>
             <div className="space-y-3">
               {assignments.map((assignment, index) => (
-                <Card key={index} className="p-4">
+                <Card key={index} className="p-4 card-hover">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900">
