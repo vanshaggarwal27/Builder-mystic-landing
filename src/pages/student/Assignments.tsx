@@ -274,42 +274,26 @@ export default function StudentAssignments() {
                       </div>
                     )}
 
-                  <div className="flex gap-2">
-                    {assignment.status === "pending" && (
-                      <>
-                        <Button size="sm" className="btn-animate">
-                          <BookOpen className="h-4 w-4 mr-1" />
-                          Start Work
-                        </Button>
-                        {assignment.canUpload && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="btn-animate"
-                            onClick={() => handleFileUpload(assignment.id)}
-                          >
-                            <Upload className="h-4 w-4 mr-1" />
-                            Upload Work
-                          </Button>
-                        )}
+                  <div className="flex gap-2 justify-end">
+                    {assignment.status === "pending" &&
+                      assignment.canUpload && (
                         <Button
                           size="sm"
-                          variant="outline"
-                          className="btn-animate"
+                          className="bg-blue-600 hover:bg-blue-700 btn-animate"
+                          onClick={() => handleFileUpload(assignment.id)}
                         >
-                          View Details
+                          <Upload className="h-4 w-4 mr-1" />
+                          Submit Assignment
                         </Button>
-                      </>
-                    )}
+                      )}
                     {assignment.status === "completed" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="btn-animate"
+                      <Badge
+                        variant="secondary"
+                        className="bg-green-100 text-green-800"
                       >
                         <CheckCircle className="h-4 w-4 mr-1" />
-                        View Submission
-                      </Button>
+                        Submitted
+                      </Badge>
                     )}
                   </div>
                 </Card>

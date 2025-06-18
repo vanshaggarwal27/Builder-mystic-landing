@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Plus, Star, Upload, Download, File } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 
 export default function TeacherAssignments() {
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleFileUpload = (assignmentId: string) => {
@@ -112,7 +114,8 @@ export default function TeacherAssignments() {
             </Tabs>
             <Button
               size="sm"
-              className="ml-4 bg-purple-600 hover:bg-purple-700"
+              className="ml-4 bg-purple-600 hover:bg-purple-700 btn-animate"
+              onClick={() => navigate("/teacher/create-assignment")}
             >
               <Plus className="h-4 w-4 mr-1" />
               New

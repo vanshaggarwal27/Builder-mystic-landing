@@ -26,6 +26,7 @@ import TeacherAttendance from "./pages/teacher/Attendance";
 import TeacherAssignments from "./pages/teacher/Assignments";
 import TeacherProfile from "./pages/teacher/Profile";
 import TeacherNotices from "./pages/teacher/Notices";
+import CreateAssignment from "./pages/teacher/CreateAssignment";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -79,6 +80,10 @@ const App = () => (
             />
             <Route path="/teacher/profile" element={<TeacherProfile />} />
             <Route path="/teacher/notices" element={<TeacherNotices />} />
+            <Route
+              path="/teacher/create-assignment"
+              element={<CreateAssignment />}
+            />
 
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
