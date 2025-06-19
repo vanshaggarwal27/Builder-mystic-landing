@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle, Star, Bell } from "lucide-react";
+import { CheckCircle, Star, Bell, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
