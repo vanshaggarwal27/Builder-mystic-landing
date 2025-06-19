@@ -95,6 +95,7 @@ const App = () => (
               path="/teacher/results"
               element={<TeacherResultsManagement />}
             />
+            <Route path="/teacher/chat" element={<TeacherChat />} />
 
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
