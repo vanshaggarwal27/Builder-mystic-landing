@@ -30,6 +30,7 @@ import TeacherProfile from "./pages/teacher/Profile";
 import TeacherNotices from "./pages/teacher/Notices";
 import CreateAssignment from "./pages/teacher/CreateAssignment";
 import TeacherResultsManagement from "./pages/teacher/ResultsManagement";
+import TeacherChat from "./pages/teacher/Chat";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
