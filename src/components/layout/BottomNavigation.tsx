@@ -33,7 +33,7 @@ const studentNavItems: NavItem[] = [
 const teacherNavItems: NavItem[] = [
   { icon: Home, label: "Home", path: "/teacher/dashboard" },
   { icon: ClipboardList, label: "Classes", path: "/teacher/classes" },
-  { icon: BarChart3, label: "Results", path: "/teacher/results" },
+  { icon: MessageCircle, label: "Chat", path: "/teacher/chat" },
   { icon: User, label: "Profile", path: "/teacher/profile" },
 ];
 
