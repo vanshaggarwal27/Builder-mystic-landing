@@ -49,7 +49,7 @@ export default function RoleSelection() {
               <img
                 src="https://cdn.builder.io/api/v1/assets/7250ca13e5b444cbbc8f0035e97a9cec/photo_6239770286706771928_x-700e86?format=webp&width=800"
                 alt="SHKVA School Logo"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
             <h1 className="text-4xl font-bold text-white mb-2">SHKVA</h1>
