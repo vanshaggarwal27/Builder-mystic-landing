@@ -45,10 +45,17 @@ export default function RoleSelection() {
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
           {/* Logo */}
           <div className="mb-12 text-center">
-            <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-              <GraduationCap className="h-10 w-10 text-white" />
+            <div className="w-24 h-24 bg-white rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg overflow-hidden">
+              <img
+                src="https://cdn.builder.io/api/v1/assets/7250ca13e5b444cbbc8f0035e97a9cec/photo_6239770286706771928_x-700e86?format=webp&width=800"
+                alt="SHKVA School Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <h1 className="text-4xl font-bold text-white mb-2">SHKVA</h1>
+            <p className="text-white/90 text-sm">
+              Shree Hans Krishna Vidyasthali
+            </p>
           </div>
 
           {/* Role Selection */}

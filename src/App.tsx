@@ -18,6 +18,8 @@ import StudentAttendance from "./pages/student/Attendance";
 import StudentProfile from "./pages/student/Profile";
 import StudentAssignments from "./pages/student/Assignments";
 import StudentNotices from "./pages/student/Notices";
+import StudentResults from "./pages/student/Results";
+import StudentChat from "./pages/student/Chat";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/Dashboard";
@@ -27,6 +29,7 @@ import TeacherAssignments from "./pages/teacher/Assignments";
 import TeacherProfile from "./pages/teacher/Profile";
 import TeacherNotices from "./pages/teacher/Notices";
 import CreateAssignment from "./pages/teacher/CreateAssignment";
+import TeacherResultsManagement from "./pages/teacher/ResultsManagement";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -35,6 +38,7 @@ import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
 import AdminSendNotice from "./pages/admin/SendNotice";
 import AdminTestButtons from "./pages/admin/TestButtons";
+import AdminTeacherAttendance from "./pages/admin/TeacherAttendance";
 
 import NotFound from "./pages/NotFound";
 
@@ -69,6 +73,8 @@ const App = () => (
               element={<StudentAssignments />}
             />
             <Route path="/student/notices" element={<StudentNotices />} />
+            <Route path="/student/results" element={<StudentResults />} />
+            <Route path="/student/chat" element={<StudentChat />} />
 
             {/* Teacher Routes */}
             <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
@@ -84,6 +90,10 @@ const App = () => (
               path="/teacher/create-assignment"
               element={<CreateAssignment />}
             />
+            <Route
+              path="/teacher/results"
+              element={<TeacherResultsManagement />}
+            />
 
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -92,6 +102,10 @@ const App = () => (
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/send-notice" element={<AdminSendNotice />} />
             <Route path="/admin/test-buttons" element={<AdminTestButtons />} />
+            <Route
+              path="/admin/teacher-attendance"
+              element={<AdminTeacherAttendance />}
+            />
 
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

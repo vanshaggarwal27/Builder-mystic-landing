@@ -25,21 +25,21 @@ interface NavItem {
 const studentNavItems: NavItem[] = [
   { icon: Home, label: "Home", path: "/student/dashboard" },
   { icon: Calendar, label: "Schedule", path: "/student/schedule" },
-  { icon: Bell, label: "Notices", path: "/student/notices" },
+  { icon: BarChart3, label: "Results", path: "/student/results" },
   { icon: User, label: "Profile", path: "/student/profile" },
 ];
 
 const teacherNavItems: NavItem[] = [
   { icon: Home, label: "Home", path: "/teacher/dashboard" },
   { icon: ClipboardList, label: "Classes", path: "/teacher/classes" },
-  { icon: Bell, label: "Notices", path: "/teacher/notices" },
+  { icon: BarChart3, label: "Results", path: "/teacher/results" },
   { icon: User, label: "Profile", path: "/teacher/profile" },
 ];
 
 const adminNavItems: NavItem[] = [
   { icon: Home, label: "Dashboard", path: "/admin/dashboard" },
   { icon: Users, label: "Users", path: "/admin/users" },
-  { icon: BarChart3, label: "Reports", path: "/admin/reports" },
+  { icon: UserCheck, label: "T.Attendance", path: "/admin/teacher-attendance" },
   { icon: Star, label: "Settings", path: "/admin/settings" },
 ];
 
