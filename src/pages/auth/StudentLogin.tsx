@@ -123,7 +123,7 @@ export default function StudentLogin() {
           {/* Demo hint */}
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <p className="text-sm text-blue-700 text-center">
-              <strong>Demo:</strong> Use student@shkva.edu with any password
+              <strong></strong> 
             </p>
           </div>
         </div>

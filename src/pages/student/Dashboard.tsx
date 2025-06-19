@@ -183,19 +183,17 @@ export default function StudentDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold text-gray-900">
-                        Arjun Patel
+                      Vadika sonal
                       </h4>
                       <Badge className="bg-yellow-100 text-yellow-800">
-                        Topper 2023
+                      Batch 23-24
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-700 mb-2">
-                      "SHKVA gave me the foundation to crack JEE Advanced with
-                      AIR 45. The teachers' support and excellent study
-                      environment made all the difference!"
+                    Score: 91%
                     </p>
                     <p className="text-xs text-gray-600">
-                      Now at IIT Delhi • Computer Science
+                      
                     </p>
                   </div>
                 </div>
@@ -209,17 +207,16 @@ export default function StudentDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold text-gray-900">
-                        Priya Sharma
+                      Nandani raj
                       </h4>
                       <Badge className="bg-green-100 text-green-800">
-                        NEET Topper
+                      Batch 24-25
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-700 mb-2">
-                      "The biology and chemistry labs at SHKVA are world-class.
-                      Scored 720/720 in NEET 2023!"
+                    Score: 90%
                     </p>
-                    <p className="text-xs text-gray-600">AIIMS Delhi • MBBS</p>
+                    <p className="text-xs text-gray-600"></p>
                   </div>
                 </div>
               </Card>
@@ -232,18 +229,16 @@ export default function StudentDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold text-gray-900">
-                        Rajesh Kumar
+                      Anshika 
                       </h4>
                       <Badge className="bg-purple-100 text-purple-800">
-                        State Topper
+                      Batch 22-23
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-700 mb-2">
-                      "99.8% in Class 12 boards! SHKVA's innovative teaching
-                      methods and regular assessments helped me excel."
+                    Score: 90%
                     </p>
                     <p className="text-xs text-gray-600">
-                      Delhi University • Economics Honors
                     </p>
                   </div>
                 </div>
