@@ -36,6 +36,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchCurrentUser = async (token: string) => {
     try {
+      // If demo token, skip API call
+      if (token === "demo-token") {
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -56,7 +62,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error("Error fetching current user:", error);
-      localStorage.removeItem("authToken");
+
+      // If backend not accessible and demo token exists, that's ok
+      if (token === "demo-token") {
+        console.log("🌐 Demo mode - backend not accessible");
+      } else {
+        localStorage.removeItem("authToken");
+      }
     } finally {
       setLoading(false);
     }
