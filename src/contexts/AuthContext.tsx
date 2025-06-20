@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import { User, UserRole } from "@/lib/types";
 
 interface AuthContextType {
@@ -6,53 +12,99 @@ interface AuthContextType {
   login: (email: string, password: string, role: UserRole) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo
-const mockUsers: Record<string, User> = {
-  "student@shkva.edu": {
-    id: "STU2024001",
-    name: "John Smith",
-    email: "john.smith@shkva.edu",
-    role: "student",
-  },
-  "teacher@shkva.edu": {
-    id: "TCH2024001",
-    name: "Ms. Johnson",
-    email: "maria.johnson@shkva.edu",
-    role: "teacher",
-  },
-  "admin@shkva.edu": {
-    id: "ADM2024001",
-    name: "Admin User",
-    email: "admin@shkva.edu",
-    role: "admin",
-  },
-};
+const API_BASE_URL = "http://localhost:5000/api";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Check for existing token on app load
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      // Verify token with backend
+      fetchCurrentUser(token);
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchCurrentUser = async (token: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser({
+          id: data.user.id,
+          name: `${data.user.profile.firstName} ${data.user.profile.lastName}`,
+          email: data.user.email,
+          role: data.user.role,
+        });
+      } else {
+        // Token is invalid, remove it
+        localStorage.removeItem("authToken");
+      }
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      localStorage.removeItem("authToken");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const login = async (email: string, password: string, role: UserRole) => {
-    // Mock authentication - in real app, this would call an API
-    const mockUser = mockUsers[email];
-    if (mockUser && mockUser.role === role) {
-      setUser(mockUser);
-    } else {
-      throw new Error("Invalid credentials");
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, role }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      // Store token in localStorage
+      localStorage.setItem("authToken", data.token);
+
+      // Set user in state
+      setUser({
+        id: data.user.id,
+        name: `${data.user.profile.firstName} ${data.user.profile.lastName}`,
+        email: data.user.email,
+        role: data.user.role,
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
     }
   };
 
   const logout = () => {
+    localStorage.removeItem("authToken");
     setUser(null);
   };
 
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isAuthenticated, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );
