@@ -25,6 +25,76 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    email: "",
+    password: "",
+    role: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleCreateUser = async () => {
+    if (
+      !newUser.email ||
+      !newUser.password ||
+      !newUser.role ||
+      !newUser.firstName ||
+      !newUser.lastName
+    ) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("http://localhost:5000/api/admin/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newUser),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create user");
+      }
+
+      toast({
+        title: "Success",
+        description: "User created successfully!",
+      });
+
+      setIsCreateDialogOpen(false);
+      setNewUser({
+        email: "",
+        password: "",
+        role: "",
+        firstName: "",
+        lastName: "",
+        phone: "",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create user",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const users = [
     {
@@ -115,10 +185,117 @@ export default function AdminUsers() {
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             </div>
-            <Button className="bg-purple-600 hover:bg-purple-700">
-              <Plus className="h-4 w-4 mr-1" />
-              Add User
-            </Button>
+            <Dialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button className="bg-purple-600 hover:bg-purple-700">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add User
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Create New User</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        value={newUser.firstName}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, firstName: e.target.value })
+                        }
+                        placeholder="John"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        value={newUser.lastName}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, lastName: e.target.value })
+                        }
+                        placeholder="Doe"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={newUser.email}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, email: e.target.value })
+                      }
+                      placeholder="john.doe@shkva.edu"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={newUser.password}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, password: e.target.value })
+                      }
+                      placeholder="Minimum 6 characters"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="role">Role</Label>
+                    <Select
+                      value={newUser.role}
+                      onValueChange={(value) =>
+                        setNewUser({ ...newUser, role: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student">Student</SelectItem>
+                        <SelectItem value="teacher">Teacher</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Phone (Optional)</Label>
+                    <Input
+                      id="phone"
+                      value={newUser.phone}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, phone: e.target.value })
+                      }
+                      placeholder="+1234567890"
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsCreateDialogOpen(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleCreateUser}
+                      disabled={isLoading}
+                      className="flex-1 bg-purple-600 hover:bg-purple-700"
+                    >
+                      {isLoading ? "Creating..." : "Create User"}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Tabs */}
