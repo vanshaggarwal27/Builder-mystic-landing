@@ -98,6 +98,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error("Login error:", error);
+
+      // Fallback for hosted environment - demo mode
+      if (error.message.includes("Failed to fetch")) {
+        console.log("🌐 Backend not accessible, using demo mode");
+
+        // Demo credentials check
+        const demoUsers: Record<string, any> = {
+          "admin@shkva.edu": {
+            id: "demo-admin",
+            name: "Admin User",
+            email: "admin@shkva.edu",
+            role: "admin",
+          },
+          "teacher@shkva.edu": {
+            id: "demo-teacher",
+            name: "Maria Johnson",
+            email: "teacher@shkva.edu",
+            role: "teacher",
+          },
+          "student@shkva.edu": {
+            id: "demo-student",
+            name: "John Smith",
+            email: "student@shkva.edu",
+            role: "student",
+          },
+        };
+
+        const demoPasswords: Record<string, string> = {
+          "admin@shkva.edu": "admin123",
+          "teacher@shkva.edu": "teacher123",
+          "student@shkva.edu": "student123",
+        };
+
+        if (
+          demoUsers[email] &&
+          demoPasswords[email] === password &&
+          demoUsers[email].role === role
+        ) {
+          localStorage.setItem("authToken", "demo-token");
+          setUser(demoUsers[email]);
+          return;
+        }
+      }
+
       throw error;
     }
   };
