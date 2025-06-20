@@ -249,10 +249,11 @@ export default function AdminUsers() {
     },
   ];
 
+  // Dynamic stats based on current users list
   const stats = {
-    students: 1247,
-    teachers: 89,
-    admins: 5,
+    students: usersList.filter((user) => user.role === "student").length,
+    teachers: usersList.filter((user) => user.role === "teacher").length,
+    admins: usersList.filter((user) => user.role === "admin").length,
   };
 
   const getRoleColor = (role: string) => {
