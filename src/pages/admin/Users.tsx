@@ -280,7 +280,7 @@ export default function AdminUsers() {
     );
   };
 
-  const filteredUsers = users.filter((user) =>
+  const filteredUsers = usersList.filter((user) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
