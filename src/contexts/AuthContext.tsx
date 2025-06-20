@@ -75,8 +75,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string, role: UserRole) => {
+    console.log("🔐 Login starting:", { email, role });
+
+    // Demo credentials for fallback
+    const demoUsers: Record<string, any> = {
+      "admin@shkva.edu": {
+        id: "demo-admin",
+        name: "Admin User",
+        email: "admin@shkva.edu",
+        role: "admin",
+      },
+      "teacher@shkva.edu": {
+        id: "demo-teacher",
+        name: "Maria Johnson",
+        email: "teacher@shkva.edu",
+        role: "teacher",
+      },
+      "student@shkva.edu": {
+        id: "demo-student",
+        name: "John Smith",
+        email: "student@shkva.edu",
+        role: "student",
+      },
+    };
+
+    const demoPasswords: Record<string, string> = {
+      "admin@shkva.edu": "admin123",
+      "teacher@shkva.edu": "teacher123",
+      "student@shkva.edu": "student123",
+    };
+
+    // Check if this is a demo login first
+    const isDemoLogin =
+      demoUsers[email] &&
+      demoPasswords[email] === password &&
+      demoUsers[email].role === role;
+
     try {
-      console.log("🔐 Login starting:", { email, role });
+      // Create a fetch with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.log("⏰ Fetch timeout - using demo mode");
+      }, 5000); // 5 second timeout
 
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
@@ -84,9 +125,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password, role }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       console.log("📡 Response received:", response.status);
+
       const data = await response.json();
       console.log("📄 Response data:", data);
 
@@ -108,53 +152,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       console.log("✅ Login completed successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
 
-      // Fallback for hosted environment - demo mode
-      if (error.message.includes("Failed to fetch")) {
-        console.log("🌐 Backend not accessible, using demo mode");
-
-        // Demo credentials check
-        const demoUsers: Record<string, any> = {
-          "admin@shkva.edu": {
-            id: "demo-admin",
-            name: "Admin User",
-            email: "admin@shkva.edu",
-            role: "admin",
-          },
-          "teacher@shkva.edu": {
-            id: "demo-teacher",
-            name: "Maria Johnson",
-            email: "teacher@shkva.edu",
-            role: "teacher",
-          },
-          "student@shkva.edu": {
-            id: "demo-student",
-            name: "John Smith",
-            email: "student@shkva.edu",
-            role: "student",
-          },
-        };
-
-        const demoPasswords: Record<string, string> = {
-          "admin@shkva.edu": "admin123",
-          "teacher@shkva.edu": "teacher123",
-          "student@shkva.edu": "student123",
-        };
-
-        if (
-          demoUsers[email] &&
-          demoPasswords[email] === password &&
-          demoUsers[email].role === role
-        ) {
-          localStorage.setItem("authToken", "demo-token");
-          setUser(demoUsers[email]);
-          return;
-        }
+      // Fallback to demo mode if network fails or timeout
+      if (
+        isDemoLogin &&
+        (error.message.includes("Failed to fetch") ||
+          error.name === "AbortError")
+      ) {
+        console.log("🌐 Using demo mode due to network issue");
+        localStorage.setItem("authToken", "demo-token");
+        setUser(demoUsers[email]);
+        console.log("✅ Demo login successful");
+        return;
       }
 
-      throw error;
+      throw new Error(
+        isDemoLogin ? "Demo mode activated" : error.message || "Login failed",
+      );
     }
   };
 
