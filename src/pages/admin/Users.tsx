@@ -304,6 +304,21 @@ export default function AdminUsers() {
         className="pb-20"
       >
         <div className="px-6 py-6">
+          {/* Info Banner */}
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg mb-6 border-l-4 border-purple-400">
+            <h3 className="font-semibold text-gray-800 mb-1">
+              User Management
+            </h3>
+            <p className="text-sm text-gray-600">
+              Create new accounts for students, teachers, or admins. Users can
+              login immediately with the credentials you provide.
+              <span className="block text-xs text-purple-600 mt-1">
+                Total Users: {usersList.length} | Students: {stats.students} |
+                Teachers: {stats.teachers} | Admins: {stats.admins}
+              </span>
+            </p>
+          </div>
+
           {/* Search and Add */}
           <div className="flex gap-3 mb-6">
             <div className="flex-1 relative">
