@@ -74,22 +74,30 @@ npm run seed:users
 
 ### 4. Start the Application
 
-**Terminal 1 - Backend Server:**
+**Option 1 - Single Command (Recommended):**
 
 ```bash
-cd server
-npm run dev
+npm run dev:full
 ```
 
-Backend runs on: http://localhost:5000
+This starts both frontend and backend servers concurrently:
 
-**Terminal 2 - Frontend Dev Server:**
+- Frontend: http://localhost:8080 (with API proxy)
+- Backend: http://localhost:5000
+
+**Option 2 - Separate Terminals:**
+
+Terminal 1 - Backend:
+
+```bash
+cd server && npm run dev
+```
+
+Terminal 2 - Frontend:
 
 ```bash
 npm run dev
 ```
-
-Frontend runs on: http://localhost:8080
 
 ## 👥 Default User Accounts
 
