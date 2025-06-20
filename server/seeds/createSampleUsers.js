@@ -7,10 +7,6 @@ const createSampleUsers = async () => {
     // Connect to database
     await mongoose.connect(
       process.env.MONGODB_URI || "mongodb://localhost:27017/shkva",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      },
     );
 
     console.log("Connected to MongoDB");
