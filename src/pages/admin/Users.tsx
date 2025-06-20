@@ -24,6 +24,34 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { addDemoUser } from "@/contexts/AuthContext";
 
+// Initial demo users
+const initialUsers = [
+  {
+    id: "ADM2024001",
+    name: "Admin User",
+    role: "admin" as const,
+    department: "System Administration",
+    status: "active" as const,
+    initials: "AU",
+  },
+  {
+    id: "STU2024001",
+    name: "John Smith",
+    role: "student" as const,
+    grade: "Grade 10-A",
+    status: "active" as const,
+    initials: "JS",
+  },
+  {
+    id: "TCH2024001",
+    name: "Maria Johnson",
+    role: "teacher" as const,
+    department: "Mathematics",
+    status: "active" as const,
+    initials: "MJ",
+  },
+];
+
 export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -39,7 +67,7 @@ export default function AdminUsers() {
     address: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [usersList, setUsersList] = useState(users); // Local state for users list
+  const [usersList, setUsersList] = useState(initialUsers);
   const { toast } = useToast();
 
   // Generate a random user ID for demo mode
@@ -92,10 +120,6 @@ export default function AdminUsers() {
     }
 
     setIsLoading(true);
-    console.log("👤 Creating user:", {
-      email: newUser.email,
-      role: newUser.role,
-    });
 
     try {
       const token = localStorage.getItem("authToken");
@@ -104,8 +128,7 @@ export default function AdminUsers() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         controller.abort();
-        console.log("⏰ User creation timeout - using demo mode");
-      }, 8000); // 8 second timeout for user creation
+      }, 8000);
 
       const response = await fetch("/api/admin/users", {
         method: "POST",
@@ -124,7 +147,6 @@ export default function AdminUsers() {
         throw new Error(data.error || "Failed to create user");
       }
 
-      console.log("✅ User created successfully in database");
       toast({
         title: "Success",
         description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created successfully!`,
@@ -149,15 +171,11 @@ export default function AdminUsers() {
       setUsersList((prev) => [...prev, newUserEntry]);
       resetForm();
     } catch (error: any) {
-      console.error("❌ User creation failed:", error);
-
       // Demo mode fallback
       if (
         error.name === "AbortError" ||
         error.message.includes("Failed to fetch")
       ) {
-        console.log("🌐 Using demo mode for user creation");
-
         // Add to demo users storage so they can login
         addDemoUser(
           newUser.email,
@@ -187,15 +205,10 @@ export default function AdminUsers() {
 
         toast({
           title: "Success (Demo Mode)",
-          description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created! They can now login with: ${newUser.email} / ${newUser.password}`,
+          description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created! They can now login with: ${newUser.email}`,
           duration: 6000,
         });
 
-        console.log("✅ Demo user created and stored:", {
-          email: newUser.email,
-          password: newUser.password,
-          role: newUser.role,
-        });
         resetForm();
         return;
       }
@@ -225,41 +238,6 @@ export default function AdminUsers() {
     });
   };
 
-  const users = [
-    {
-      id: "STU2024001",
-      name: "John Smith",
-      role: "student" as const,
-      grade: "Grade 10-A",
-      status: "active" as const,
-      initials: "JS",
-    },
-    {
-      id: "TCH2024001",
-      name: "Ms. Johnson",
-      role: "teacher" as const,
-      department: "Mathematics",
-      status: "active" as const,
-      initials: "MJ",
-    },
-    {
-      id: "ADM2024001",
-      name: "Admin User",
-      role: "admin" as const,
-      department: "System",
-      status: "active" as const,
-      initials: "AD",
-    },
-    {
-      id: "STU2024002",
-      name: "Alice Brown",
-      role: "student" as const,
-      grade: "Grade 9-B",
-      status: "inactive" as const,
-      initials: "AB",
-    },
-  ];
-
   // Dynamic stats based on current users list
   const stats = {
     students: usersList.filter((user) => user.role === "student").length,
@@ -281,15 +259,15 @@ export default function AdminUsers() {
   };
 
   const getInitialsColor = (initials: string) => {
-    const colors = {
-      JS: "bg-blue-100 text-blue-700",
-      MJ: "bg-green-100 text-green-700",
-      AD: "bg-purple-100 text-purple-700",
-      AB: "bg-gray-100 text-gray-700",
-    };
-    return (
-      colors[initials as keyof typeof colors] || "bg-gray-100 text-gray-700"
-    );
+    const colors = [
+      "bg-blue-100 text-blue-700",
+      "bg-green-100 text-green-700",
+      "bg-purple-100 text-purple-700",
+      "bg-orange-100 text-orange-700",
+      "bg-pink-100 text-pink-700",
+    ];
+    const index = initials.charCodeAt(0) % colors.length;
+    return colors[index];
   };
 
   const filteredUsers = usersList.filter((user) =>
@@ -443,71 +421,6 @@ export default function AdminUsers() {
                     </div>
                   </div>
 
-                  {/* Contact Information */}
-                  <div className="space-y-3 border-t pt-4">
-                    <h4 className="font-medium text-sm text-gray-700">
-                      Contact Information
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input
-                          id="phone"
-                          value={newUser.phone}
-                          onChange={(e) =>
-                            setNewUser({ ...newUser, phone: e.target.value })
-                          }
-                          placeholder="+1234567890"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="gender">Gender</Label>
-                        <Select
-                          value={newUser.gender}
-                          onValueChange={(value) =>
-                            setNewUser({ ...newUser, gender: value })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select gender" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="male">Male</SelectItem>
-                            <SelectItem value="female">Female</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                      <Input
-                        id="dateOfBirth"
-                        type="date"
-                        value={newUser.dateOfBirth}
-                        onChange={(e) =>
-                          setNewUser({
-                            ...newUser,
-                            dateOfBirth: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="address">Address</Label>
-                      <Input
-                        id="address"
-                        value={newUser.address}
-                        onChange={(e) =>
-                          setNewUser({ ...newUser, address: e.target.value })
-                        }
-                        placeholder="123 Main St, City, State"
-                      />
-                    </div>
-                  </div>
-
                   {/* Instructions */}
                   <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
                     <p className="text-sm text-blue-700">
@@ -561,7 +474,7 @@ export default function AdminUsers() {
             <div className="grid grid-cols-3 gap-4 my-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
-                  {stats.students.toLocaleString()}
+                  {stats.students}
                 </div>
                 <div className="text-sm text-gray-600">Students</div>
               </div>
@@ -585,39 +498,34 @@ export default function AdminUsers() {
                   key={user.id}
                   className="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center space-x-3">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center ${getInitialsColor(
-                        user.initials,
-                      )}`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${getInitialsColor(user.initials)}`}
                     >
-                      <span className="font-semibold">{user.initials}</span>
+                      {user.initials}
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">{user.name}</h4>
-                      <p className="text-sm text-gray-600">
-                        {user.grade || user.department} • {user.role}
-                      </p>
-                      <p className="text-xs text-gray-500">ID: {user.id}</p>
+                      <div className="font-medium text-gray-900">
+                        {user.name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {user.role === "student" ? user.grade : user.department}{" "}
+                        • {user.id}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant="secondary"
-                      className={
-                        user.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }
-                    >
-                      {user.status}
+                  <div className="flex items-center space-x-2">
+                    <Badge className={getRoleColor(user.role)}>
+                      {user.role}
                     </Badge>
-                    <Button variant="ghost" size="sm">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               ))}
+              {filteredUsers.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No users found matching your search.</p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="students" className="space-y-3">
@@ -626,23 +534,24 @@ export default function AdminUsers() {
                 .map((user) => (
                   <div
                     key={user.id}
-                    className="bg-white rounded-xl p-4 shadow-sm"
+                    className="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center space-x-3">
                       <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center ${getInitialsColor(
-                          user.initials,
-                        )}`}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${getInitialsColor(user.initials)}`}
                       >
-                        <span className="font-semibold">{user.initials}</span>
+                        {user.initials}
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900">
+                        <div className="font-medium text-gray-900">
                           {user.name}
-                        </h4>
-                        <p className="text-sm text-gray-600">{user.grade}</p>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {user.grade} • {user.id}
+                        </div>
                       </div>
                     </div>
+                    <Badge className="bg-blue-100 text-blue-700">Student</Badge>
                   </div>
                 ))}
             </TabsContent>
@@ -653,25 +562,26 @@ export default function AdminUsers() {
                 .map((user) => (
                   <div
                     key={user.id}
-                    className="bg-white rounded-xl p-4 shadow-sm"
+                    className="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center space-x-3">
                       <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center ${getInitialsColor(
-                          user.initials,
-                        )}`}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${getInitialsColor(user.initials)}`}
                       >
-                        <span className="font-semibold">{user.initials}</span>
+                        {user.initials}
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900">
+                        <div className="font-medium text-gray-900">
                           {user.name}
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {user.department}
-                        </p>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {user.department} • {user.id}
+                        </div>
                       </div>
                     </div>
+                    <Badge className="bg-green-100 text-green-700">
+                      Teacher
+                    </Badge>
                   </div>
                 ))}
             </TabsContent>
@@ -682,29 +592,33 @@ export default function AdminUsers() {
                 .map((user) => (
                   <div
                     key={user.id}
-                    className="bg-white rounded-xl p-4 shadow-sm"
+                    className="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center space-x-3">
                       <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center ${getInitialsColor(
-                          user.initials,
-                        )}`}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${getInitialsColor(user.initials)}`}
                       >
-                        <span className="font-semibold">{user.initials}</span>
+                        {user.initials}
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900">
+                        <div className="font-medium text-gray-900">
                           {user.name}
-                        </h4>
-                        <p className="text-sm text-gray-600">Administrator</p>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {user.department} • {user.id}
+                        </div>
                       </div>
                     </div>
+                    <Badge className="bg-purple-100 text-purple-700">
+                      Admin
+                    </Badge>
                   </div>
                 ))}
             </TabsContent>
           </Tabs>
         </div>
       </MobileLayout>
+
       <BottomNavigation />
     </>
   );
