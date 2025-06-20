@@ -24,14 +24,13 @@ export default function TeacherLogin() {
     setIsLoading(true);
 
     try {
-      // For demo, use email instead of teacher ID
-      await login("teacher@shkva.edu", password, "teacher");
+      await login(email, password, "teacher");
       navigate("/teacher/dashboard");
     } catch (error) {
       toast({
         title: "Login Failed",
         description:
-          "Invalid credentials. Try any teacher ID with any password.",
+          "Invalid email or password. Please contact your admin if you need an account.",
         variant: "destructive",
       });
     } finally {

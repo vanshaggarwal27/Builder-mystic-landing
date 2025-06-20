@@ -14,7 +14,7 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { toast } = useToast();
-  const [adminId, setAdminId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [securityCode, setSecurityCode] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -22,16 +22,34 @@ export default function AdminLogin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // For admin login, we expect a security code (demo: any 6 digits)
+    if (!securityCode || securityCode.length !== 6) {
+      toast({
+        title: "Security Code Required",
+        description: "Please enter a 6-digit security code (e.g., 123456)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // For demo, use email instead of admin ID
-      await login("admin@shkva.edu", password, "admin");
+      console.log("🔐 Admin login attempt:", {
+        email,
+        securityCode: securityCode.length,
+      });
+      await login(email, password, "admin");
+      console.log("✅ Admin login successful, navigating...");
       navigate("/admin/dashboard");
-    } catch (error) {
+    } catch (error: any) {
+      console.error("❌ Admin login failed:", error);
       toast({
         title: "Login Failed",
-        description: "Invalid credentials. Try any admin ID with any password.",
+        description:
+          error.message ||
+          "Invalid email or password. Please contact your system administrator.",
         variant: "destructive",
       });
     } finally {
@@ -54,14 +72,14 @@ export default function AdminLogin() {
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="adminId">Admin ID</Label>
+            <Label htmlFor="email">Admin Email</Label>
             <div className="relative">
               <Input
-                id="adminId"
-                type="text"
-                placeholder="Enter your admin ID"
-                value={adminId}
-                onChange={(e) => setAdminId(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="Enter your admin email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="pl-4 pr-12"
               />
@@ -139,7 +157,7 @@ export default function AdminLogin() {
         {/* Demo hint */}
         <div className="mt-4 p-4 bg-purple-50 rounded-lg">
           <p className="text-sm text-purple-700 text-center">
-            <strong>Demo:</strong> Use any admin ID and password
+            <strong>Demo:</strong> admin@shkva.edu / admin123 / any 6 digits
           </p>
         </div>
       </div>

@@ -30,7 +30,7 @@ export default function StudentLogin() {
       toast({
         title: "Login Failed",
         description:
-          "Invalid email or password. Try student@shkva.edu with any password.",
+          "Invalid email or password. Please contact your admin if you need an account.",
         variant: "destructive",
       });
     } finally {
@@ -123,7 +123,7 @@ export default function StudentLogin() {
           {/* Demo hint */}
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <p className="text-sm text-blue-700 text-center">
-              <strong></strong> 
+              <strong></strong>
             </p>
           </div>
         </div>
