@@ -8,7 +8,8 @@
     "dev": "nodemon app.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "seed:admin": "node seeds/createAdmin.js"
+    "seed:admin": "node seeds/createAdmin.js",
+    "seed:users": "node seeds/createSampleUsers.js"
   },
   "keywords": [
     "school",
