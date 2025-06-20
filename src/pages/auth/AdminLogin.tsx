@@ -14,7 +14,7 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { toast } = useToast();
-  const [adminId, setAdminId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [securityCode, setSecurityCode] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -22,6 +22,17 @@ export default function AdminLogin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // For admin login, we expect a security code (demo: any 6 digits)
+    if (!securityCode || securityCode.length !== 6) {
+      toast({
+        title: "Security Code Required",
+        description: "Please enter a 6-digit security code",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -54,14 +65,14 @@ export default function AdminLogin() {
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="adminId">Admin ID</Label>
+            <Label htmlFor="email">Admin Email</Label>
             <div className="relative">
               <Input
-                id="adminId"
-                type="text"
-                placeholder="Enter your admin ID"
-                value={adminId}
-                onChange={(e) => setAdminId(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="Enter your admin email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="pl-4 pr-12"
               />
@@ -139,7 +150,7 @@ export default function AdminLogin() {
         {/* Demo hint */}
         <div className="mt-4 p-4 bg-purple-50 rounded-lg">
           <p className="text-sm text-purple-700 text-center">
-            <strong>Demo:</strong> Use any admin ID and password
+            <strong>Demo:</strong> admin@shkva.edu / admin123 / any 6 digits
           </p>
         </div>
       </div>
