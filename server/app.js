@@ -68,9 +68,10 @@ app.use("*", (req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 SHKVA Server running on port ${PORT}`);
   console.log(`📚 School Management System API ready!`);
+  console.log(`🌐 Server accessible at http://0.0.0.0:${PORT}`);
 });
 
 module.exports = app;
