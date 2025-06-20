@@ -25,13 +25,13 @@ export default function AdminLogin() {
     setIsLoading(true);
 
     try {
-      // For demo, use email instead of admin ID
-      await login("admin@shkva.edu", password, "admin");
+      await login(email, password, "admin");
       navigate("/admin/dashboard");
     } catch (error) {
       toast({
         title: "Login Failed",
-        description: "Invalid credentials. Try any admin ID with any password.",
+        description:
+          "Invalid email or password. Please contact your system administrator.",
         variant: "destructive",
       });
     } finally {
