@@ -6,9 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminUsers() {
@@ -31,17 +43,24 @@ export default function AdminUsers() {
 
   // Generate a random user ID for demo mode
   const generateUserId = () => {
-    const prefix = {
-      student: "STU",
-      teacher: "TCH",
-      admin: "ADM"
-    }[newUser.role] || "USR";
+    const prefix =
+      {
+        student: "STU",
+        teacher: "TCH",
+        admin: "ADM",
+      }[newUser.role] || "USR";
     return `${prefix}${Date.now()}`;
   };
 
   const handleCreateUser = async () => {
     // Validation
-    if (!newUser.email || !newUser.password || !newUser.role || !newUser.firstName || !newUser.lastName) {
+    if (
+      !newUser.email ||
+      !newUser.password ||
+      !newUser.role ||
+      !newUser.firstName ||
+      !newUser.lastName
+    ) {
       toast({
         title: "Error",
         description: "Please fill in all required fields (marked with *)",
@@ -72,7 +91,10 @@ export default function AdminUsers() {
     }
 
     setIsLoading(true);
-    console.log("👤 Creating user:", { email: newUser.email, role: newUser.role });
+    console.log("👤 Creating user:", {
+      email: newUser.email,
+      role: newUser.role,
+    });
 
     try {
       const token = localStorage.getItem("authToken");
@@ -113,19 +135,26 @@ export default function AdminUsers() {
         name: `${newUser.firstName} ${newUser.lastName}`,
         role: newUser.role as any,
         grade: newUser.role === "student" ? "Grade 10-A" : undefined,
-        department: newUser.role === "teacher" ? "General" : newUser.role === "admin" ? "Administration" : undefined,
+        department:
+          newUser.role === "teacher"
+            ? "General"
+            : newUser.role === "admin"
+              ? "Administration"
+              : undefined,
         status: "active" as const,
         initials: `${newUser.firstName[0]}${newUser.lastName[0]}`.toUpperCase(),
       };
 
-      setUsersList(prev => [...prev, newUserEntry]);
+      setUsersList((prev) => [...prev, newUserEntry]);
       resetForm();
-
     } catch (error: any) {
       console.error("❌ User creation failed:", error);
 
       // Demo mode fallback
-      if (error.name === "AbortError" || error.message.includes("Failed to fetch")) {
+      if (
+        error.name === "AbortError" ||
+        error.message.includes("Failed to fetch")
+      ) {
         console.log("🌐 Using demo mode for user creation");
 
         const newUserEntry = {
@@ -133,19 +162,29 @@ export default function AdminUsers() {
           name: `${newUser.firstName} ${newUser.lastName}`,
           role: newUser.role as any,
           grade: newUser.role === "student" ? "Grade 10-A" : undefined,
-          department: newUser.role === "teacher" ? "General" : newUser.role === "admin" ? "Administration" : undefined,
+          department:
+            newUser.role === "teacher"
+              ? "General"
+              : newUser.role === "admin"
+                ? "Administration"
+                : undefined,
           status: "active" as const,
-          initials: `${newUser.firstName[0]}${newUser.lastName[0]}`.toUpperCase(),
+          initials:
+            `${newUser.firstName[0]}${newUser.lastName[0]}`.toUpperCase(),
         };
 
-        setUsersList(prev => [...prev, newUserEntry]);
+        setUsersList((prev) => [...prev, newUserEntry]);
 
         toast({
           title: "Success (Demo Mode)",
           description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created in demo mode! Login: ${newUser.email} / ${newUser.password}`,
         });
 
-        console.log("✅ Demo user created:", { email: newUser.email, password: newUser.password, role: newUser.role });
+        console.log("✅ Demo user created:", {
+          email: newUser.email,
+          password: newUser.password,
+          role: newUser.role,
+        });
         resetForm();
         return;
       }
@@ -264,7 +303,10 @@ export default function AdminUsers() {
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             </div>
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <Dialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+            >
               <DialogTrigger asChild>
                 <Button className="bg-purple-600 hover:bg-purple-700">
                   <Plus className="h-4 w-4 mr-1" />
@@ -278,14 +320,21 @@ export default function AdminUsers() {
                 <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                   {/* Basic Information */}
                   <div className="space-y-3">
-                    <h4 className="font-medium text-sm text-gray-700">Basic Information</h4>
+                    <h4 className="font-medium text-sm text-gray-700">
+                      Basic Information
+                    </h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="firstName">First Name *</Label>
                         <Input
                           id="firstName"
                           value={newUser.firstName}
-                          onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                          onChange={(e) =>
+                            setNewUser({
+                              ...newUser,
+                              firstName: e.target.value,
+                            })
+                          }
                           placeholder="John"
                           required
                         />
@@ -295,7 +344,9 @@ export default function AdminUsers() {
                         <Input
                           id="lastName"
                           value={newUser.lastName}
-                          onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                          onChange={(e) =>
+                            setNewUser({ ...newUser, lastName: e.target.value })
+                          }
                           placeholder="Doe"
                           required
                         />
@@ -308,7 +359,9 @@ export default function AdminUsers() {
                         id="email"
                         type="email"
                         value={newUser.email}
-                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, email: e.target.value })
+                        }
                         placeholder="john.doe@shkva.edu"
                         required
                       />
@@ -320,7 +373,9 @@ export default function AdminUsers() {
                         id="password"
                         type="password"
                         value={newUser.password}
-                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, password: e.target.value })
+                        }
                         placeholder="Minimum 6 characters"
                         required
                       />
@@ -328,7 +383,12 @@ export default function AdminUsers() {
 
                     <div>
                       <Label htmlFor="role">Role *</Label>
-                      <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
+                      <Select
+                        value={newUser.role}
+                        onValueChange={(value) =>
+                          setNewUser({ ...newUser, role: value })
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select user role" />
                         </SelectTrigger>
@@ -358,20 +418,29 @@ export default function AdminUsers() {
 
                   {/* Contact Information */}
                   <div className="space-y-3 border-t pt-4">
-                    <h4 className="font-medium text-sm text-gray-700">Contact Information</h4>
+                    <h4 className="font-medium text-sm text-gray-700">
+                      Contact Information
+                    </h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="phone">Phone Number</Label>
                         <Input
                           id="phone"
                           value={newUser.phone}
-                          onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                          onChange={(e) =>
+                            setNewUser({ ...newUser, phone: e.target.value })
+                          }
                           placeholder="+1234567890"
                         />
                       </div>
                       <div>
                         <Label htmlFor="gender">Gender</Label>
-                        <Select value={newUser.gender} onValueChange={(value) => setNewUser({ ...newUser, gender: value })}>
+                        <Select
+                          value={newUser.gender}
+                          onValueChange={(value) =>
+                            setNewUser({ ...newUser, gender: value })
+                          }
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select gender" />
                           </SelectTrigger>
@@ -390,7 +459,12 @@ export default function AdminUsers() {
                         id="dateOfBirth"
                         type="date"
                         value={newUser.dateOfBirth}
-                        onChange={(e) => setNewUser({ ...newUser, dateOfBirth: e.target.value })}
+                        onChange={(e) =>
+                          setNewUser({
+                            ...newUser,
+                            dateOfBirth: e.target.value,
+                          })
+                        }
                       />
                     </div>
 
@@ -399,7 +473,9 @@ export default function AdminUsers() {
                       <Input
                         id="address"
                         value={newUser.address}
-                        onChange={(e) => setNewUser({ ...newUser, address: e.target.value })}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, address: e.target.value })
+                        }
                         placeholder="123 Main St, City, State"
                       />
                     </div>
@@ -408,17 +484,22 @@ export default function AdminUsers() {
                   {/* Instructions */}
                   <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
                     <p className="text-sm text-blue-700">
-                      <strong>Note:</strong> The user will be able to login immediately with the email and password you provide.
+                      <strong>Note:</strong> The user will be able to login
+                      immediately with the email and password you provide.
                       {newUser.role && (
                         <span className="block mt-1">
-                          {newUser.role === "student" && "Students can access assignments, attendance, and notices."}
-                          {newUser.role === "teacher" && "Teachers can manage classes, create assignments, and track attendance."}
-                          {newUser.role === "admin" && "Admins have full access to user management and system settings."}
+                          {newUser.role === "student" &&
+                            "Students can access assignments, attendance, and notices."}
+                          {newUser.role === "teacher" &&
+                            "Teachers can manage classes, create assignments, and track attendance."}
+                          {newUser.role === "admin" &&
+                            "Admins have full access to user management and system settings."}
                         </span>
                       )}
                     </p>
                   </div>
-                </div>
+
+                  {/* Action Buttons */}
                   <div className="flex gap-3 pt-4">
                     <Button
                       variant="outline"
