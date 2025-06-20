@@ -27,7 +27,7 @@ export default function AdminLogin() {
     if (!securityCode || securityCode.length !== 6) {
       toast({
         title: "Security Code Required",
-        description: "Please enter a 6-digit security code",
+        description: "Please enter a 6-digit security code (e.g., 123456)",
         variant: "destructive",
       });
       return;
@@ -36,12 +36,19 @@ export default function AdminLogin() {
     setIsLoading(true);
 
     try {
+      console.log("🔐 Admin login attempt:", {
+        email,
+        securityCode: securityCode.length,
+      });
       await login(email, password, "admin");
+      console.log("✅ Admin login successful, navigating...");
       navigate("/admin/dashboard");
-    } catch (error) {
+    } catch (error: any) {
+      console.error("❌ Admin login failed:", error);
       toast({
         title: "Login Failed",
         description:
+          error.message ||
           "Invalid email or password. Please contact your system administrator.",
         variant: "destructive",
       });
