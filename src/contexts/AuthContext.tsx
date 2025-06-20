@@ -76,12 +76,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string, role: UserRole) => {
     try {
-      console.log("🔐 Attempting login:", {
-        email,
-        role,
-        apiUrl: `${API_BASE_URL}/auth/login`,
-      });
-
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
@@ -90,9 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password, role }),
       });
 
-      console.log("📡 Login response status:", response.status);
       const data = await response.json();
-      console.log("📄 Login response data:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Login failed");
