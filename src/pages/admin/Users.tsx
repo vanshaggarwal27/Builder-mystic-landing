@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { addDemoUser } from "@/contexts/AuthContext";
 
 export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -157,6 +158,15 @@ export default function AdminUsers() {
       ) {
         console.log("🌐 Using demo mode for user creation");
 
+        // Add to demo users storage so they can login
+        addDemoUser(
+          newUser.email,
+          newUser.password,
+          newUser.firstName,
+          newUser.lastName,
+          newUser.role,
+        );
+
         const newUserEntry = {
           id: generateUserId(),
           name: `${newUser.firstName} ${newUser.lastName}`,
@@ -177,10 +187,11 @@ export default function AdminUsers() {
 
         toast({
           title: "Success (Demo Mode)",
-          description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created in demo mode! Login: ${newUser.email} / ${newUser.password}`,
+          description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created! They can now login with: ${newUser.email} / ${newUser.password}`,
+          duration: 6000,
         });
 
-        console.log("✅ Demo user created:", {
+        console.log("✅ Demo user created and stored:", {
           email: newUser.email,
           password: newUser.password,
           role: newUser.role,
