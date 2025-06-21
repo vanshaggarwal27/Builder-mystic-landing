@@ -17,10 +17,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Use deployed backend URL directly for mobile apps
+// Use proxy for local development, direct URL for production/mobile
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "https://shkva-backend-new.onrender.com/api";
+  import.meta.env.MODE === "development" &&
+  window.location.hostname === "localhost"
+    ? "/api"
+    : "https://shkva-backend-new.onrender.com/api";
 
 // Demo users storage (persists in localStorage)
 const getDemoUsers = () => {
@@ -158,7 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Direct backend URL for mobile apps
     const backendURL = "https://shkva-backend-new.onrender.com/api";
-    console.log("🔗 Using backend URL:", backendURL);
+    console.log("�� Using backend URL:", backendURL);
 
     try {
       // Create a fetch with timeout
@@ -187,8 +189,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ok: response.ok,
       });
 
-      const data = await response.json();
-      console.log("📄 Response data received");
+      // Check if response has content before parsing JSON
+      const responseText = await response.text();
+      console.log("📄 Raw response:", responseText);
+
+      let data;
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch (parseError) {
+        console.error("❌ JSON parse error:", parseError);
+        throw new Error("Invalid response from server");
+      }
 
       if (!response.ok) {
         throw new Error(data.error || `Server error: ${response.status}`);
