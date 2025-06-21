@@ -1,192 +1,282 @@
 import React from "react";
-import { CheckCircle, Star, Bell, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {
+  Users,
+  BookOpen,
+  Calendar,
+  Upload,
+  FileText,
+  UserCheck,
+  Clock,
+  Award,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SlideTransition } from "@/components/layout/PageTransition";
+import { Badge } from "@/components/ui/badge";
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
 
-  const todaysClasses = [
+  const quickStats = [
+    { label: "My Classes", value: "5", icon: BookOpen, color: "text-blue-600" },
+    { label: "Students", value: "147", icon: Users, color: "text-green-600" },
     {
-      name: "Grade 10-A Math",
-      time: "9:00 - 10:00 AM",
-      students: 30,
-      status: "current" as const,
+      label: "Assignments",
+      value: "12",
+      icon: FileText,
+      color: "text-purple-600",
+    },
+    { label: "Pending", value: "3", icon: Clock, color: "text-orange-600" },
+  ];
+
+  const quickActions = [
+    {
+      title: "Upload Assignment",
+      description: "Create & assign homework",
+      icon: Upload,
+      color: "from-green-500 to-emerald-500",
+      route: "/teacher/upload-assignment",
     },
     {
-      name: "Grade 9-B Math",
-      time: "10:15 - 11:15 AM",
-      students: 28,
-      status: "upcoming" as const,
+      title: "Upload Results",
+      description: "Enter exam marks & grades",
+      icon: Award,
+      color: "from-purple-500 to-pink-500",
+      route: "/teacher/upload-results",
     },
     {
-      name: "Grade 11-A Math",
-      time: "2:00 - 3:00 PM",
-      students: 25,
-      status: "upcoming" as const,
+      title: "Mark Attendance",
+      description: "Take daily attendance",
+      icon: UserCheck,
+      color: "from-blue-500 to-cyan-500",
+      route: "/teacher/mark-attendance",
+    },
+    {
+      title: "View Schedule",
+      description: "Check class timetable",
+      icon: Calendar,
+      color: "from-orange-500 to-red-500",
+      route: "/teacher/schedule",
     },
   ];
 
-  const recentActivities = [
+  const teachingLoad = [
     {
-      type: "attendance",
-      title: "Attendance marked for Grade 10-A",
-      subtitle: "28/30 students present",
-      time: "10 minutes ago",
+      class: "Class 5-A",
+      subject: "Mathematics",
+      students: 32,
+      nextPeriod: "Period 2 (9:45 AM)",
+    },
+    {
+      class: "Class 5-B",
+      subject: "Mathematics",
+      students: 30,
+      nextPeriod: "Period 4 (11:30 AM)",
+    },
+    {
+      class: "Class 6-A",
+      subject: "Science",
+      students: 28,
+      nextPeriod: "Period 6 (2:15 PM)",
     },
   ];
+
+  const recentActivity = [
+    {
+      title: "Assignment submitted",
+      description: "Math Chapter 5 - 25/32 students",
+      time: "1 hour ago",
+      status: "pending",
+    },
+    {
+      title: "Attendance marked",
+      description: "Class 5-A - Present: 30/32",
+      time: "2 hours ago",
+      status: "completed",
+    },
+    {
+      title: "Results uploaded",
+      description: "Mid-term Math - Class 5-B",
+      time: "1 day ago",
+      status: "completed",
+    },
+    {
+      title: "Assignment created",
+      description: "Science Lab Report - Class 6-A",
+      time: "2 days ago",
+      status: "completed",
+    },
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "bg-green-100 text-green-700";
+      case "pending":
+        return "bg-orange-100 text-orange-700";
+      case "overdue":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
 
   return (
-    <SlideTransition>
+    <>
       <MobileLayout
-        headerGradient="from-green-500 to-blue-600"
+        title="Teacher Dashboard"
+        headerGradient="from-green-600 to-blue-600"
         className="pb-20"
       >
-        <div className="px-6 py-6 pt-8">
-          {/* Enhanced Profile Header */}
-          <div className="relative bg-gradient-to-br from-green-500 via-emerald-500 to-blue-600 text-white p-8 rounded-3xl mb-6 mt-4 overflow-hidden shadow-xl">
-            {/* Decorative background elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-            <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-10"></div>
-
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-white/25 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
-                    <span className="text-2xl font-bold">MJ</span>
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold mb-1">Ms. Johnson</h2>
-                    <div className="text-white/90 text-sm flex items-center gap-2">
-                      <div className="w-2 h-2 bg-emerald-300 rounded-full"></div>
-                      <span>Mathematics Teacher</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="relative">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                    <Bell className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-semibold text-white">3</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div
-                  className="bg-white/15 backdrop-blur-sm rounded-2xl p-5 text-center cursor-pointer hover:bg-white/25 hover:scale-105 transition-all duration-300 shadow-lg"
-                  onClick={() => navigate("/teacher/attendance")}
-                >
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <CheckCircle className="h-6 w-6 text-white" />
-                  </div>
-                  <span className="text-sm font-semibold text-white block">
-                    Mark Attendance
-                  </span>
-                </div>
-                <div
-                  className="bg-white/15 backdrop-blur-sm rounded-2xl p-5 text-center cursor-pointer hover:bg-white/25 hover:scale-105 transition-all duration-300 shadow-lg"
-                  onClick={() => navigate("/teacher/assignments")}
-                >
-                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <Star className="h-6 w-6 text-white" />
-                  </div>
-                  <span className="text-sm font-semibold text-white block">
-                    Upload Homework
-                  </span>
-                </div>
-              </div>
+        <div className="px-6 py-6">
+          <div className="space-y-6">
+            {/* Welcome Section */}
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border-l-4 border-green-400">
+              <h2 className="font-semibold text-gray-800">
+                Welcome back, Teacher!
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Ready to inspire young minds today? Your teaching tools are at
+                your fingertips.
+              </p>
             </div>
-          </div>
 
-          {/* Today's Classes */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Today's Classes
-            </h3>
-            <div className="space-y-3">
-              {todaysClasses.map((cls, index) => (
-                <Card
-                  key={index}
-                  className={`p-4 card-hover ${cls.status === "current" ? "bg-green-50 border-green-200" : ""}`}
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              {quickStats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="bg-white p-4 rounded-lg shadow-sm"
                 >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        cls.status === "current"
-                          ? "bg-green-500"
-                          : "bg-gray-300"
-                      }`}
-                    ></div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-medium text-gray-900">
-                          {cls.name}
-                        </h4>
-                        {cls.status === "current" && (
-                          <Badge
-                            variant="secondary"
-                            className="bg-green-100 text-green-700"
-                          >
-                            Current
-                          </Badge>
-                        )}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        {stat.value}
                       </div>
-                      <p className="text-sm text-gray-600">{cls.time}</p>
-                      <p className="text-xs text-gray-500">
-                        Room 201 • {cls.students} Students
-                      </p>
+                      <div className="text-sm text-gray-600">{stat.label}</div>
                     </div>
+                    <stat.icon className={`h-8 w-8 ${stat.color}`} />
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
-          </div>
 
-          {/* Recent Activities */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Recent Activities
-            </h3>
+            {/* Quick Actions */}
             <div className="space-y-3">
-              {recentActivities.map((activity, index) => (
-                <Card key={index} className="p-4 card-hover">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">
-                        {activity.title}
+              <h3 className="font-semibold text-gray-900">Teaching Tools</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {quickActions.map((action) => (
+                  <Button
+                    key={action.title}
+                    onClick={() => navigate(action.route)}
+                    className="h-auto p-4 bg-white text-left border border-gray-200 hover:shadow-md transition-all"
+                    variant="ghost"
+                  >
+                    <div className="text-center">
+                      <div
+                        className={`p-3 rounded-lg bg-gradient-to-r ${action.color} mx-auto mb-2 w-fit`}
+                      >
+                        <action.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900 text-sm">
+                        {action.title}
                       </h4>
-                      <p className="text-sm text-gray-600">
-                        {activity.subtitle}
+                      <p className="text-xs text-gray-600 mt-1">
+                        {action.description}
                       </p>
-                      <p className="text-xs text-gray-500">{activity.time}</p>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Today's Classes */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold text-gray-900">Today's Classes</h3>
+              </div>
+              <div className="space-y-1">
+                {teachingLoad.map((classInfo, index) => (
+                  <div key={index} className="p-4 border-b last:border-b-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium text-gray-900">
+                          {classInfo.class}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {classInfo.subject}
+                        </p>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-700">
+                        {classInfo.students} students
+                      </Badge>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Clock className="h-4 w-4 mr-1" />
+                      Next: {classInfo.nextPeriod}
                     </div>
                   </div>
-                </Card>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold text-gray-900">Recent Activity</h3>
+              </div>
+              <div className="space-y-1">
+                {recentActivity.map((activity, index) => (
+                  <div key={index} className="p-4 border-b last:border-b-0">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium text-gray-900">
+                            {activity.title}
+                          </h4>
+                          <Badge className={getStatusColor(activity.status)}>
+                            {activity.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {activity.description}
+                        </p>
+                      </div>
+                      <span className="text-xs text-gray-500 ml-2">
+                        {activity.time}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Additional Features */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => navigate("/teacher/assignments")}
+                className="bg-purple-600 hover:bg-purple-700 h-auto py-4"
+              >
+                <div className="text-center">
+                  <FileText className="h-6 w-6 mx-auto mb-1" />
+                  <div className="text-sm">Assignments</div>
+                </div>
+              </Button>
+              <Button
+                onClick={() => navigate("/teacher/classes")}
+                className="bg-indigo-600 hover:bg-indigo-700 h-auto py-4"
+              >
+                <div className="text-center">
+                  <Users className="h-6 w-6 mx-auto mb-1" />
+                  <div className="text-sm">My Classes</div>
+                </div>
+              </Button>
             </div>
           </div>
         </div>
       </MobileLayout>
-
-      {/* Floating Chat Button */}
-      <Button
-        onClick={() => navigate("/teacher/chat")}
-        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 shadow-lg btn-animate z-10"
-      >
-        <MessageCircle className="h-6 w-6 text-white" />
-      </Button>
-
       <BottomNavigation />
-    </SlideTransition>
+    </>
   );
 }
