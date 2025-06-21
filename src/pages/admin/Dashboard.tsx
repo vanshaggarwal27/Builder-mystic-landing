@@ -43,42 +43,42 @@ export default function AdminDashboard() {
   const mainFeatures = [
     {
       title: "User Management",
-      description: "Manage students, teachers & admin accounts",
+      description: "Manage users",
       icon: Users,
       color: "from-blue-500 to-cyan-500",
       route: "/admin/users",
     },
     {
       title: "Class Management",
-      description: "Manage classes from Nursery to Class 10",
+      description: "Manage classes",
       icon: BookOpen,
       color: "from-purple-500 to-pink-500",
       route: "/admin/classes",
     },
     {
       title: "Announcements",
-      description: "Send notices & announcements",
+      description: "Send notices",
       icon: Bell,
       color: "from-orange-500 to-red-500",
       route: "/admin/announcements",
     },
     {
       title: "Schedule Management",
-      description: "Manage timetables & calendar events",
+      description: "Manage timetables",
       icon: Calendar,
       color: "from-teal-500 to-blue-500",
       route: "/admin/schedule",
     },
     {
       title: "Teacher Attendance",
-      description: "Monitor teacher attendance",
+      description: "View attendance",
       icon: UserCheck,
       color: "from-green-500 to-emerald-500",
       route: "/admin/teacher-attendance",
     },
     {
       title: "Reports",
-      description: "View analytics & generate reports",
+      description: "View analytics",
       icon: FileText,
       color: "from-indigo-500 to-purple-500",
       route: "/admin/reports",
@@ -151,30 +151,27 @@ export default function AdminDashboard() {
               <h3 className="font-semibold text-gray-900 text-center">
                 Management Tools
               </h3>
-              <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+              <div className="grid grid-cols-2 gap-3 px-4">
                 {mainFeatures.map((feature) => (
-                  <Button
+                  <div
                     key={feature.title}
                     onClick={() => navigate(feature.route)}
-                    className="h-auto p-3 bg-white text-center border border-gray-200 hover:shadow-md transition-all min-h-[120px]"
-                    variant="ghost"
+                    className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-all cursor-pointer p-4 min-h-[130px] flex flex-col items-center justify-center w-full"
                   >
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <div
-                        className={`p-2 rounded-lg bg-gradient-to-r ${feature.color}`}
-                      >
-                        <feature.icon className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="text-center space-y-1">
-                        <h4 className="font-semibold text-gray-900 text-xs leading-tight">
-                          {feature.title}
-                        </h4>
-                        <p className="text-[10px] text-gray-600 leading-tight line-clamp-2">
-                          {feature.description}
-                        </p>
-                      </div>
+                    <div
+                      className={`p-2.5 rounded-lg bg-gradient-to-r ${feature.color} mb-3`}
+                    >
+                      <feature.icon className="h-5 w-5 text-white" />
                     </div>
-                  </Button>
+                    <div className="text-center space-y-1 w-full overflow-hidden">
+                      <h4 className="font-semibold text-gray-900 text-xs leading-tight px-2 text-center">
+                        {feature.title}
+                      </h4>
+                      <p className="text-[10px] text-gray-500 leading-tight px-2 text-center">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
