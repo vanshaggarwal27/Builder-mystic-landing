@@ -151,33 +151,27 @@ export default function AdminDashboard() {
               <h3 className="font-semibold text-gray-900 text-center">
                 Management Tools
               </h3>
-              <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+              <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
                 {mainFeatures.map((feature) => (
-                  <Button
+                  <div
                     key={feature.title}
                     onClick={() => navigate(feature.route)}
-                    className="h-auto p-3 bg-white text-center border border-gray-200 hover:shadow-md transition-all"
-                    variant="ghost"
-                    style={{ minHeight: "110px", maxHeight: "110px" }}
+                    className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-all cursor-pointer p-4 h-[130px] flex flex-col items-center justify-between"
                   >
-                    <div className="flex flex-col items-center justify-between h-full">
-                      <div
-                        className={`p-2 rounded-lg bg-gradient-to-r ${feature.color} mb-2`}
-                      >
-                        <feature.icon className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="text-center flex-1 flex flex-col justify-center">
-                        <h4 className="font-semibold text-gray-900 text-xs leading-tight mb-1 px-1">
-                          {feature.title}
-                        </h4>
-                        <p className="text-[9px] text-gray-600 leading-tight px-1 overflow-hidden text-ellipsis">
-                          {feature.description.length > 45
-                            ? `${feature.description.substring(0, 42)}...`
-                            : feature.description}
-                        </p>
-                      </div>
+                    <div
+                      className={`p-3 rounded-xl bg-gradient-to-r ${feature.color} mb-3`}
+                    >
+                      <feature.icon className="h-6 w-6 text-white" />
                     </div>
-                  </Button>
+                    <div className="text-center space-y-1 flex-1 flex flex-col justify-center">
+                      <h4 className="font-semibold text-gray-900 text-xs leading-tight">
+                        {feature.title}
+                      </h4>
+                      <p className="text-[10px] text-gray-500 leading-tight">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
