@@ -35,11 +35,19 @@ import TeacherChat from "./pages/teacher/Chat";
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminUsers from "./pages/admin/Users";
+import AdminClasses from "./pages/admin/Classes";
+import AdminAnnouncements from "./pages/admin/Announcements";
+import AdminSchedule from "./pages/admin/Schedule";
 import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
 import AdminSendNotice from "./pages/admin/SendNotice";
 import AdminTestButtons from "./pages/admin/TestButtons";
 import AdminTeacherAttendance from "./pages/admin/TeacherAttendance";
+
+// Teacher Upload Components
+import TeacherUploadAssignment from "./pages/teacher/UploadAssignment";
+import TeacherUploadResults from "./pages/teacher/UploadResults";
+import TeacherMarkAttendance from "./pages/teacher/MarkAttendance";
 
 import NotFound from "./pages/NotFound";
 
@@ -98,12 +106,27 @@ const AppRoutes = () => {
           path="/teacher/create-assignment"
           element={<CreateAssignment />}
         />
+        <Route
+          path="/teacher/upload-assignment"
+          element={<TeacherUploadAssignment />}
+        />
+        <Route
+          path="/teacher/upload-results"
+          element={<TeacherUploadResults />}
+        />
+        <Route
+          path="/teacher/mark-attendance"
+          element={<TeacherMarkAttendance />}
+        />
         <Route path="/teacher/results" element={<TeacherResultsManagement />} />
         <Route path="/teacher/chat" element={<TeacherChat />} />
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/classes" element={<AdminClasses />} />
+        <Route path="/admin/announcements" element={<AdminAnnouncements />} />
+        <Route path="/admin/schedule" element={<AdminSchedule />} />
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/send-notice" element={<AdminSendNotice />} />
