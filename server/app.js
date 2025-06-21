@@ -41,8 +41,26 @@ if (config.security.helmetEnabled) {
   );
 }
 
-// CORS configuration
-app.use(cors(config.cors));
+// CORS configuration - More permissive for mobile apps
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true);
+
+      // Allow any origin for now (can be restricted later)
+      return callback(null, true);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+    ],
+  }),
+);
 
 // Logging
 app.use(morgan(config.server.env === "production" ? "combined" : "dev"));
@@ -80,6 +98,13 @@ app.use("/api/attendance", attendanceRoutes);
 
 // Health Check with detailed information
 app.get("/api/health", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  );
+
   res.json({
     status: "OK",
     message: "SHKVA School Management System API",
@@ -89,6 +114,18 @@ app.get("/api/health", (req, res) => {
     database:
       mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
     uptime: process.uptime(),
+    cors: "Enabled for all origins",
+  });
+});
+
+// Mobile app health check
+app.get("/api/mobile/health", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.json({
+    status: "Mobile API Ready",
+    message: "SHKVA Mobile App Backend",
+    timestamp: new Date().toISOString(),
+    mobile: true,
   });
 });
 

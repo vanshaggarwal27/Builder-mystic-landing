@@ -39,10 +39,17 @@ module.exports = {
           /.*\.netlify\.app$/,
           /.*\.builder\.codes$/,
           /.*\.projects\.builder\.codes$/,
+          // Allow mobile app origins
+          "capacitor://localhost",
+          "ionic://localhost",
+          "http://localhost",
+          "https://localhost",
+          // Allow any origin for mobile apps (can be restricted later)
+          "*",
         ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   },
 
   // Rate Limiting
