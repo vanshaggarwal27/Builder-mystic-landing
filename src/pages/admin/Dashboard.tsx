@@ -43,14 +43,14 @@ export default function AdminDashboard() {
   const mainFeatures = [
     {
       title: "User Management",
-      description: "Add & manage users",
+      description: "Manage users",
       icon: Users,
       color: "from-blue-500 to-cyan-500",
       route: "/admin/users",
     },
     {
       title: "Class Management",
-      description: "Nursery to Class 10",
+      description: "Manage classes",
       icon: BookOpen,
       color: "from-purple-500 to-pink-500",
       route: "/admin/classes",
@@ -64,21 +64,21 @@ export default function AdminDashboard() {
     },
     {
       title: "Schedule Management",
-      description: "Timetables & events",
+      description: "Manage timetables",
       icon: Calendar,
       color: "from-teal-500 to-blue-500",
       route: "/admin/schedule",
     },
     {
       title: "Teacher Attendance",
-      description: "Monitor attendance",
+      description: "View attendance",
       icon: UserCheck,
       color: "from-green-500 to-emerald-500",
       route: "/admin/teacher-attendance",
     },
     {
       title: "Reports",
-      description: "Analytics & reports",
+      description: "View analytics",
       icon: FileText,
       color: "from-indigo-500 to-purple-500",
       route: "/admin/reports",
@@ -151,23 +151,23 @@ export default function AdminDashboard() {
               <h3 className="font-semibold text-gray-900 text-center">
                 Management Tools
               </h3>
-              <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
+              <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
                 {mainFeatures.map((feature) => (
                   <div
                     key={feature.title}
                     onClick={() => navigate(feature.route)}
-                    className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-all cursor-pointer p-4 h-[130px] flex flex-col items-center justify-between"
+                    className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-all cursor-pointer p-3 h-[120px] flex flex-col items-center justify-center"
                   >
                     <div
-                      className={`p-3 rounded-xl bg-gradient-to-r ${feature.color} mb-3`}
+                      className={`p-2.5 rounded-lg bg-gradient-to-r ${feature.color} mb-2`}
                     >
-                      <feature.icon className="h-6 w-6 text-white" />
+                      <feature.icon className="h-5 w-5 text-white" />
                     </div>
-                    <div className="text-center space-y-1 flex-1 flex flex-col justify-center">
-                      <h4 className="font-semibold text-gray-900 text-xs leading-tight">
+                    <div className="text-center space-y-1 w-full px-1">
+                      <h4 className="font-semibold text-gray-900 text-xs leading-tight break-words">
                         {feature.title}
                       </h4>
-                      <p className="text-[10px] text-gray-500 leading-tight">
+                      <p className="text-[9px] text-gray-500 leading-tight break-words">
                         {feature.description}
                       </p>
                     </div>
