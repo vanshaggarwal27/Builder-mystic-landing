@@ -156,31 +156,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       demoUsers[email].password === password &&
       demoUsers[email].role === role;
 
+    // Direct backend URL for mobile apps
+    const backendURL = "https://shkva-backend-new.onrender.com/api";
+    console.log("🔗 Using backend URL:", backendURL);
+
     try {
       // Create a fetch with timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         controller.abort();
-        console.log("⏰ Fetch timeout - using demo mode");
-      }, 5000); // 5 second timeout
+        console.log("⏰ Fetch timeout after 8 seconds");
+      }, 8000); // 8 second timeout for mobile networks
 
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      console.log("📡 Attempting fetch to:", `${backendURL}/auth/login`);
+
+      const response = await fetch(`${backendURL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({ email, password, role }),
         signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
-      console.log("📡 Response received:", response.status);
+      console.log("📡 Response received:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+      });
 
       const data = await response.json();
-      console.log("📄 Response data:", data);
+      console.log("📄 Response data received");
 
       if (!response.ok) {
-        throw new Error(data.error || "Login failed");
+        throw new Error(data.error || `Server error: ${response.status}`);
       }
 
       // Store token in localStorage
@@ -196,17 +207,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: data.user.role,
       });
 
-      console.log("✅ Login completed successfully");
+      console.log("✅ Backend login completed successfully");
     } catch (error: any) {
-      console.error("Login error:", error);
+      console.error("❌ Backend login failed:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
 
-      // Fallback to demo mode if network fails or timeout
-      if (
-        isDemoLogin &&
-        (error.message.includes("Failed to fetch") ||
-          error.name === "AbortError")
-      ) {
-        console.log("🌐 Using demo mode due to network issue");
+      // Always fall back to demo mode for valid credentials
+      if (isDemoLogin) {
+        console.log("🌐 Falling back to demo mode");
         localStorage.setItem("authToken", "demo-token");
         const { password, ...userWithoutPassword } = demoUsers[email];
         setUser(userWithoutPassword);
@@ -214,9 +225,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      throw new Error(
-        isDemoLogin ? "Demo mode activated" : error.message || "Login failed",
-      );
+      // For invalid credentials, show the actual error
+      throw new Error(error.message || "Invalid credentials");
     }
   };
 
