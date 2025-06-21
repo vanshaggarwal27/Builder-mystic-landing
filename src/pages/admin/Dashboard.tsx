@@ -148,31 +148,35 @@ export default function AdminDashboard() {
 
             {/* Main Features */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-gray-900">Management Tools</h3>
-              {mainFeatures.map((feature) => (
-                <Button
-                  key={feature.title}
-                  onClick={() => navigate(feature.route)}
-                  className="w-full h-auto p-4 bg-white text-left border border-gray-200 hover:shadow-md transition-all"
-                  variant="ghost"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className={`p-3 rounded-lg bg-gradient-to-r ${feature.color}`}
-                    >
-                      <feature.icon className="h-6 w-6 text-white" />
+              <h3 className="font-semibold text-gray-900 text-center">
+                Management Tools
+              </h3>
+              <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+                {mainFeatures.map((feature) => (
+                  <Button
+                    key={feature.title}
+                    onClick={() => navigate(feature.route)}
+                    className="h-auto p-4 bg-white text-center border border-gray-200 hover:shadow-md transition-all"
+                    variant="ghost"
+                  >
+                    <div className="flex flex-col items-center space-y-3">
+                      <div
+                        className={`p-3 rounded-lg bg-gradient-to-r ${feature.color}`}
+                      >
+                        <feature.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="text-center">
+                        <h4 className="font-semibold text-gray-900 text-sm">
+                          {feature.title}
+                        </h4>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {feature.description}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900">
-                        {feature.title}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {feature.description}
-                      </p>
-                    </div>
-                  </div>
-                </Button>
-              ))}
+                  </Button>
+                ))}
+              </div>
             </div>
 
             {/* Recent Activity */}
@@ -202,7 +206,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
               <Button
                 onClick={() => navigate("/admin/announcements")}
                 className="bg-orange-600 hover:bg-orange-700 h-auto py-4"
