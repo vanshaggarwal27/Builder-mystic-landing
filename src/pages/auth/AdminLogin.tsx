@@ -153,13 +153,6 @@ export default function AdminLogin() {
             Admin access is monitored and logged for security purposes.
           </AlertDescription>
         </Alert>
-
-        {/* Demo hint */}
-        <div className="mt-4 p-4 bg-purple-50 rounded-lg">
-          <p className="text-sm text-purple-700 text-center">
-            <strong>Demo:</strong> admin@shkva.edu / admin123 / any 6 digits
-          </p>
-        </div>
       </div>
     </MobileLayout>
   );
