@@ -43,42 +43,42 @@ export default function AdminDashboard() {
   const mainFeatures = [
     {
       title: "User Management",
-      description: "Manage students, teachers & admin accounts",
+      description: "Add & manage users",
       icon: Users,
       color: "from-blue-500 to-cyan-500",
       route: "/admin/users",
     },
     {
       title: "Class Management",
-      description: "Manage classes from Nursery to Class 10",
+      description: "Nursery to Class 10",
       icon: BookOpen,
       color: "from-purple-500 to-pink-500",
       route: "/admin/classes",
     },
     {
       title: "Announcements",
-      description: "Send notices & announcements",
+      description: "Send notices",
       icon: Bell,
       color: "from-orange-500 to-red-500",
       route: "/admin/announcements",
     },
     {
       title: "Schedule Management",
-      description: "Manage timetables & calendar events",
+      description: "Timetables & events",
       icon: Calendar,
       color: "from-teal-500 to-blue-500",
       route: "/admin/schedule",
     },
     {
       title: "Teacher Attendance",
-      description: "Monitor teacher attendance",
+      description: "Monitor attendance",
       icon: UserCheck,
       color: "from-green-500 to-emerald-500",
       route: "/admin/teacher-attendance",
     },
     {
       title: "Reports",
-      description: "View analytics & generate reports",
+      description: "Analytics & reports",
       icon: FileText,
       color: "from-indigo-500 to-purple-500",
       route: "/admin/reports",
@@ -151,26 +151,29 @@ export default function AdminDashboard() {
               <h3 className="font-semibold text-gray-900 text-center">
                 Management Tools
               </h3>
-              <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+              <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
                 {mainFeatures.map((feature) => (
                   <Button
                     key={feature.title}
                     onClick={() => navigate(feature.route)}
-                    className="h-auto p-3 bg-white text-center border border-gray-200 hover:shadow-md transition-all min-h-[120px]"
+                    className="h-auto p-3 bg-white text-center border border-gray-200 hover:shadow-md transition-all"
                     variant="ghost"
+                    style={{ minHeight: "110px", maxHeight: "110px" }}
                   >
-                    <div className="flex flex-col items-center justify-center space-y-2">
+                    <div className="flex flex-col items-center justify-between h-full">
                       <div
-                        className={`p-2 rounded-lg bg-gradient-to-r ${feature.color}`}
+                        className={`p-2 rounded-lg bg-gradient-to-r ${feature.color} mb-2`}
                       >
                         <feature.icon className="h-5 w-5 text-white" />
                       </div>
-                      <div className="text-center space-y-1">
-                        <h4 className="font-semibold text-gray-900 text-xs leading-tight">
+                      <div className="text-center flex-1 flex flex-col justify-center">
+                        <h4 className="font-semibold text-gray-900 text-xs leading-tight mb-1 px-1">
                           {feature.title}
                         </h4>
-                        <p className="text-[10px] text-gray-600 leading-tight line-clamp-2">
-                          {feature.description}
+                        <p className="text-[9px] text-gray-600 leading-tight px-1 overflow-hidden text-ellipsis">
+                          {feature.description.length > 45
+                            ? `${feature.description.substring(0, 42)}...`
+                            : feature.description}
                         </p>
                       </div>
                     </div>
