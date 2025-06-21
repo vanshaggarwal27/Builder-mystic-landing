@@ -95,11 +95,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check for existing token on app load
+  // Check for existing token on app load and restore user session
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    if (token) {
-      // Verify token with backend
+    const savedUser = localStorage.getItem("currentUser");
+
+    if (token && savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        setUser(user);
+        if (token.startsWith("demo-token")) {
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.error("Error parsing saved user:", e);
+      }
+    }
+
+    if (token && !token.startsWith("demo-token")) {
       fetchCurrentUser(token);
     } else {
       setLoading(false);
@@ -209,14 +223,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("💾 Storing token...");
       localStorage.setItem("authToken", data.token);
 
-      // Set user in state
+      // Set user in state and persist
       console.log("👤 Setting user state...");
-      setUser({
+      const userData = {
         id: data.user.id,
         name: `${data.user.profile.firstName} ${data.user.profile.lastName}`,
         email: data.user.email,
         role: data.user.role,
-      });
+      };
+      setUser(userData);
+      localStorage.setItem("currentUser", JSON.stringify(userData));
 
       console.log("✅ Backend login completed successfully");
     } catch (error: any) {
@@ -226,10 +242,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         stack: error.stack,
       });
 
-      // Always fall back to demo mode for valid credentials
+      // For valid credentials, fall back to demo mode, but for newly created users, try backend first
       if (isDemoLogin) {
-        console.log("🌐 Falling back to demo mode");
-        localStorage.setItem("authToken", "demo-token");
+        console.log("🌐 Falling back to demo mode for valid credentials");
+        localStorage.setItem("authToken", `demo-token-${email}`);
         const { password, ...userWithoutPassword } = demoUsers[email];
         setUser(userWithoutPassword);
         console.log("✅ Demo login successful");
@@ -243,6 +259,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem("authToken");
+    localStorage.removeItem("currentUser");
     setUser(null);
   };
 

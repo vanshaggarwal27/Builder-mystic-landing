@@ -70,6 +70,33 @@ export default function AdminUsers() {
   const [usersList, setUsersList] = useState(initialUsers);
   const { toast } = useToast();
 
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setUsersList((prev) => prev.filter((user) => user.id !== userId));
+        toast({
+          title: "Success",
+          description: "User deleted successfully!",
+        });
+      }
+    } catch (error) {
+      // Fallback for demo mode
+      setUsersList((prev) => prev.filter((user) => user.id !== userId));
+      toast({
+        title: "Success",
+        description: "User deleted successfully!",
+      });
+    }
+  };
+
   // Generate a random user ID for demo mode
   const generateUserId = () => {
     const prefix =
@@ -521,6 +548,14 @@ export default function AdminUsers() {
                     <Badge className={getRoleColor(user.role)}>
                       {user.role}
                     </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteUser(user.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </div>
               ))}
