@@ -3,30 +3,56 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
+const rateLimit = require("express-rate-limit");
+const compression = require("compression");
 require("dotenv").config();
 
+// Import configuration
+const config = require("./config/production");
+
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(helmet());
-app.use(
-  cors({
-    origin: [
-      "http://localhost:8080",
-      "http://localhost:3000",
-      /.*\.builder\.codes$/,
-      /.*\.projects\.builder\.codes$/,
-    ],
-    credentials: true,
-  }),
-);
-app.use(morgan("combined"));
+// Trust proxy for production deployments
+if (config.security.trustProxy) {
+  app.set("trust proxy", 1);
+}
+
+// Rate limiting
+const limiter = rateLimit(config.rateLimit);
+app.use("/api/", limiter);
+
+// Compression middleware
+app.use(compression());
+
+// Security middleware
+if (config.security.helmetEnabled) {
+  app.use(
+    helmet({
+      crossOriginEmbedderPolicy: false,
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", "data:", "https:"],
+        },
+      },
+    }),
+  );
+}
+
+// CORS configuration
+app.use(cors(config.cors));
+
+// Logging
+app.use(morgan(config.server.env === "production" ? "combined" : "dev"));
+
+// Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/shkva");
+// MongoDB Connection with production configuration
+mongoose.connect(config.mongodb.uri, config.mongodb.options);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -52,36 +78,101 @@ app.use("/api/assignments", assignmentRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/attendance", attendanceRoutes);
 
-// Health Check
+// Health Check with detailed information
 app.get("/api/health", (req, res) => {
   res.json({
     status: "OK",
     message: "SHKVA School Management System API",
     timestamp: new Date().toISOString(),
+    version: "1.0.0",
+    environment: config.server.env,
+    database:
+      mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+    uptime: process.uptime(),
+  });
+});
+
+// Root endpoint
+app.get("/", (req, res) => {
+  res.json({
+    message: "SHKVA School Management System API",
+    documentation: "/api/health",
+    status: "Running",
   });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: "Something went wrong!",
+  console.error("Error:", err);
+
+  // Mongoose validation error
+  if (err.name === "ValidationError") {
+    return res.status(400).json({
+      error: "Validation Error",
+      details: Object.values(err.errors).map((e) => e.message),
+    });
+  }
+
+  // Mongoose duplicate key error
+  if (err.code === 11000) {
+    return res.status(400).json({
+      error: "Duplicate entry",
+      message: "Resource already exists",
+    });
+  }
+
+  // JWT errors
+  if (err.name === "JsonWebTokenError") {
+    return res.status(401).json({
+      error: "Invalid token",
+      message: "Authentication failed",
+    });
+  }
+
+  res.status(err.status || 500).json({
+    error: "Internal Server Error",
     message:
-      process.env.NODE_ENV === "development"
+      config.server.env === "development"
         ? err.message
-        : "Internal server error",
+        : "Something went wrong",
   });
 });
 
 // 404 handler
 app.use("*", (req, res) => {
-  res.status(404).json({ error: "Route not found" });
+  res.status(404).json({
+    error: "Route not found",
+    message: `Cannot ${req.method} ${req.originalUrl}`,
+  });
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 SHKVA Server running on port ${PORT}`);
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received, shutting down gracefully");
+  mongoose.connection.close(() => {
+    console.log("MongoDB connection closed");
+    process.exit(0);
+  });
+});
+
+process.on("SIGINT", () => {
+  console.log("SIGINT received, shutting down gracefully");
+  mongoose.connection.close(() => {
+    console.log("MongoDB connection closed");
+    process.exit(0);
+  });
+});
+
+// Start server
+app.listen(config.server.port, config.server.host, () => {
+  console.log(
+    `🚀 SHKVA Server running on ${config.server.host}:${config.server.port}`,
+  );
   console.log(`📚 School Management System API ready!`);
-  console.log(`🌐 Server accessible at http://0.0.0.0:${PORT}`);
+  console.log(`🌐 Environment: ${config.server.env}`);
+  console.log(
+    `💾 Database: ${mongoose.connection.readyState === 1 ? "Connected" : "Connecting..."}`,
+  );
 });
 
 module.exports = app;

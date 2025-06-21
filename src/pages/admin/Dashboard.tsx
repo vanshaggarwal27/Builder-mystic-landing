@@ -147,29 +147,29 @@ export default function AdminDashboard() {
             </div>
 
             {/* Main Features */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               <h3 className="font-semibold text-gray-900 text-center">
                 Management Tools
               </h3>
-              <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+              <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
                 {mainFeatures.map((feature) => (
                   <Button
                     key={feature.title}
                     onClick={() => navigate(feature.route)}
-                    className="h-auto p-4 bg-white text-center border border-gray-200 hover:shadow-md transition-all"
+                    className="h-auto p-3 bg-white text-center border border-gray-200 hover:shadow-md transition-all min-h-[120px]"
                     variant="ghost"
                   >
-                    <div className="flex flex-col items-center space-y-3">
+                    <div className="flex flex-col items-center justify-center space-y-2">
                       <div
-                        className={`p-3 rounded-lg bg-gradient-to-r ${feature.color}`}
+                        className={`p-2 rounded-lg bg-gradient-to-r ${feature.color}`}
                       >
-                        <feature.icon className="h-6 w-6 text-white" />
+                        <feature.icon className="h-5 w-5 text-white" />
                       </div>
-                      <div className="text-center">
-                        <h4 className="font-semibold text-gray-900 text-sm">
+                      <div className="text-center space-y-1">
+                        <h4 className="font-semibold text-gray-900 text-xs leading-tight">
                           {feature.title}
                         </h4>
-                        <p className="text-xs text-gray-600 mt-1">
+                        <p className="text-[10px] text-gray-600 leading-tight line-clamp-2">
                           {feature.description}
                         </p>
                       </div>
