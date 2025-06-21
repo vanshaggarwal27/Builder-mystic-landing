@@ -151,23 +151,23 @@ export default function AdminDashboard() {
               <h3 className="font-semibold text-gray-900 text-center">
                 Management Tools
               </h3>
-              <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+              <div className="grid grid-cols-2 gap-3 px-4">
                 {mainFeatures.map((feature) => (
                   <div
                     key={feature.title}
                     onClick={() => navigate(feature.route)}
-                    className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-all cursor-pointer p-3 h-[120px] flex flex-col items-center justify-center"
+                    className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-all cursor-pointer p-4 min-h-[130px] flex flex-col items-center justify-center w-full"
                   >
                     <div
-                      className={`p-2.5 rounded-lg bg-gradient-to-r ${feature.color} mb-2`}
+                      className={`p-2.5 rounded-lg bg-gradient-to-r ${feature.color} mb-3`}
                     >
                       <feature.icon className="h-5 w-5 text-white" />
                     </div>
-                    <div className="text-center space-y-1 w-full px-1">
-                      <h4 className="font-semibold text-gray-900 text-xs leading-tight break-words">
+                    <div className="text-center space-y-1 w-full overflow-hidden">
+                      <h4 className="font-semibold text-gray-900 text-xs leading-tight px-2 text-center">
                         {feature.title}
                       </h4>
-                      <p className="text-[9px] text-gray-500 leading-tight break-words">
+                      <p className="text-[10px] text-gray-500 leading-tight px-2 text-center">
                         {feature.description}
                       </p>
                     </div>
