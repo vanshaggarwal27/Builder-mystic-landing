@@ -40,6 +40,7 @@ import AdminAnnouncements from "./pages/admin/Announcements";
 import AdminSchedule from "./pages/admin/Schedule";
 import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
+import AdminSuccessStories from "./pages/admin/SuccessStories";
 import AdminSendNotice from "./pages/admin/SendNotice";
 import AdminTestButtons from "./pages/admin/TestButtons";
 import AdminTeacherAttendance from "./pages/admin/TeacherAttendance";
@@ -129,6 +130,10 @@ const AppRoutes = () => {
         <Route path="/admin/schedule" element={<AdminSchedule />} />
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route
+          path="/admin/success-stories"
+          element={<AdminSuccessStories />}
+        />
         <Route path="/admin/send-notice" element={<AdminSendNotice />} />
         <Route path="/admin/test-buttons" element={<AdminTestButtons />} />
         <Route

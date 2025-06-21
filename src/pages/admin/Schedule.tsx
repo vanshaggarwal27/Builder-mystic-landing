@@ -128,6 +128,50 @@ export default function AdminSchedule() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  const handleEditEntry = (id: string, type: "timetable" | "event") => {
+    if (type === "timetable") {
+      const entry = timetableList.find((t) => t.id === id);
+      if (entry) {
+        setNewEntry({
+          ...newEntry,
+          class: entry.class,
+          day: entry.day,
+          period: entry.period,
+          subject: entry.subject,
+          teacher: entry.teacher,
+          time: entry.time,
+          room: entry.room,
+        });
+        setDialogType("timetable");
+        setIsCreateDialogOpen(true);
+      }
+    } else {
+      const entry = eventsList.find((e) => e.id === id);
+      if (entry) {
+        setNewEntry({
+          ...newEntry,
+          title: entry.title,
+          date: entry.date,
+          eventTime: entry.time,
+          type: entry.type,
+          description: entry.description,
+        });
+        setDialogType("event");
+        setIsCreateDialogOpen(true);
+      }
+    }
+  };
+
+  const handleDeleteEntry = (id: string, type: "timetable" | "event") => {
+    if (type === "timetable") {
+      setTimetableList((prev) => prev.filter((t) => t.id !== id));
+      toast({ title: "Success", description: "Timetable entry deleted!" });
+    } else {
+      setEventsList((prev) => prev.filter((e) => e.id !== id));
+      toast({ title: "Success", description: "Event deleted!" });
+    }
+  };
+
   const days = [
     "Monday",
     "Tuesday",
@@ -377,11 +421,21 @@ export default function AdminSchedule() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleEditEntry(entry.id, "timetable")}
+                    >
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleDeleteEntry(entry.id, "timetable")}
+                    >
                       <Trash2 className="h-4 w-4 mr-1" />
                       Delete
                     </Button>

@@ -4,7 +4,6 @@ import {
   Users,
   BookOpen,
   Calendar,
-  MessageSquare,
   Settings,
   FileText,
   UserCheck,
@@ -70,18 +69,18 @@ export default function AdminDashboard() {
       route: "/admin/schedule",
     },
     {
-      title: "Teacher Attendance",
-      description: "View attendance",
-      icon: UserCheck,
+      title: "Success Stories",
+      description: "View achievements",
+      icon: Settings,
       color: "from-green-500 to-emerald-500",
-      route: "/admin/teacher-attendance",
+      route: "/admin/success-stories",
     },
     {
-      title: "Reports",
-      description: "View analytics",
-      icon: FileText,
-      color: "from-indigo-500 to-purple-500",
-      route: "/admin/reports",
+      title: "Settings",
+      description: "Account settings",
+      icon: Settings,
+      color: "from-gray-500 to-slate-500",
+      route: "/admin/settings",
     },
   ];
 
@@ -200,28 +199,6 @@ export default function AdminDashboard() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
-              <Button
-                onClick={() => navigate("/admin/announcements")}
-                className="bg-orange-600 hover:bg-orange-700 h-auto py-4"
-              >
-                <div className="text-center">
-                  <Bell className="h-6 w-6 mx-auto mb-1" />
-                  <div className="text-sm">Send Notice</div>
-                </div>
-              </Button>
-              <Button
-                onClick={() => navigate("/admin/users")}
-                className="bg-blue-600 hover:bg-blue-700 h-auto py-4"
-              >
-                <div className="text-center">
-                  <Users className="h-6 w-6 mx-auto mb-1" />
-                  <div className="text-sm">Add User</div>
-                </div>
-              </Button>
             </div>
           </div>
         </div>
