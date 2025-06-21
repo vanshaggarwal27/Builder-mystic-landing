@@ -9,9 +9,10 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       "/api": {
-        target: process.env.VITE_API_URL || "http://localhost:5000",
+        target:
+          process.env.VITE_API_URL || "https://shkva-backend-new.onrender.com",
         changeOrigin: true,
-        secure: false,
+        secure: true,
       },
     },
   },

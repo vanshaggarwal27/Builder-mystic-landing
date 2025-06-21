@@ -130,15 +130,18 @@ export default function AdminUsers() {
         controller.abort();
       }, 8000);
 
-      const response = await fetch("/api/admin/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "https://shkva-backend-new.onrender.com/api"}/admin/users`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(newUser),
+          signal: controller.signal,
         },
-        body: JSON.stringify(newUser),
-        signal: controller.signal,
-      });
+      );
 
       clearTimeout(timeoutId);
       const data = await response.json();
