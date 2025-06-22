@@ -241,16 +241,6 @@ export default function AdminSettings() {
                 <div>• Last login: {new Date().toLocaleDateString()}</div>
               </div>
             </div>
-
-            {/* Logout Button */}
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              className="w-full text-red-600 border-red-200 hover:bg-red-50"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
           </div>
         </div>
       </MobileLayout>
