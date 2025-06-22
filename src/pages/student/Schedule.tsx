@@ -107,33 +107,10 @@ export default function StudentSchedule() {
     { short: "FRI", number: "22" },
   ];
 
-  const schedule = [
-    {
-      time: "9:00 - 10:00 AM",
-      subject: "Mathematics",
-      teacher: "Ms. Johnson",
-      room: "Room 201",
-      topic: "Algebra - Chapter 5",
-      status: "current" as const,
-      hasAssignment: true,
-    },
-    {
-      time: "10:15 - 11:15 AM",
-      subject: "English Literature",
-      teacher: "Mr. Smith",
-      room: "Room 105",
-      topic: "Shakespeare - Romeo & Juliet",
-      status: "upcoming" as const,
-    },
-    {
-      time: "11:30 - 12:30 PM",
-      subject: "Physics",
-      teacher: "Dr. Wilson",
-      room: "Lab 301",
-      topic: "Motion & Forces",
-      status: "upcoming" as const,
-    },
-  ];
+  // Filter schedule for today (Monday for demo)
+  const todaySchedule = schedule.filter(
+    (item) => item.day === "Monday" || !item.day,
+  );
 
   return (
     <FadeTransition>
