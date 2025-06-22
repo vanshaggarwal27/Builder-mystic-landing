@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
     gender: { type: String, enum: ["male", "female", "other"] },
     address: String,
     avatar: String,
+    bloodGroup: {
+      type: String,
+      enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+    },
   },
   isActive: {
     type: Boolean,
