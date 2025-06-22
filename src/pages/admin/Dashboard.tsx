@@ -13,6 +13,7 @@ import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import BackendStatus from "./BackendStatus";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
