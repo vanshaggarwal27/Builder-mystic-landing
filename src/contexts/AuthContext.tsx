@@ -17,12 +17,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Use proxy for local development, direct URL for production/mobile
-const API_BASE_URL =
-  import.meta.env.MODE === "development" &&
-  window.location.hostname === "localhost"
-    ? "/api"
-    : "https://shkva-backend-new.onrender.com/api";
+// Always use production backend for real authentication
+const API_BASE_URL = "https://shkva-backend-new.onrender.com/api";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
