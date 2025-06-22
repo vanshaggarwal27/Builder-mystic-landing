@@ -192,6 +192,24 @@ export function getAuthHeaders() {
 
 // Helper function to make authenticated API calls
 export async function apiCall(endpoint: string, options: RequestInit = {}) {
+  const token = localStorage.getItem("authToken");
+
+  // Handle demo admin token for offline scenarios
+  if (token === "demo-admin-token") {
+    // For demo admin, simulate API responses for essential operations
+    if (endpoint === "/admin/users" && options.method === "GET") {
+      return { users: [] }; // Return empty users list
+    }
+    if (endpoint === "/admin/users" && options.method === "POST") {
+      throw new Error(
+        "Please use real admin login to create users. Backend connection required.",
+      );
+    }
+    throw new Error(
+      "Backend connection required for this operation. Please ensure you're connected to the internet and try logging in again.",
+    );
+  }
+
   const url = `${API_BASE_URL}${endpoint}`;
   const headers = getAuthHeaders();
 
