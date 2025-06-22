@@ -150,25 +150,53 @@ export default function StudentProfile() {
     }
   };
 
+  // Use real profile data with fallbacks
   const studentData = {
-    name: "John Smith",
-    grade: "Grade 10-A",
-    rollNo: "2024001",
-    studentId: "STU2024001",
+    name:
+      userProfile?.firstName && userProfile?.lastName
+        ? `${userProfile.firstName} ${userProfile.lastName}`
+        : user?.name || "Student Name",
+    grade: userProfile?.grade || "Not assigned",
+    rollNo: userProfile?.studentId || "Not assigned",
+    studentId: userProfile?.studentId || "Not assigned",
     personal: {
-      fullName: user?.name || "John Smith",
-      dateOfBirth: "March 15, 2008",
-      gender: "Male",
-      bloodGroup: "O+",
-      phone: "+1 234 567 8900",
-      email: user?.email || "john.smith@shkva.edu",
-      address: "456 Pine Street, City",
+      fullName:
+        userProfile?.firstName && userProfile?.lastName
+          ? `${userProfile.firstName} ${userProfile.lastName}`
+          : user?.name || "Student Name",
+      dateOfBirth: userProfile?.dateOfBirth
+        ? new Date(userProfile.dateOfBirth).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Not provided",
+      gender: userProfile?.gender
+        ? userProfile.gender.charAt(0).toUpperCase() +
+          userProfile.gender.slice(1)
+        : "Not provided",
+      bloodGroup: userProfile?.bloodGroup || "Not provided",
+      phone: userProfile?.phone || "Not provided",
+      email: userProfile?.email || user?.email || "Not provided",
+      address: userProfile?.address || "Not provided",
+      parentName: userProfile?.parentName || "Not provided",
+      parentPhone: userProfile?.parentPhone || "Not provided",
+      emergencyContact: userProfile?.emergencyContact || "Not provided",
     },
     academic: {
-      class: "Grade 10-A",
-      section: "A",
-      academicYear: "2023-2024",
-      admissionDate: "August 15, 2023",
+      class: userProfile?.grade || "Not assigned",
+      section: userProfile?.grade
+        ? userProfile.grade.split(" ")[1] || "A"
+        : "A",
+      academicYear:
+        new Date().getFullYear() + "-" + (new Date().getFullYear() + 1),
+      admissionDate: userProfile?.admissionDate
+        ? new Date(userProfile.admissionDate).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Not provided",
     },
   };
 
