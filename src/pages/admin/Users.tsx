@@ -213,6 +213,19 @@ export default function AdminUsers() {
       dateOfBirth: "",
       gender: "",
       address: "",
+      bloodGroup: "",
+      grade: "",
+      department: "",
+      position: "",
+      experience: "",
+      joiningDate: "",
+      admissionDate: "",
+      studentId: "",
+      teacherId: "",
+      subjects: "",
+      emergencyContact: "",
+      parentName: "",
+      parentPhone: "",
     });
   };
 
