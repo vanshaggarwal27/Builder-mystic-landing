@@ -53,6 +53,19 @@ export default function AdminUsers() {
     dateOfBirth: "",
     gender: "",
     address: "",
+    bloodGroup: "",
+    grade: "",
+    department: "",
+    position: "",
+    experience: "",
+    joiningDate: "",
+    admissionDate: "",
+    studentId: "",
+    teacherId: "",
+    subjects: "",
+    emergencyContact: "",
+    parentName: "",
+    parentPhone: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
