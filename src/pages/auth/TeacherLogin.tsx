@@ -123,7 +123,7 @@ export default function TeacherLogin() {
         {/* Demo hint */}
         <div className="mt-6 p-4 bg-green-50 rounded-lg">
           <p className="text-sm text-green-700 text-center">
-            <strong>Demo:</strong> Use any teacher ID and password
+            <strong>Demo:</strong> teacher@shkva.edu / teacher123
           </p>
         </div>
       </div>
