@@ -133,9 +133,22 @@ export default function StudentSchedule() {
                   <h3 className="text-sm font-medium text-gray-900">
                     Week Navigation
                   </h3>
+                  {isLoading && (
+                    <p className="text-xs text-blue-600">Loading schedule...</p>
+                  )}
                 </div>
-                <Button variant="ghost" size="sm" className="p-2">
-                  <ChevronRight className="h-4 w-4" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-2"
+                  onClick={loadScheduleData}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
 
