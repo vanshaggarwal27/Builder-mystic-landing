@@ -214,15 +214,32 @@ export default function TeacherProfile() {
                 <p className="text-sm text-gray-600">
                   Logged in as {user?.email}
                 </p>
+                {isLoadingProfile && (
+                  <p className="text-xs text-blue-600">Loading profile...</p>
+                )}
               </div>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                className="text-red-600 border-red-200 hover:bg-red-50"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={loadUserProfile}
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoadingProfile}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-1 ${isLoadingProfile ? "animate-spin" : ""}`}
+                  />
+                  Refresh
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
             </div>
           </div>
 
