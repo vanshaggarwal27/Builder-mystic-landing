@@ -64,7 +64,9 @@ const studentSchema = new mongoose.Schema({
   rollNumber: String,
   academicYear: String,
   admissionDate: Date,
-  bloodGroup: String,
+  parentName: String,
+  parentPhone: String,
+  emergencyContact: String,
   parentContact: {
     fatherName: String,
     motherName: String,
