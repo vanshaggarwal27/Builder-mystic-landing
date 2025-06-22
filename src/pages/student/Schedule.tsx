@@ -1,22 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Star,
-  RefreshCw,
-} from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Star, RefreshCw } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FadeTransition } from "@/components/layout/PageTransition";
-import {
-  UserProfileService,
-  ScheduleItem,
-  UserProfile,
-} from "@/lib/userProfileService";
+import { UserProfileService, ScheduleItem, UserProfile } from "@/lib/userProfileService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -49,7 +39,7 @@ export default function StudentSchedule() {
         const defaultSchedule = UserProfileService.generateDefaultSchedule(
           user?.role || "student",
           profile?.grade,
-          profile?.department,
+          profile?.department
         );
         setSchedule(defaultSchedule);
       }
@@ -108,15 +98,15 @@ export default function StudentSchedule() {
   ];
 
   // Filter schedule for today (Monday for demo)
-  const todaySchedule = schedule.filter(
-    (item) => item.day === "Monday" || !item.day,
+  const todaySchedule = schedule.filter(item =>
+    item.day === "Monday" || !item.day
   );
 
   return (
     <FadeTransition>
       <MobileLayout
         title="Timetable"
-        subtitle={`${userProfile?.grade || "Your Class"} • ${selectedWeek}`}
+        subtitle={`${userProfile?.grade || 'Your Class'} • ${selectedWeek}`}
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >
@@ -173,7 +163,7 @@ export default function StudentSchedule() {
 
           {/* Schedule */}
           <div className="space-y-4">
-            {schedule.map((item, index) => (
+            {todaySchedule.length > 0 ? todaySchedule.map((item, index) => (
               <Card
                 key={index}
                 className={`p-4 card-hover ${
