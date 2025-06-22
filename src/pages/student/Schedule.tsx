@@ -1,11 +1,24 @@
-import React, { useState } from "react";
-import { Calendar, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  RefreshCw,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FadeTransition } from "@/components/layout/PageTransition";
+import {
+  UserProfileService,
+  ScheduleItem,
+  UserProfile,
+} from "@/lib/userProfileService";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function StudentSchedule() {
   const [selectedWeek, setSelectedWeek] = useState("March 18-22, 2024");
