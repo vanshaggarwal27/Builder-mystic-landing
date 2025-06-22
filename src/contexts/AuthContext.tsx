@@ -87,26 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string, role: UserRole) => {
     console.log("🔐 Login starting:", { email, role });
 
-    // Special case for admin demo login only
-    if (
-      email === "admin@shkva.edu" &&
-      password === "admin123" &&
-      role === "admin"
-    ) {
-      console.log("🔑 Admin demo login");
-      const adminUser = {
-        id: "demo-admin",
-        name: "Admin User",
-        email: "admin@shkva.edu",
-        role: "admin" as UserRole,
-      };
-      setUser(adminUser);
-      localStorage.setItem("authToken", "demo-admin-token");
-      localStorage.setItem("currentUser", JSON.stringify(adminUser));
-      return;
-    }
-
-    // For all other users, use real backend authentication only
+    // All users, including admin, use real backend authentication
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
