@@ -197,6 +197,50 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
+// Get current user profile (for profile pages)
+router.get("/profile", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    let roleData = {};
+    switch (user.role) {
+      case "student":
+        roleData = await Student.findOne({ user: user._id }).lean();
+        break;
+      case "teacher":
+        roleData = await Teacher.findOne({ user: user._id }).lean();
+        break;
+      case "admin":
+        roleData = await Admin.findOne({ user: user._id }).lean();
+        break;
+    }
+
+    // Merge user profile with role-specific data for a complete profile
+    const completeProfile = {
+      id: user._id,
+      firstName: user.profile.firstName,
+      lastName: user.profile.lastName,
+      email: user.email,
+      role: user.role,
+      phone: user.profile.phone,
+      dateOfBirth: user.profile.dateOfBirth,
+      gender: user.profile.gender,
+      address: user.profile.address,
+      bloodGroup: user.profile.bloodGroup,
+      // Include role-specific fields
+      ...(roleData || {}),
+    };
+
+    res.json({ profile: completeProfile });
+  } catch (error) {
+    console.error("Get profile error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Change password
 router.post(
   "/change-password",
