@@ -243,7 +243,7 @@ export default function AdminUsers() {
 
       toast({
         title: "Success",
-        description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created successfully with complete profile information!`,
+        description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created successfully! Enhanced profile data has been stored and will be visible in the user's profile.`,
       });
 
       // Reload users list to show the new user
