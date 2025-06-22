@@ -134,7 +134,31 @@ router.post(
 router.get("/users", [auth, auth.requireRole(["admin"])], async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
-    res.json({ users });
+
+    // Get role-specific data for each user
+    const usersWithRoleData = await Promise.all(
+      users.map(async (user) => {
+        let roleData = {};
+        switch (user.role) {
+          case "student":
+            roleData = await Student.findOne({ user: user._id }).lean();
+            break;
+          case "teacher":
+            roleData = await Teacher.findOne({ user: user._id }).lean();
+            break;
+          case "admin":
+            roleData = await Admin.findOne({ user: user._id }).lean();
+            break;
+        }
+
+        return {
+          ...user.toObject(),
+          roleData: roleData || {},
+        };
+      }),
+    );
+
+    res.json({ users: usersWithRoleData });
   } catch (error) {
     console.error("Get users error:", error);
     res.status(500).json({ error: "Server error" });
