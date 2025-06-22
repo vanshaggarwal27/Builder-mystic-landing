@@ -98,18 +98,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password, role }),
       });
 
-      const responseText = await response.text();
+      // Check content type to determine how to parse
+      const contentType = response.headers.get("content-type");
       let data;
-      try {
-        data = responseText ? JSON.parse(responseText) : {};
-      } catch (parseError) {
-        console.error("❌ JSON parse error:", parseError);
-        throw new Error("Invalid response from server");
+
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const responseText = await response.text();
+        try {
+          data = responseText ? JSON.parse(responseText) : {};
+        } catch (parseError) {
+          console.error("❌ JSON parse error:", parseError);
+          throw new Error("Invalid response from server");
+        }
       }
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Invalid credentials. Please contact your admin.",
+          data.error ||
+            data.message ||
+            "Invalid credentials. Please contact your admin.",
         );
       }
 
