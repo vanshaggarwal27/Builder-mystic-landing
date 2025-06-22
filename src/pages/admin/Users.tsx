@@ -53,6 +53,19 @@ export default function AdminUsers() {
     dateOfBirth: "",
     gender: "",
     address: "",
+    bloodGroup: "",
+    grade: "",
+    department: "",
+    position: "",
+    experience: "",
+    joiningDate: "",
+    admissionDate: "",
+    studentId: "",
+    teacherId: "",
+    subjects: "",
+    emergencyContact: "",
+    parentName: "",
+    parentPhone: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
@@ -140,6 +153,25 @@ export default function AdminUsers() {
       return;
     }
 
+    // Role-specific validation
+    if (newUser.role === "student" && !newUser.grade) {
+      toast({
+        title: "Error",
+        description: "Please select a grade for the student",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newUser.role === "teacher" && !newUser.department) {
+      toast({
+        title: "Error",
+        description: "Please select a department for the teacher",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newUser.email)) {
@@ -164,14 +196,48 @@ export default function AdminUsers() {
     setIsLoading(true);
 
     try {
+      // Send complete user data with all enhanced fields to the updated backend
+      const userData = {
+        email: newUser.email,
+        password: newUser.password,
+        role: newUser.role,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        phone: newUser.phone,
+        dateOfBirth: newUser.dateOfBirth,
+        gender: newUser.gender,
+        address: newUser.address,
+        bloodGroup: newUser.bloodGroup,
+
+        // Student-specific fields
+        ...(newUser.role === "student" && {
+          grade: newUser.grade,
+          studentId: newUser.studentId || `STU${Date.now()}`,
+          admissionDate: newUser.admissionDate,
+          parentName: newUser.parentName,
+          parentPhone: newUser.parentPhone,
+          emergencyContact: newUser.emergencyContact,
+        }),
+
+        // Teacher-specific fields
+        ...(newUser.role === "teacher" && {
+          department: newUser.department,
+          teacherId: newUser.teacherId || `TCH${Date.now()}`,
+          position: newUser.position,
+          experience: newUser.experience,
+          subjects: newUser.subjects,
+          joiningDate: newUser.joiningDate,
+        }),
+      };
+
       const data = await apiCall("/admin/users", {
         method: "POST",
-        body: JSON.stringify(newUser),
+        body: JSON.stringify(userData),
       });
 
       toast({
         title: "Success",
-        description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created successfully! Login credentials sent.`,
+        description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created successfully with complete profile information!`,
       });
 
       // Reload users list to show the new user
@@ -200,6 +266,19 @@ export default function AdminUsers() {
       dateOfBirth: "",
       gender: "",
       address: "",
+      bloodGroup: "",
+      grade: "",
+      department: "",
+      position: "",
+      experience: "",
+      joiningDate: "",
+      admissionDate: "",
+      studentId: "",
+      teacherId: "",
+      subjects: "",
+      emergencyContact: "",
+      parentName: "",
+      parentPhone: "",
     });
   };
 
@@ -405,7 +484,341 @@ export default function AdminUsers() {
                         </SelectContent>
                       </Select>
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input
+                          id="phone"
+                          value={newUser.phone}
+                          onChange={(e) =>
+                            setNewUser({ ...newUser, phone: e.target.value })
+                          }
+                          placeholder="+1 234 567 8900"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                        <Input
+                          id="dateOfBirth"
+                          type="date"
+                          value={newUser.dateOfBirth}
+                          onChange={(e) =>
+                            setNewUser({
+                              ...newUser,
+                              dateOfBirth: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="gender">Gender</Label>
+                        <Select
+                          value={newUser.gender}
+                          onValueChange={(value) =>
+                            setNewUser({ ...newUser, gender: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="male">Male</SelectItem>
+                            <SelectItem value="female">Female</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="bloodGroup">Blood Group</Label>
+                        <Select
+                          value={newUser.bloodGroup}
+                          onValueChange={(value) =>
+                            setNewUser({ ...newUser, bloodGroup: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select blood group" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="A+">A+</SelectItem>
+                            <SelectItem value="A-">A-</SelectItem>
+                            <SelectItem value="B+">B+</SelectItem>
+                            <SelectItem value="B-">B-</SelectItem>
+                            <SelectItem value="AB+">AB+</SelectItem>
+                            <SelectItem value="AB-">AB-</SelectItem>
+                            <SelectItem value="O+">O+</SelectItem>
+                            <SelectItem value="O-">O-</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="address">Address</Label>
+                      <Input
+                        id="address"
+                        value={newUser.address}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, address: e.target.value })
+                        }
+                        placeholder="Full address"
+                      />
+                    </div>
                   </div>
+
+                  {/* Role-specific Information */}
+                  {newUser.role === "student" && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-sm text-gray-700">
+                        Student Information
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="grade">Grade/Class *</Label>
+                          <Select
+                            value={newUser.grade}
+                            onValueChange={(value) =>
+                              setNewUser({ ...newUser, grade: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select grade" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Grade 1">Grade 1</SelectItem>
+                              <SelectItem value="Grade 2">Grade 2</SelectItem>
+                              <SelectItem value="Grade 3">Grade 3</SelectItem>
+                              <SelectItem value="Grade 4">Grade 4</SelectItem>
+                              <SelectItem value="Grade 5">Grade 5</SelectItem>
+                              <SelectItem value="Grade 6">Grade 6</SelectItem>
+                              <SelectItem value="Grade 7">Grade 7</SelectItem>
+                              <SelectItem value="Grade 8">Grade 8</SelectItem>
+                              <SelectItem value="Grade 9">Grade 9</SelectItem>
+                              <SelectItem value="Grade 10">Grade 10</SelectItem>
+                              <SelectItem value="Grade 11">Grade 11</SelectItem>
+                              <SelectItem value="Grade 12">Grade 12</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="studentId">Student ID</Label>
+                          <Input
+                            id="studentId"
+                            value={newUser.studentId}
+                            onChange={(e) =>
+                              setNewUser({
+                                ...newUser,
+                                studentId: e.target.value,
+                              })
+                            }
+                            placeholder="STU2024001"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="admissionDate">Admission Date</Label>
+                        <Input
+                          id="admissionDate"
+                          type="date"
+                          value={newUser.admissionDate}
+                          onChange={(e) =>
+                            setNewUser({
+                              ...newUser,
+                              admissionDate: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="parentName">
+                            Parent/Guardian Name
+                          </Label>
+                          <Input
+                            id="parentName"
+                            value={newUser.parentName}
+                            onChange={(e) =>
+                              setNewUser({
+                                ...newUser,
+                                parentName: e.target.value,
+                              })
+                            }
+                            placeholder="Parent full name"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="parentPhone">
+                            Parent/Guardian Phone
+                          </Label>
+                          <Input
+                            id="parentPhone"
+                            value={newUser.parentPhone}
+                            onChange={(e) =>
+                              setNewUser({
+                                ...newUser,
+                                parentPhone: e.target.value,
+                              })
+                            }
+                            placeholder="+1 234 567 8900"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="emergencyContact">
+                          Emergency Contact
+                        </Label>
+                        <Input
+                          id="emergencyContact"
+                          value={newUser.emergencyContact}
+                          onChange={(e) =>
+                            setNewUser({
+                              ...newUser,
+                              emergencyContact: e.target.value,
+                            })
+                          }
+                          placeholder="Emergency contact details"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {newUser.role === "teacher" && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-sm text-gray-700">
+                        Teacher Information
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="department">Department *</Label>
+                          <Select
+                            value={newUser.department}
+                            onValueChange={(value) =>
+                              setNewUser({ ...newUser, department: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select department" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Mathematics">
+                                Mathematics
+                              </SelectItem>
+                              <SelectItem value="English">English</SelectItem>
+                              <SelectItem value="Science">Science</SelectItem>
+                              <SelectItem value="Physics">Physics</SelectItem>
+                              <SelectItem value="Chemistry">
+                                Chemistry
+                              </SelectItem>
+                              <SelectItem value="Biology">Biology</SelectItem>
+                              <SelectItem value="History">History</SelectItem>
+                              <SelectItem value="Geography">
+                                Geography
+                              </SelectItem>
+                              <SelectItem value="Computer Science">
+                                Computer Science
+                              </SelectItem>
+                              <SelectItem value="Physical Education">
+                                Physical Education
+                              </SelectItem>
+                              <SelectItem value="Art">Art</SelectItem>
+                              <SelectItem value="Music">Music</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="teacherId">Teacher ID</Label>
+                          <Input
+                            id="teacherId"
+                            value={newUser.teacherId}
+                            onChange={(e) =>
+                              setNewUser({
+                                ...newUser,
+                                teacherId: e.target.value,
+                              })
+                            }
+                            placeholder="TCH2024001"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="position">Position</Label>
+                          <Select
+                            value={newUser.position}
+                            onValueChange={(value) =>
+                              setNewUser({ ...newUser, position: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select position" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Junior Teacher">
+                                Junior Teacher
+                              </SelectItem>
+                              <SelectItem value="Senior Teacher">
+                                Senior Teacher
+                              </SelectItem>
+                              <SelectItem value="Head of Department">
+                                Head of Department
+                              </SelectItem>
+                              <SelectItem value="Assistant Principal">
+                                Assistant Principal
+                              </SelectItem>
+                              <SelectItem value="Principal">
+                                Principal
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="experience">Experience</Label>
+                          <Input
+                            id="experience"
+                            value={newUser.experience}
+                            onChange={(e) =>
+                              setNewUser({
+                                ...newUser,
+                                experience: e.target.value,
+                              })
+                            }
+                            placeholder="5 Years"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="subjects">
+                          Subjects/Specialization
+                        </Label>
+                        <Input
+                          id="subjects"
+                          value={newUser.subjects}
+                          onChange={(e) =>
+                            setNewUser({ ...newUser, subjects: e.target.value })
+                          }
+                          placeholder="Mathematics, Algebra, Calculus"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="joiningDate">Joining Date</Label>
+                        <Input
+                          id="joiningDate"
+                          type="date"
+                          value={newUser.joiningDate}
+                          onChange={(e) =>
+                            setNewUser({
+                              ...newUser,
+                              joiningDate: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Instructions */}
                   <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">

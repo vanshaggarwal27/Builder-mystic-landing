@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Edit,
   Settings,
@@ -9,6 +9,7 @@ import {
   Eye,
   EyeOff,
   User,
+  RefreshCw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
@@ -21,6 +22,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserProfileService, UserProfile } from "@/lib/userProfileService";
 
 export default function StudentProfile() {
   const navigate = useNavigate();
@@ -32,6 +34,31 @@ export default function StudentProfile() {
   const [showPasswords, setShowPasswords] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState(true);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // Load user profile on component mount
+  useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      setIsLoadingProfile(true);
+      const profile = await UserProfileService.getCurrentUserProfile();
+      setUserProfile(profile);
+    } catch (error) {
+      console.error("Error loading profile:", error);
+      // Don't show error toast for now, just continue with basic user data
+      // toast({
+      //   title: "Error",
+      //   description: "Failed to load profile data",
+      //   variant: "destructive",
+      // });
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -124,25 +151,53 @@ export default function StudentProfile() {
     }
   };
 
+  // Use real profile data with fallbacks
   const studentData = {
-    name: "John Smith",
-    grade: "Grade 10-A",
-    rollNo: "2024001",
-    studentId: "STU2024001",
+    name:
+      userProfile?.firstName && userProfile?.lastName
+        ? `${userProfile.firstName} ${userProfile.lastName}`
+        : user?.name || "Student Name",
+    grade: userProfile?.grade || "Not assigned",
+    rollNo: userProfile?.studentId || "Not assigned",
+    studentId: userProfile?.studentId || "Not assigned",
     personal: {
-      fullName: user?.name || "John Smith",
-      dateOfBirth: "March 15, 2008",
-      gender: "Male",
-      bloodGroup: "O+",
-      phone: "+1 234 567 8900",
-      email: user?.email || "john.smith@shkva.edu",
-      address: "456 Pine Street, City",
+      fullName:
+        userProfile?.firstName && userProfile?.lastName
+          ? `${userProfile.firstName} ${userProfile.lastName}`
+          : user?.name || "Student Name",
+      dateOfBirth: userProfile?.dateOfBirth
+        ? new Date(userProfile.dateOfBirth).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Not provided",
+      gender: userProfile?.gender
+        ? userProfile.gender.charAt(0).toUpperCase() +
+          userProfile.gender.slice(1)
+        : "Not provided",
+      bloodGroup: userProfile?.bloodGroup || "Not provided",
+      phone: userProfile?.phone || "Not provided",
+      email: userProfile?.email || user?.email || "Not provided",
+      address: userProfile?.address || "Not provided",
+      parentName: userProfile?.parentName || "Not provided",
+      parentPhone: userProfile?.parentPhone || "Not provided",
+      emergencyContact: userProfile?.emergencyContact || "Not provided",
     },
     academic: {
-      class: "Grade 10-A",
-      section: "A",
-      academicYear: "2023-2024",
-      admissionDate: "August 15, 2023",
+      class: userProfile?.grade || "Not assigned",
+      section: userProfile?.grade
+        ? userProfile.grade.split(" ")[1] || "A"
+        : "A",
+      academicYear:
+        new Date().getFullYear() + "-" + (new Date().getFullYear() + 1),
+      admissionDate: userProfile?.admissionDate
+        ? new Date(userProfile.admissionDate).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Not provided",
     },
   };
 
@@ -162,15 +217,32 @@ export default function StudentProfile() {
                 <p className="text-sm text-gray-600">
                   Logged in as {user?.email}
                 </p>
+                {isLoadingProfile && (
+                  <p className="text-xs text-blue-600">Loading profile...</p>
+                )}
               </div>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                className="text-red-600 border-red-200 hover:bg-red-50"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={loadUserProfile}
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoadingProfile}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-1 ${isLoadingProfile ? "animate-spin" : ""}`}
+                  />
+                  Refresh
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -247,6 +319,29 @@ export default function StudentProfile() {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Address:</span>
                     <span>{studentData.personal.address}</span>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Parent/Guardian Information */}
+              <Card className="p-4">
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Parent/Guardian Information
+                </h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Parent/Guardian Name:</span>
+                    <span className="font-medium">
+                      {studentData.personal.parentName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Parent Phone:</span>
+                    <span>{studentData.personal.parentPhone}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Emergency Contact:</span>
+                    <span>{studentData.personal.emergencyContact}</span>
                   </div>
                 </div>
               </Card>

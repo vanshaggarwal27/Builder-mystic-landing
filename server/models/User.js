@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
     gender: { type: String, enum: ["male", "female", "other"] },
     address: String,
     avatar: String,
+    bloodGroup: {
+      type: String,
+      enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+    },
   },
   isActive: {
     type: Boolean,
@@ -60,7 +64,9 @@ const studentSchema = new mongoose.Schema({
   rollNumber: String,
   academicYear: String,
   admissionDate: Date,
-  bloodGroup: String,
+  parentName: String,
+  parentPhone: String,
+  emergencyContact: String,
   parentContact: {
     fatherName: String,
     motherName: String,
@@ -88,9 +94,9 @@ const teacherSchema = new mongoose.Schema({
   },
   department: String,
   position: String,
-  experience: Number,
+  experience: String, // Changed from Number to String to allow "5 Years" format
   joiningDate: Date,
-  subjects: [String],
+  subjects: String, // Store as comma-separated string or use [String] for array
   classes: [String],
   qualifications: [String],
   salary: Number,

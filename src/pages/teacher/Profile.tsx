@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Edit,
   Settings,
@@ -8,6 +8,7 @@ import {
   Shield,
   Eye,
   EyeOff,
+  RefreshCw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
@@ -20,6 +21,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserProfileService, UserProfile } from "@/lib/userProfileService";
 
 export default function TeacherProfile() {
   const navigate = useNavigate();
@@ -31,6 +33,31 @@ export default function TeacherProfile() {
   const [showPasswords, setShowPasswords] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState(true);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // Load user profile on component mount
+  useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      setIsLoadingProfile(true);
+      const profile = await UserProfileService.getCurrentUserProfile();
+      setUserProfile(profile);
+    } catch (error) {
+      console.error("Error loading profile:", error);
+      // Don't show error toast for now, just continue with basic user data
+      // toast({
+      //   title: "Error",
+      //   description: "Failed to load profile data",
+      //   variant: "destructive",
+      // });
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -123,24 +150,52 @@ export default function TeacherProfile() {
     }
   };
 
+  // Use real profile data with fallbacks
   const teacherData = {
-    name: "Ms. Johnson",
-    fullName: "Maria Johnson",
-    department: "Mathematics Teacher",
-    teacherId: "TCH2024001",
+    name:
+      userProfile?.firstName && userProfile?.lastName
+        ? `${userProfile.firstName} ${userProfile.lastName}`
+        : user?.name || "Teacher Name",
+    fullName:
+      userProfile?.firstName && userProfile?.lastName
+        ? `${userProfile.firstName} ${userProfile.lastName}`
+        : user?.name || "Teacher Name",
+    department: userProfile?.department
+      ? `${userProfile.department} Teacher`
+      : "Teacher",
+    teacherId: userProfile?.teacherId || "Not assigned",
     personal: {
-      fullName: "Maria Johnson",
-      dateOfBirth: "June 15, 1985",
-      gender: "Female",
-      phone: "+1 234 567 8910",
-      email: user?.email || "maria.johnson@shkva.edu",
-      address: "123 Oak Street, City",
+      fullName:
+        userProfile?.firstName && userProfile?.lastName
+          ? `${userProfile.firstName} ${userProfile.lastName}`
+          : user?.name || "Teacher Name",
+      dateOfBirth: userProfile?.dateOfBirth
+        ? new Date(userProfile.dateOfBirth).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Not provided",
+      gender: userProfile?.gender
+        ? userProfile.gender.charAt(0).toUpperCase() +
+          userProfile.gender.slice(1)
+        : "Not provided",
+      phone: userProfile?.phone || "Not provided",
+      email: userProfile?.email || user?.email || "Not provided",
+      address: userProfile?.address || "Not provided",
     },
     professional: {
-      department: "Mathematics",
-      position: "Senior Teacher",
-      experience: "8 Years",
-      joiningDate: "August 15, 2016",
+      department: userProfile?.department || "Not assigned",
+      position: userProfile?.position || "Teacher",
+      experience: userProfile?.experience || "Not provided",
+      subjects: userProfile?.subjects || "Not provided",
+      joiningDate: userProfile?.joiningDate
+        ? new Date(userProfile.joiningDate).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Not provided",
     },
   };
 
@@ -160,15 +215,32 @@ export default function TeacherProfile() {
                 <p className="text-sm text-gray-600">
                   Logged in as {user?.email}
                 </p>
+                {isLoadingProfile && (
+                  <p className="text-xs text-blue-600">Loading profile...</p>
+                )}
               </div>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                className="text-red-600 border-red-200 hover:bg-red-50"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={loadUserProfile}
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoadingProfile}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-1 ${isLoadingProfile ? "animate-spin" : ""}`}
+                  />
+                  Refresh
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -262,6 +334,12 @@ export default function TeacherProfile() {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Experience:</span>
                     <span>{teacherData.professional.experience}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">
+                      Subjects/Specialization:
+                    </span>
+                    <span>{teacherData.professional.subjects}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Joining Date:</span>
