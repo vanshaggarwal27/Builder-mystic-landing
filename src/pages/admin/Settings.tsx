@@ -91,6 +91,25 @@ export default function AdminSettings() {
       >
         <div className="px-6 py-6">
           <div className="space-y-6">
+            {/* Quick Logout Section */}
+            <div className="bg-white rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-gray-900">Account</h3>
+                  <p className="text-sm text-gray-600">
+                    Logged in as {user?.email}
+                  </p>
+                </div>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            </div>
             {/* Profile Section */}
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <div className="flex items-center space-x-3 mb-4">
