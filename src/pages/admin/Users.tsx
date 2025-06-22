@@ -153,6 +153,25 @@ export default function AdminUsers() {
       return;
     }
 
+    // Role-specific validation
+    if (newUser.role === "student" && !newUser.grade) {
+      toast({
+        title: "Error",
+        description: "Please select a grade for the student",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newUser.role === "teacher" && !newUser.department) {
+      toast({
+        title: "Error",
+        description: "Please select a department for the teacher",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newUser.email)) {
