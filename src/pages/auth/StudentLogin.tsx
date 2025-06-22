@@ -119,13 +119,6 @@ export default function StudentLogin() {
               Need help? Contact your school administrator
             </p>
           </div>
-
-          {/* Demo hint */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-700 text-center">
-              <strong></strong>
-            </p>
-          </div>
         </div>
       </MobileLayout>
     </SlideTransition>
