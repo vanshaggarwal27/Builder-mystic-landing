@@ -49,11 +49,12 @@ export default function StudentProfile() {
       setUserProfile(profile);
     } catch (error) {
       console.error("Error loading profile:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load profile data",
-        variant: "destructive",
-      });
+      // Don't show error toast for now, just continue with basic user data
+      // toast({
+      //   title: "Error",
+      //   description: "Failed to load profile data",
+      //   variant: "destructive",
+      // });
     } finally {
       setIsLoadingProfile(false);
     }
