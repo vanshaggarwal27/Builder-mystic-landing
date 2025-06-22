@@ -1,217 +1,324 @@
-import React from "react";
-import { Bell, Calendar, Users, AlertTriangle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Bell, Calendar, Users, AlertTriangle, RefreshCw } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FadeTransition } from "@/components/layout/PageTransition";
+import { useToast } from "@/hooks/use-toast";
+import { apiCall } from "@/contexts/AuthContext";
+
+interface Notice {
+  _id: string;
+  title: string;
+  message: string;
+  priority: "low" | "normal" | "high" | "urgent";
+  createdAt: string;
+  target: "all" | "students" | "teachers" | "admin";
+  targetGrade?: string;
+  readBy: string[];
+  createdBy: {
+    name: string;
+    role: string;
+  };
+}
 
 export default function StudentNotices() {
-  const notices = [
-    {
-      id: "1",
-      title: "School Sports Day 2024",
-      content:
-        "All students are required to participate in the annual sports day event. Please bring your sports uniform and water bottle. Event starts at 9:00 AM.",
-      priority: "high" as const,
-      date: "2 hours ago",
-      target: "All Students",
-      readStatus: "unread" as const,
-    },
-    {
-      id: "2",
-      title: "Mid-Term Examination Schedule",
-      content:
-        "Mid-term examinations will begin from April 1st, 2024. Please check your individual timetables for specific dates and times. Good luck!",
-      priority: "urgent" as const,
-      date: "1 day ago",
-      target: "Grade 10 Students",
-      readStatus: "read" as const,
-    },
-    {
-      id: "3",
-      title: "Library Hours Extended",
-      content:
-        "The school library will now be open until 7:00 PM on weekdays to help students with their studies. New books have also been added to the collection.",
-      priority: "normal" as const,
-      date: "3 days ago",
-      target: "All Students",
-      readStatus: "read" as const,
-    },
-    {
-      id: "4",
-      title: "Parent-Teacher Meeting",
-      content:
-        "Parents are invited for a meeting to discuss student progress. Please inform your parents about the scheduled meeting on March 30th at 2:00 PM.",
-      priority: "high" as const,
-      date: "1 week ago",
-      target: "Grade 10-A",
-      readStatus: "read" as const,
-    },
-  ];
+  const { toast } = useToast();
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadNotices();
+  }, []);
+
+  const loadNotices = async () => {
+    try {
+      setIsLoading(true);
+      const data = await apiCall("/students/notices");
+      setNotices(data.notices || []);
+    } catch (error: any) {
+      console.error("Error loading notices:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load notices. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const markAsRead = async (noticeId: string) => {
+    try {
+      await apiCall(`/students/notices/${noticeId}/read`, {
+        method: "POST",
+      });
+
+      // Update local state
+      setNotices((prev) =>
+        prev.map((notice) =>
+          notice._id === noticeId
+            ? { ...notice, readBy: [...notice.readBy, "current-user"] }
+            : notice,
+        ),
+      );
+    } catch (error: any) {
+      console.error("Error marking notice as read:", error);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return "1 day ago";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "urgent":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-500 text-white";
       case "high":
-        return "bg-orange-100 text-orange-800 border-orange-200";
+        return "bg-orange-100 text-orange-700";
       case "normal":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-blue-100 text-blue-700";
+      case "low":
+        return "bg-gray-100 text-gray-700";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gray-100 text-gray-700";
     }
   };
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case "urgent":
-        return <AlertTriangle className="h-4 w-4" />;
+        return AlertTriangle;
       case "high":
-        return <Bell className="h-4 w-4" />;
+        return Bell;
+      case "normal":
+        return Calendar;
+      case "low":
+        return Users;
       default:
-        return <Bell className="h-4 w-4" />;
+        return Bell;
     }
   };
 
-  const unreadCount = notices.filter((n) => n.readStatus === "unread").length;
+  const isRead = (notice: Notice) => {
+    // In a real app, you'd check if current user ID is in readBy array
+    return notice.readBy.includes("current-user");
+  };
 
-  return (
-    <FadeTransition>
-      <MobileLayout
-        title="Notices"
-        subtitle={`${unreadCount} unread notices`}
-        headerGradient="from-blue-500 to-green-500"
-        className="pb-20"
-      >
-        <div className="px-6 py-6 pt-8">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <Card className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600 mb-1">
-                  {unreadCount}
-                </div>
-                <div className="text-sm text-blue-700">Unread</div>
-              </div>
-            </Card>
-            <Card className="p-4 bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600 mb-1">
-                  {notices.length}
-                </div>
-                <div className="text-sm text-green-700">Total</div>
-              </div>
-            </Card>
+  const unreadNotices = notices.filter((notice) => !isRead(notice));
+  const readNotices = notices.filter((notice) => isRead(notice));
+
+  if (isLoading) {
+    return (
+      <MobileLayout title="Notices" headerGradient="from-orange-500 to-red-500">
+        <div className="px-6 py-6 flex items-center justify-center">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin mx-auto text-orange-600 mb-4" />
+            <p className="text-gray-600">Loading notices...</p>
           </div>
-
-          {/* Tabs */}
-          <Tabs defaultValue="all" className="mb-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="unread">Unread</TabsTrigger>
-              <TabsTrigger value="urgent">Urgent</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="all" className="space-y-4">
-              {notices.map((notice) => (
-                <Card
-                  key={notice.id}
-                  className={`p-4 card-hover border-l-4 ${
-                    notice.readStatus === "unread"
-                      ? "border-l-blue-500 bg-blue-50/50"
-                      : "border-l-gray-300"
-                  }`}
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3
-                            className={`font-semibold ${
-                              notice.readStatus === "unread"
-                                ? "text-gray-900"
-                                : "text-gray-700"
-                            }`}
-                          >
-                            {notice.title}
-                          </h3>
-                          {notice.readStatus === "unread" && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600 mb-3">
-                          {notice.content}
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>{notice.date}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            <span>{notice.target}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge
-                        variant="secondary"
-                        className={`${getPriorityColor(notice.priority)} flex items-center gap-1`}
-                      >
-                        {getPriorityIcon(notice.priority)}
-                        {notice.priority}
-                      </Badge>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </TabsContent>
-
-            <TabsContent value="unread" className="space-y-4">
-              {notices
-                .filter((notice) => notice.readStatus === "unread")
-                .map((notice) => (
-                  <Card
-                    key={notice.id}
-                    className="p-4 card-hover border-l-4 border-l-blue-500 bg-blue-50/50"
-                  >
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      {notice.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-2">
-                      {notice.content}
-                    </p>
-                    <div className="text-xs text-gray-500">{notice.date}</div>
-                  </Card>
-                ))}
-            </TabsContent>
-
-            <TabsContent value="urgent" className="space-y-4">
-              {notices
-                .filter((notice) => notice.priority === "urgent")
-                .map((notice) => (
-                  <Card
-                    key={notice.id}
-                    className="p-4 card-hover border-l-4 border-l-red-500 bg-red-50/50"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <AlertTriangle className="h-4 w-4 text-red-600" />
-                      <h3 className="font-semibold text-red-900">
-                        {notice.title}
-                      </h3>
-                    </div>
-                    <p className="text-sm text-red-700 mb-2">
-                      {notice.content}
-                    </p>
-                    <div className="text-xs text-red-600">{notice.date}</div>
-                  </Card>
-                ))}
-            </TabsContent>
-          </Tabs>
         </div>
       </MobileLayout>
+    );
+  }
+
+  return (
+    <>
+      <MobileLayout
+        title="Notices"
+        headerGradient="from-orange-500 to-red-500"
+        className="pb-20"
+      >
+        <FadeTransition>
+          <div className="px-6 py-6">
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="text-center bg-white rounded-xl p-4 shadow-sm">
+                <div className="text-2xl font-bold text-orange-600">
+                  {unreadNotices.length}
+                </div>
+                <div className="text-sm text-gray-600">Unread</div>
+              </div>
+              <div className="text-center bg-white rounded-xl p-4 shadow-sm">
+                <div className="text-2xl font-bold text-gray-600">
+                  {notices.length}
+                </div>
+                <div className="text-sm text-gray-600">Total</div>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">School Notices</h2>
+              <Button onClick={loadNotices} variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+
+            <Tabs defaultValue="unread" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="unread">
+                  Unread ({unreadNotices.length})
+                </TabsTrigger>
+                <TabsTrigger value="all">All Notices</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="unread" className="space-y-4">
+                {unreadNotices.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No unread notices</p>
+                    <p className="text-sm">You're all caught up!</p>
+                  </div>
+                ) : (
+                  unreadNotices.map((notice) => {
+                    const PriorityIcon = getPriorityIcon(notice.priority);
+                    return (
+                      <Card
+                        key={notice._id}
+                        className="p-4 border-l-4 border-orange-400 cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => markAsRead(notice._id)}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div
+                            className={`p-2 rounded-full ${getPriorityColor(notice.priority)}`}
+                          >
+                            <PriorityIcon className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-semibold text-gray-900">
+                                {notice.title}
+                              </h3>
+                              <Badge
+                                className={getPriorityColor(notice.priority)}
+                              >
+                                {notice.priority}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                              {notice.message}
+                            </p>
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <span className="flex items-center">
+                                <Users className="h-3 w-3 mr-1" />
+                                {notice.target === "all"
+                                  ? "All Students"
+                                  : notice.targetGrade
+                                    ? `Grade ${notice.targetGrade}`
+                                    : "Students"}
+                              </span>
+                              <span className="flex items-center">
+                                <Calendar className="h-3 w-3 mr-1" />
+                                {formatDate(notice.createdAt)}
+                              </span>
+                            </div>
+                            <div className="mt-2 text-xs text-gray-400">
+                              From: {notice.createdBy.name} (
+                              {notice.createdBy.role})
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })
+                )}
+              </TabsContent>
+
+              <TabsContent value="all" className="space-y-4">
+                {notices.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No notices available</p>
+                  </div>
+                ) : (
+                  notices.map((notice) => {
+                    const PriorityIcon = getPriorityIcon(notice.priority);
+                    const noticeIsRead = isRead(notice);
+
+                    return (
+                      <Card
+                        key={notice._id}
+                        className={`p-4 ${noticeIsRead ? "opacity-75" : "border-l-4 border-orange-400"} cursor-pointer hover:shadow-md transition-all`}
+                        onClick={() => !noticeIsRead && markAsRead(notice._id)}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div
+                            className={`p-2 rounded-full ${getPriorityColor(notice.priority)}`}
+                          >
+                            <PriorityIcon className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3
+                                className={`font-semibold ${noticeIsRead ? "text-gray-600" : "text-gray-900"}`}
+                              >
+                                {notice.title}
+                                {!noticeIsRead && (
+                                  <span className="ml-2 w-2 h-2 bg-orange-500 rounded-full inline-block"></span>
+                                )}
+                              </h3>
+                              <Badge
+                                className={getPriorityColor(notice.priority)}
+                              >
+                                {notice.priority}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                              {notice.message}
+                            </p>
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <span className="flex items-center">
+                                <Users className="h-3 w-3 mr-1" />
+                                {notice.target === "all"
+                                  ? "All Students"
+                                  : notice.targetGrade
+                                    ? `Grade ${notice.targetGrade}`
+                                    : "Students"}
+                              </span>
+                              <span className="flex items-center">
+                                <Calendar className="h-3 w-3 mr-1" />
+                                {formatDate(notice.createdAt)}
+                              </span>
+                            </div>
+                            <div className="mt-2 text-xs text-gray-400">
+                              From: {notice.createdBy.name} (
+                              {notice.createdBy.role})
+                              {noticeIsRead && (
+                                <span className="ml-2 text-green-600">
+                                  ✓ Read
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+        </FadeTransition>
+      </MobileLayout>
+
       <BottomNavigation />
-    </FadeTransition>
+    </>
   );
 }
