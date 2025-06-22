@@ -24,8 +24,33 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const { email, password, role, firstName, lastName, ...otherData } =
-        req.body;
+      const {
+        email,
+        password,
+        role,
+        firstName,
+        lastName,
+        phone,
+        dateOfBirth,
+        gender,
+        address,
+        bloodGroup,
+        // Student specific fields
+        grade,
+        studentId,
+        admissionDate,
+        parentName,
+        parentPhone,
+        emergencyContact,
+        // Teacher specific fields
+        department,
+        teacherId,
+        position,
+        experience,
+        subjects,
+        joiningDate,
+        ...otherData
+      } = req.body;
 
       // Check if user exists
       const existingUser = await User.findOne({ email });
@@ -33,7 +58,7 @@ router.post(
         return res.status(400).json({ error: "User already exists" });
       }
 
-      // Create user
+      // Create user with enhanced profile
       const user = new User({
         email,
         password,
@@ -41,26 +66,40 @@ router.post(
         profile: {
           firstName,
           lastName,
-          ...otherData.profile,
+          phone: phone || "",
+          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+          gender: gender || "",
+          address: address || "",
+          bloodGroup: bloodGroup || "",
         },
       });
 
       await user.save();
 
-      // Create role-specific profile
+      // Create role-specific profile with enhanced fields
       let roleProfile;
       switch (role) {
         case "student":
           roleProfile = new Student({
             user: user._id,
-            studentId: `STU${Date.now()}`,
+            studentId: studentId || `STU${Date.now()}`,
+            grade: grade || "",
+            admissionDate: admissionDate ? new Date(admissionDate) : null,
+            parentName: parentName || "",
+            parentPhone: parentPhone || "",
+            emergencyContact: emergencyContact || "",
             ...otherData,
           });
           break;
         case "teacher":
           roleProfile = new Teacher({
             user: user._id,
-            teacherId: `TCH${Date.now()}`,
+            teacherId: teacherId || `TCH${Date.now()}`,
+            department: department || "",
+            position: position || "",
+            experience: experience || "",
+            subjects: subjects || "",
+            joiningDate: joiningDate ? new Date(joiningDate) : null,
             ...otherData,
           });
           break;
