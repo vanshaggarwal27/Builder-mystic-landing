@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Edit,
   Settings,
@@ -8,6 +8,7 @@ import {
   Shield,
   Eye,
   EyeOff,
+  RefreshCw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
@@ -20,6 +21,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserProfileService, UserProfile } from "@/lib/userProfileService";
 
 export default function TeacherProfile() {
   const navigate = useNavigate();
