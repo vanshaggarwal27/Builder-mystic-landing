@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { addDemoUser } from "@/contexts/AuthContext";
+import { apiCall } from "@/contexts/AuthContext";
 
 // Initial demo users
 const initialUsers = [
