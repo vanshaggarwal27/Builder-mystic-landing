@@ -57,33 +57,40 @@ export default function AdminSettings() {
       if (token === "demo-admin-token") {
         toast({
           title: "Demo Mode",
-          description: "Password change is not available in demo mode. Please login with real backend credentials.",
+          description:
+            "Password change is not available in demo mode. Please login with real backend credentials.",
           variant: "destructive",
         });
         return;
       }
 
-      const response = await fetch("https://shkva-backend-new.onrender.com/api/auth/change-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+      const response = await fetch(
+        "https://shkva-backend-new.onrender.com/api/auth/change-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            currentPassword,
+            newPassword,
+          }),
         },
-        body: JSON.stringify({
-          currentPassword,
-          newPassword,
-        }),
-      });
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || data.message || "Failed to change password");
+        throw new Error(
+          data.error || data.message || "Failed to change password",
+        );
       }
 
       toast({
         title: "Password Changed",
-        description: "Your password has been updated successfully. Please login again with your new password.",
+        description:
+          "Your password has been updated successfully. Please login again with your new password.",
       });
 
       setCurrentPassword("");
@@ -94,18 +101,16 @@ export default function AdminSettings() {
       setTimeout(() => {
         handleLogout();
       }, 2000);
-
     } catch (error: any) {
       console.error("Password change error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to change password. Please try again.",
+        description:
+          error.message || "Failed to change password. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
-    }
-  };
     }
   };
 
@@ -132,7 +137,9 @@ export default function AdminSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-gray-900">Account</h3>
-                  <p className="text-sm text-gray-600">Logged in as {user?.email}</p>
+                  <p className="text-sm text-gray-600">
+                    Logged in as {user?.email}
+                  </p>
                 </div>
                 <Button
                   onClick={handleLogout}
@@ -275,8 +282,6 @@ export default function AdminSettings() {
                 <div>• Last login: {new Date().toLocaleDateString()}</div>
               </div>
             </div>
-
-
           </div>
         </div>
       </MobileLayout>
