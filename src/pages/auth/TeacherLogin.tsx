@@ -119,13 +119,6 @@ export default function TeacherLogin() {
             Contact IT Support
           </Button>
         </div>
-
-        {/* Demo hint */}
-        <div className="mt-6 p-4 bg-green-50 rounded-lg">
-          <p className="text-sm text-green-700 text-center">
-            <strong>Demo:</strong> teacher@shkva.edu / teacher123
-          </p>
-        </div>
       </div>
     </MobileLayout>
   );
