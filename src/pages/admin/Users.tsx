@@ -196,40 +196,38 @@ export default function AdminUsers() {
     setIsLoading(true);
 
     try {
-      // Prepare user data with complete profile information
+      // Prepare user data in the format expected by the backend
       const userData = {
         email: newUser.email,
         password: newUser.password,
         role: newUser.role,
-        profile: {
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
-          phone: newUser.phone,
-          dateOfBirth: newUser.dateOfBirth,
-          gender: newUser.gender,
-          address: newUser.address,
-          bloodGroup: newUser.bloodGroup,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        phone: newUser.phone,
+        dateOfBirth: newUser.dateOfBirth,
+        gender: newUser.gender,
+        address: newUser.address,
+        bloodGroup: newUser.bloodGroup,
 
-          // Student-specific fields
-          ...(newUser.role === "student" && {
-            grade: newUser.grade,
-            studentId: newUser.studentId || `STU${Date.now()}`,
-            admissionDate: newUser.admissionDate,
-            parentName: newUser.parentName,
-            parentPhone: newUser.parentPhone,
-            emergencyContact: newUser.emergencyContact,
-          }),
+        // Student-specific fields
+        ...(newUser.role === "student" && {
+          grade: newUser.grade,
+          studentId: newUser.studentId || `STU${Date.now()}`,
+          admissionDate: newUser.admissionDate,
+          parentName: newUser.parentName,
+          parentPhone: newUser.parentPhone,
+          emergencyContact: newUser.emergencyContact,
+        }),
 
-          // Teacher-specific fields
-          ...(newUser.role === "teacher" && {
-            department: newUser.department,
-            teacherId: newUser.teacherId || `TCH${Date.now()}`,
-            position: newUser.position,
-            experience: newUser.experience,
-            subjects: newUser.subjects,
-            joiningDate: newUser.joiningDate,
-          }),
-        },
+        // Teacher-specific fields
+        ...(newUser.role === "teacher" && {
+          department: newUser.department,
+          teacherId: newUser.teacherId || `TCH${Date.now()}`,
+          position: newUser.position,
+          experience: newUser.experience,
+          subjects: newUser.subjects,
+          joiningDate: newUser.joiningDate,
+        }),
       };
 
       const data = await apiCall("/admin/users", {
