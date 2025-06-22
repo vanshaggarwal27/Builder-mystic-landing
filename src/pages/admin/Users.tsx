@@ -196,50 +196,44 @@ export default function AdminUsers() {
     setIsLoading(true);
 
     try {
-      // Send only the basic fields that the backend currently supports
+      // Send complete user data with all enhanced fields to the updated backend
       const userData = {
         email: newUser.email,
         password: newUser.password,
         role: newUser.role,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
-        phone: newUser.phone || "",
-        dateOfBirth: newUser.dateOfBirth || "",
-        gender: newUser.gender || "",
-        address: newUser.address || "",
+        phone: newUser.phone,
+        dateOfBirth: newUser.dateOfBirth,
+        gender: newUser.gender,
+        address: newUser.address,
+        bloodGroup: newUser.bloodGroup,
+
+        // Student-specific fields
+        ...(newUser.role === "student" && {
+          grade: newUser.grade,
+          studentId: newUser.studentId || `STU${Date.now()}`,
+          admissionDate: newUser.admissionDate,
+          parentName: newUser.parentName,
+          parentPhone: newUser.parentPhone,
+          emergencyContact: newUser.emergencyContact,
+        }),
+
+        // Teacher-specific fields
+        ...(newUser.role === "teacher" && {
+          department: newUser.department,
+          teacherId: newUser.teacherId || `TCH${Date.now()}`,
+          position: newUser.position,
+          experience: newUser.experience,
+          subjects: newUser.subjects,
+          joiningDate: newUser.joiningDate,
+        }),
       };
 
       const data = await apiCall("/admin/users", {
         method: "POST",
         body: JSON.stringify(userData),
       });
-
-      // Store additional profile data locally for now (until backend supports it)
-      if (data.user) {
-        const enhancedProfile = {
-          userId: data.user.id,
-          bloodGroup: newUser.bloodGroup,
-          grade: newUser.grade,
-          studentId: newUser.studentId,
-          admissionDate: newUser.admissionDate,
-          parentName: newUser.parentName,
-          parentPhone: newUser.parentPhone,
-          emergencyContact: newUser.emergencyContact,
-          department: newUser.department,
-          teacherId: newUser.teacherId,
-          position: newUser.position,
-          experience: newUser.experience,
-          subjects: newUser.subjects,
-          joiningDate: newUser.joiningDate,
-        };
-
-        // Store in localStorage for demo purposes
-        const existingProfiles = JSON.parse(
-          localStorage.getItem("userProfiles") || "{}",
-        );
-        existingProfiles[data.user.id] = enhancedProfile;
-        localStorage.setItem("userProfiles", JSON.stringify(existingProfiles));
-      }
 
       toast({
         title: "Success",
