@@ -72,19 +72,51 @@ export default function StudentProfile() {
 
     setIsLoading(true);
     try {
-      // Simulate password change
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const token = localStorage.getItem("authToken");
+
+      const response = await fetch(
+        "https://shkva-backend-new.onrender.com/api/auth/change-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            currentPassword,
+            newPassword,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || data.message || "Failed to change password",
+        );
+      }
+
       toast({
         title: "Password Changed",
-        description: "Your password has been updated successfully.",
+        description:
+          "Your password has been updated successfully. Please login again with your new password.",
       });
+
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error) {
+
+      // Auto logout after password change for security
+      setTimeout(() => {
+        handleLogout();
+      }, 2000);
+    } catch (error: any) {
+      console.error("Password change error:", error);
       toast({
         title: "Error",
-        description: "Failed to change password. Please try again.",
+        description:
+          error.message || "Failed to change password. Please try again.",
         variant: "destructive",
       });
     } finally {
