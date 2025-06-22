@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, ChevronLeft, ChevronRight, Star, RefreshCw } from "lucide-react";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  RefreshCw,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FadeTransition } from "@/components/layout/PageTransition";
-import { UserProfileService, ScheduleItem, UserProfile } from "@/lib/userProfileService";
+import {
+  UserProfileService,
+  ScheduleItem,
+  UserProfile,
+} from "@/lib/userProfileService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -39,7 +49,7 @@ export default function StudentSchedule() {
         const defaultSchedule = UserProfileService.generateDefaultSchedule(
           user?.role || "student",
           profile?.grade,
-          profile?.department
+          profile?.department,
         );
         setSchedule(defaultSchedule);
       }
@@ -98,15 +108,15 @@ export default function StudentSchedule() {
   ];
 
   // Filter schedule for today (Monday for demo)
-  const todaySchedule = schedule.filter(item =>
-    item.day === "Monday" || !item.day
+  const todaySchedule = schedule.filter(
+    (item) => item.day === "Monday" || !item.day,
   );
 
   return (
     <FadeTransition>
       <MobileLayout
         title="Timetable"
-        subtitle={`${userProfile?.grade || 'Your Class'} • ${selectedWeek}`}
+        subtitle={`${userProfile?.grade || "Your Class"} • ${selectedWeek}`}
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >
@@ -163,59 +173,77 @@ export default function StudentSchedule() {
 
           {/* Schedule */}
           <div className="space-y-4">
-            {todaySchedule.length > 0 ? todaySchedule.map((item, index) => (
-              <Card
-                key={index}
-                className={`p-4 card-hover ${
-                  item.status === "current"
-                    ? "bg-blue-50 border-blue-200"
-                    : "bg-gray-50 border-gray-200"
-                }`}
-              >
-                <div className="space-y-3">
-                  {/* Time and Status Row */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-3 h-3 rounded-full ${
-                          item.status === "current"
-                            ? "bg-blue-500"
-                            : "bg-gray-300"
-                        }`}
-                      ></div>
-                      <div className="text-sm text-gray-600">{item.time}</div>
+            {todaySchedule.length > 0 ? (
+              todaySchedule.map((item, index) => (
+                <Card
+                  key={index}
+                  className={`p-4 card-hover ${
+                    item.status === "current"
+                      ? "bg-blue-50 border-blue-200"
+                      : "bg-gray-50 border-gray-200"
+                  }`}
+                >
+                  <div className="space-y-3">
+                    {/* Time and Status Row */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            item.status === "current"
+                              ? "bg-blue-500"
+                              : "bg-gray-300"
+                          }`}
+                        ></div>
+                        <div className="text-sm text-gray-600">{item.time}</div>
+                      </div>
+                      {item.status === "current" && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-blue-100 text-blue-700 text-xs"
+                        >
+                          Current
+                        </Badge>
+                      )}
                     </div>
-                    {item.status === "current" && (
-                      <Badge
-                        variant="secondary"
-                        className="bg-blue-100 text-blue-700 text-xs"
-                      >
-                        Current
-                      </Badge>
-                    )}
-                  </div>
 
-                  {/* Subject and Details */}
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-gray-900 text-base">
-                      {item.subject}
-                    </h3>
-                    <div className="text-sm text-gray-600">
-                      <div className="mb-1">
-                        {item.teacher} • {item.room}
+                    {/* Subject and Details */}
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-gray-900 text-base">
+                        {item.subject}
+                      </h3>
+                      <div className="text-sm text-gray-600">
+                        <div className="mb-1">
+                          {item.teacher} • {item.room}
+                        </div>
+                        <div className="text-blue-600">{item.topic}</div>
                       </div>
-                      <div className="text-blue-600">{item.topic}</div>
+                      {item.hasAssignment && (
+                        <div className="flex items-center gap-1 text-xs text-orange-600 bg-orange-50 p-2 rounded-lg">
+                          <Star className="h-3 w-3 fill-current" />
+                          <span>Assignment due today</span>
+                        </div>
+                      )}
                     </div>
-                    {item.hasAssignment && (
-                      <div className="flex items-center gap-1 text-xs text-orange-600 bg-orange-50 p-2 rounded-lg">
-                        <Star className="h-3 w-3 fill-current" />
-                        <span>Assignment due today</span>
-                      </div>
-                    )}
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                <p>No classes scheduled for today</p>
+                <Button
+                  variant="outline"
+                  onClick={loadScheduleData}
+                  className="mt-3"
+                  disabled={isLoading}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+                  />
+                  Refresh Schedule
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </MobileLayout>
