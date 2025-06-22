@@ -335,6 +335,12 @@ export default function TeacherProfile() {
                     <span>{teacherData.professional.experience}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span className="text-gray-600">
+                      Subjects/Specialization:
+                    </span>
+                    <span>{teacherData.professional.subjects}</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-gray-600">Joining Date:</span>
                     <span>{teacherData.professional.joiningDate}</span>
                   </div>
