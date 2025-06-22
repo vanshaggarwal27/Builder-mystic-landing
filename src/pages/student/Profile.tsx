@@ -322,6 +322,29 @@ export default function StudentProfile() {
                 </div>
               </Card>
 
+              {/* Parent/Guardian Information */}
+              <Card className="p-4">
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Parent/Guardian Information
+                </h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Parent/Guardian Name:</span>
+                    <span className="font-medium">
+                      {studentData.personal.parentName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Parent Phone:</span>
+                    <span>{studentData.personal.parentPhone}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Emergency Contact:</span>
+                    <span>{studentData.personal.emergencyContact}</span>
+                  </div>
+                </div>
+              </Card>
+
               {/* Academic Information */}
               <Card className="p-4">
                 <h3 className="font-semibold text-gray-900 mb-4">
