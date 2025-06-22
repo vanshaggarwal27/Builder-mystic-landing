@@ -197,6 +197,51 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
+// Change password
+router.post(
+  "/change-password",
+  [
+    body("currentPassword").isLength({ min: 1 }),
+    body("newPassword").isLength({ min: 6 }),
+  ],
+  auth,
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+
+      // Get the user
+      const user = await User.findById(req.userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Verify current password
+      const isCurrentPasswordValid =
+        await user.comparePassword(currentPassword);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({ error: "Current password is incorrect" });
+      }
+
+      // Update password
+      user.password = newPassword; // This will be hashed automatically by the pre-save hook
+      await user.save();
+
+      res.json({
+        message: "Password changed successfully",
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Change password error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
 // Logout
 router.post("/logout", auth, (req, res) => {
   res.json({ message: "Logged out successfully" });
