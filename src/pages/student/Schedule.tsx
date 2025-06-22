@@ -22,6 +22,82 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function StudentSchedule() {
   const [selectedWeek, setSelectedWeek] = useState("March 18-22, 2024");
+  const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadScheduleData();
+  }, []);
+
+  const loadScheduleData = async () => {
+    try {
+      setIsLoading(true);
+
+      // Load user profile first to get grade info
+      const profile = await UserProfileService.getCurrentUserProfile();
+      setUserProfile(profile);
+
+      // Load user's schedule
+      const scheduleData = await UserProfileService.getUserSchedule();
+      if (scheduleData.length > 0) {
+        setSchedule(scheduleData);
+      } else {
+        // Generate default schedule based on user's grade/role
+        const defaultSchedule = UserProfileService.generateDefaultSchedule(
+          user?.role || "student",
+          profile?.grade,
+          profile?.department,
+        );
+        setSchedule(defaultSchedule);
+      }
+    } catch (error) {
+      console.error("Error loading schedule:", error);
+      // Generate fallback schedule
+      const fallbackSchedule = generateFallbackSchedule();
+      setSchedule(fallbackSchedule);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateFallbackSchedule = (): ScheduleItem[] => {
+    return [
+      {
+        id: "mon-1",
+        day: "Monday",
+        time: "9:00 - 10:00 AM",
+        subject: "Mathematics",
+        teacher: "Ms. Johnson",
+        room: "Room 201",
+        topic: "Algebra - Chapter 5",
+        status: "current",
+        hasAssignment: true,
+      },
+      {
+        id: "mon-2",
+        day: "Monday",
+        time: "10:15 - 11:15 AM",
+        subject: "English Literature",
+        teacher: "Mr. Smith",
+        room: "Room 105",
+        topic: "Shakespeare - Romeo & Juliet",
+        status: "upcoming",
+      },
+      {
+        id: "mon-3",
+        day: "Monday",
+        time: "11:30 - 12:30 PM",
+        subject: "Physics",
+        teacher: "Dr. Wilson",
+        room: "Lab 301",
+        topic: "Motion & Forces",
+        status: "upcoming",
+      },
+    ];
+  };
 
   const weekDays = [
     { short: "MON", number: "18" },
