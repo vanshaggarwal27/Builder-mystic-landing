@@ -86,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string, role: UserRole) => {
     console.log("🔐 Login starting:", { email, role });
+    console.log("🌐 Using API URL:", API_BASE_URL);
 
     // All users, including admin, use real backend authentication
     try {
