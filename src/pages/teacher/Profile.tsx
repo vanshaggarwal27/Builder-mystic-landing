@@ -149,24 +149,52 @@ export default function TeacherProfile() {
     }
   };
 
+  // Use real profile data with fallbacks
   const teacherData = {
-    name: "Ms. Johnson",
-    fullName: "Maria Johnson",
-    department: "Mathematics Teacher",
-    teacherId: "TCH2024001",
+    name:
+      userProfile?.firstName && userProfile?.lastName
+        ? `${userProfile.firstName} ${userProfile.lastName}`
+        : user?.name || "Teacher Name",
+    fullName:
+      userProfile?.firstName && userProfile?.lastName
+        ? `${userProfile.firstName} ${userProfile.lastName}`
+        : user?.name || "Teacher Name",
+    department: userProfile?.department
+      ? `${userProfile.department} Teacher`
+      : "Teacher",
+    teacherId: userProfile?.teacherId || "Not assigned",
     personal: {
-      fullName: "Maria Johnson",
-      dateOfBirth: "June 15, 1985",
-      gender: "Female",
-      phone: "+1 234 567 8910",
-      email: user?.email || "maria.johnson@shkva.edu",
-      address: "123 Oak Street, City",
+      fullName:
+        userProfile?.firstName && userProfile?.lastName
+          ? `${userProfile.firstName} ${userProfile.lastName}`
+          : user?.name || "Teacher Name",
+      dateOfBirth: userProfile?.dateOfBirth
+        ? new Date(userProfile.dateOfBirth).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Not provided",
+      gender: userProfile?.gender
+        ? userProfile.gender.charAt(0).toUpperCase() +
+          userProfile.gender.slice(1)
+        : "Not provided",
+      phone: userProfile?.phone || "Not provided",
+      email: userProfile?.email || user?.email || "Not provided",
+      address: userProfile?.address || "Not provided",
     },
     professional: {
-      department: "Mathematics",
-      position: "Senior Teacher",
-      experience: "8 Years",
-      joiningDate: "August 15, 2016",
+      department: userProfile?.department || "Not assigned",
+      position: userProfile?.position || "Teacher",
+      experience: userProfile?.experience || "Not provided",
+      subjects: userProfile?.subjects || "Not provided",
+      joiningDate: userProfile?.joiningDate
+        ? new Date(userProfile.joiningDate).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Not provided",
     },
   };
 
