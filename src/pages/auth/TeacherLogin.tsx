@@ -14,7 +14,7 @@ export default function TeacherLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { toast } = useToast();
-  const [teacherId, setTeacherId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
