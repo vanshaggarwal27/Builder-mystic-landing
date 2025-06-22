@@ -51,25 +51,61 @@ export default function AdminSettings() {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const token = localStorage.getItem("authToken");
+
+      // Check if using demo admin token
+      if (token === "demo-admin-token") {
+        toast({
+          title: "Demo Mode",
+          description: "Password change is not available in demo mode. Please login with real backend credentials.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await fetch("https://shkva-backend-new.onrender.com/api/auth/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || "Failed to change password");
+      }
 
       toast({
-        title: "Success",
-        description: "Password changed successfully!",
+        title: "Password Changed",
+        description: "Your password has been updated successfully. Please login again with your new password.",
       });
 
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error) {
+
+      // Auto logout after password change for security
+      setTimeout(() => {
+        handleLogout();
+      }, 2000);
+
+    } catch (error: any) {
+      console.error("Password change error:", error);
       toast({
         title: "Error",
-        description: "Failed to change password",
+        description: error.message || "Failed to change password. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+    }
+  };
     }
   };
 
@@ -96,9 +132,7 @@ export default function AdminSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-gray-900">Account</h3>
-                  <p className="text-sm text-gray-600">
-                    Logged in as {user?.email}
-                  </p>
+                  <p className="text-sm text-gray-600">Logged in as {user?.email}</p>
                 </div>
                 <Button
                   onClick={handleLogout}
@@ -241,6 +275,8 @@ export default function AdminSettings() {
                 <div>• Last login: {new Date().toLocaleDateString()}</div>
               </div>
             </div>
+
+
           </div>
         </div>
       </MobileLayout>
