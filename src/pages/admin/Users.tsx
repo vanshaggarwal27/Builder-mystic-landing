@@ -196,14 +196,50 @@ export default function AdminUsers() {
     setIsLoading(true);
 
     try {
+      // Prepare user data with complete profile information
+      const userData = {
+        email: newUser.email,
+        password: newUser.password,
+        role: newUser.role,
+        profile: {
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          phone: newUser.phone,
+          dateOfBirth: newUser.dateOfBirth,
+          gender: newUser.gender,
+          address: newUser.address,
+          bloodGroup: newUser.bloodGroup,
+
+          // Student-specific fields
+          ...(newUser.role === "student" && {
+            grade: newUser.grade,
+            studentId: newUser.studentId || `STU${Date.now()}`,
+            admissionDate: newUser.admissionDate,
+            parentName: newUser.parentName,
+            parentPhone: newUser.parentPhone,
+            emergencyContact: newUser.emergencyContact,
+          }),
+
+          // Teacher-specific fields
+          ...(newUser.role === "teacher" && {
+            department: newUser.department,
+            teacherId: newUser.teacherId || `TCH${Date.now()}`,
+            position: newUser.position,
+            experience: newUser.experience,
+            subjects: newUser.subjects,
+            joiningDate: newUser.joiningDate,
+          }),
+        },
+      };
+
       const data = await apiCall("/admin/users", {
         method: "POST",
-        body: JSON.stringify(newUser),
+        body: JSON.stringify(userData),
       });
 
       toast({
         title: "Success",
-        description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created successfully! Login credentials sent.`,
+        description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created successfully with complete profile information!`,
       });
 
       // Reload users list to show the new user
