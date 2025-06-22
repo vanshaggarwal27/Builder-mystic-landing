@@ -94,9 +94,9 @@ const teacherSchema = new mongoose.Schema({
   },
   department: String,
   position: String,
-  experience: Number,
+  experience: String, // Changed from Number to String to allow "5 Years" format
   joiningDate: Date,
-  subjects: [String],
+  subjects: String, // Store as comma-separated string or use [String] for array
   classes: [String],
   qualifications: [String],
   salary: Number,
