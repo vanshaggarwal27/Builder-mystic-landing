@@ -14,7 +14,7 @@ export default function TeacherLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { toast } = useToast();
-  const [teacherId, setTeacherId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,14 +55,14 @@ export default function TeacherLogin() {
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="teacherId">Teacher ID</Label>
+            <Label htmlFor="email">Email Address</Label>
             <div className="relative">
               <Input
-                id="teacherId"
-                type="text"
-                placeholder="Enter your teacher ID"
-                value={teacherId}
-                onChange={(e) => setTeacherId(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="Enter your email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="pl-4 pr-12"
               />
@@ -118,13 +118,6 @@ export default function TeacherLogin() {
           <Button variant="link" className="text-green-600 p-0">
             Contact IT Support
           </Button>
-        </div>
-
-        {/* Demo hint */}
-        <div className="mt-6 p-4 bg-green-50 rounded-lg">
-          <p className="text-sm text-green-700 text-center">
-            <strong>Demo:</strong> Use any teacher ID and password
-          </p>
         </div>
       </div>
     </MobileLayout>

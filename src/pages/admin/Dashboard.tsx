@@ -13,6 +13,7 @@ import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import BackendStatus from "./BackendStatus";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -116,6 +117,8 @@ export default function AdminDashboard() {
       >
         <div className="px-6 py-6">
           <div className="space-y-6">
+            {/* Backend Connection Status */}
+            <BackendStatus />
             {/* Welcome Section */}
             <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border-l-4 border-purple-400">
               <h2 className="font-semibold text-gray-800">Welcome, Admin!</h2>

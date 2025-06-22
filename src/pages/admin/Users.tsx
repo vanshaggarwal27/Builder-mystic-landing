@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Plus, Search, MoreVertical } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, Search, RefreshCw } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
@@ -22,35 +22,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { addDemoUser } from "@/contexts/AuthContext";
+import { apiCall } from "@/contexts/AuthContext";
 
-// Initial demo users
-const initialUsers = [
-  {
-    id: "ADM2024001",
-    name: "Admin User",
-    role: "admin" as const,
-    department: "System Administration",
-    status: "active" as const,
-    initials: "AU",
-  },
-  {
-    id: "STU2024001",
-    name: "John Smith",
-    role: "student" as const,
-    grade: "Grade 10-A",
-    status: "active" as const,
-    initials: "JS",
-  },
-  {
-    id: "TCH2024001",
-    name: "Maria Johnson",
-    role: "teacher" as const,
-    department: "Mathematics",
-    status: "active" as const,
-    initials: "MJ",
-  },
-];
+// User interface
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: "student" | "teacher" | "admin";
+  grade?: string;
+  department?: string;
+  status: "active" | "inactive";
+  initials: string;
+  profile?: {
+    firstName: string;
+    lastName: string;
+  };
+}
 
 export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,45 +55,72 @@ export default function AdminUsers() {
     address: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [usersList, setUsersList] = useState(initialUsers);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [usersList, setUsersList] = useState<User[]>([]);
   const { toast } = useToast();
+
+  // Load users on component mount
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      setIsLoadingUsers(true);
+      const data = await apiCall("/admin/users");
+
+      const formattedUsers = data.users.map((user: any) => ({
+        id: user._id,
+        name: `${user.profile.firstName} ${user.profile.lastName}`,
+        email: user.email,
+        role: user.role,
+        grade:
+          user.role === "student"
+            ? user.profile.grade || "Not assigned"
+            : undefined,
+        department:
+          user.role === "teacher"
+            ? user.profile.department || "General"
+            : user.role === "admin"
+              ? "Administration"
+              : undefined,
+        status: user.status || "active",
+        initials:
+          `${user.profile.firstName[0]}${user.profile.lastName[0]}`.toUpperCase(),
+        profile: user.profile,
+      }));
+
+      setUsersList(formattedUsers);
+    } catch (error: any) {
+      console.error("Error loading users:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load users. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      await apiCall(`/admin/users/${userId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
 
-      if (response.ok) {
-        setUsersList((prev) => prev.filter((user) => user.id !== userId));
-        toast({
-          title: "Success",
-          description: "User deleted successfully!",
-        });
-      }
-    } catch (error) {
-      // Fallback for demo mode
       setUsersList((prev) => prev.filter((user) => user.id !== userId));
       toast({
         title: "Success",
         description: "User deleted successfully!",
       });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
     }
-  };
-
-  // Generate a random user ID for demo mode
-  const generateUserId = () => {
-    const prefix =
-      {
-        student: "STU",
-        teacher: "TCH",
-        admin: "ADM",
-      }[newUser.role] || "USR";
-    return `${prefix}${Date.now()}`;
   };
 
   const handleCreateUser = async () => {
@@ -149,100 +164,20 @@ export default function AdminUsers() {
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem("authToken");
-
-      // Create AbortController for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-      }, 8000);
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "https://shkva-backend-new.onrender.com/api"}/admin/users`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(newUser),
-          signal: controller.signal,
-        },
-      );
-
-      clearTimeout(timeoutId);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create user");
-      }
+      const data = await apiCall("/admin/users", {
+        method: "POST",
+        body: JSON.stringify(newUser),
+      });
 
       toast({
         title: "Success",
-        description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created successfully!`,
+        description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created successfully! Login credentials sent.`,
       });
 
-      // Add to local users list
-      const newUserEntry = {
-        id: data.user.id || generateUserId(),
-        name: `${newUser.firstName} ${newUser.lastName}`,
-        role: newUser.role as any,
-        grade: newUser.role === "student" ? "Grade 10-A" : undefined,
-        department:
-          newUser.role === "teacher"
-            ? "General"
-            : newUser.role === "admin"
-              ? "Administration"
-              : undefined,
-        status: "active" as const,
-        initials: `${newUser.firstName[0]}${newUser.lastName[0]}`.toUpperCase(),
-      };
-
-      setUsersList((prev) => [...prev, newUserEntry]);
+      // Reload users list to show the new user
+      await loadUsers();
       resetForm();
     } catch (error: any) {
-      // Demo mode fallback
-      if (
-        error.name === "AbortError" ||
-        error.message.includes("Failed to fetch")
-      ) {
-        // Add to demo users storage so they can login
-        addDemoUser(
-          newUser.email,
-          newUser.password,
-          newUser.firstName,
-          newUser.lastName,
-          newUser.role,
-        );
-
-        const newUserEntry = {
-          id: generateUserId(),
-          name: `${newUser.firstName} ${newUser.lastName}`,
-          role: newUser.role as any,
-          grade: newUser.role === "student" ? "Grade 10-A" : undefined,
-          department:
-            newUser.role === "teacher"
-              ? "General"
-              : newUser.role === "admin"
-                ? "Administration"
-                : undefined,
-          status: "active" as const,
-          initials:
-            `${newUser.firstName[0]}${newUser.lastName[0]}`.toUpperCase(),
-        };
-
-        setUsersList((prev) => [...prev, newUserEntry]);
-
-        toast({
-          title: "Success (Demo Mode)",
-          description: `${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} account created! They can now login with: ${newUser.email}`,
-          duration: 6000,
-        });
-
-        resetForm();
-        return;
-      }
-
       toast({
         title: "Error",
         description: error.message || "Failed to create user",
@@ -300,9 +235,27 @@ export default function AdminUsers() {
     return colors[index];
   };
 
-  const filteredUsers = usersList.filter((user) =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredUsers = usersList.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  if (isLoadingUsers) {
+    return (
+      <MobileLayout
+        title="User Management"
+        headerGradient="from-purple-600 to-blue-600"
+      >
+        <div className="px-6 py-6 flex items-center justify-center">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin mx-auto text-purple-600 mb-4" />
+            <p className="text-gray-600">Loading users...</p>
+          </div>
+        </div>
+      </MobileLayout>
+    );
+  }
 
   return (
     <>
@@ -338,6 +291,9 @@ export default function AdminUsers() {
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             </div>
+            <Button onClick={loadUsers} variant="outline" size="icon">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
             <Dialog
               open={isCreateDialogOpen}
               onOpenChange={setIsCreateDialogOpen}
@@ -538,9 +494,9 @@ export default function AdminUsers() {
                       <div className="font-medium text-gray-900">
                         {user.name}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {user.role === "student" ? user.grade : user.department}{" "}
-                        • {user.id}
+                      <div className="text-sm text-gray-500">{user.email}</div>
+                      <div className="text-xs text-gray-400">
+                        {user.role === "student" ? user.grade : user.department}
                       </div>
                     </div>
                   </div>
@@ -585,13 +541,22 @@ export default function AdminUsers() {
                           {user.name}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {user.grade} • {user.id}
+                          {user.email}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {user.grade}
                         </div>
                       </div>
                     </div>
                     <Badge className="bg-blue-100 text-blue-700">Student</Badge>
                   </div>
                 ))}
+              {filteredUsers.filter((user) => user.role === "student")
+                .length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No students found.</p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="teachers" className="space-y-3">
@@ -613,7 +578,10 @@ export default function AdminUsers() {
                           {user.name}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {user.department} • {user.id}
+                          {user.email}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {user.department}
                         </div>
                       </div>
                     </div>
@@ -622,6 +590,12 @@ export default function AdminUsers() {
                     </Badge>
                   </div>
                 ))}
+              {filteredUsers.filter((user) => user.role === "teacher")
+                .length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No teachers found.</p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="admins" className="space-y-3">
@@ -643,7 +617,10 @@ export default function AdminUsers() {
                           {user.name}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {user.department} • {user.id}
+                          {user.email}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {user.department}
                         </div>
                       </div>
                     </div>
@@ -652,6 +629,12 @@ export default function AdminUsers() {
                     </Badge>
                   </div>
                 ))}
+              {filteredUsers.filter((user) => user.role === "admin").length ===
+                0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No admins found.</p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
