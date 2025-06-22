@@ -55,14 +55,14 @@ export default function TeacherLogin() {
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="teacherId">Teacher ID</Label>
+            <Label htmlFor="email">Email Address</Label>
             <div className="relative">
               <Input
-                id="teacherId"
-                type="text"
-                placeholder="Enter your teacher ID"
-                value={teacherId}
-                onChange={(e) => setTeacherId(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="Enter your email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="pl-4 pr-12"
               />
