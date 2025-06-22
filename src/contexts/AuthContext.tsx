@@ -116,10 +116,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (!response.ok) {
+        console.error("❌ Server response not ok:", {
+          status: response.status,
+          statusText: response.statusText,
+          data: data,
+        });
         throw new Error(
           data.error ||
             data.message ||
-            "Invalid credentials. Please contact your admin.",
+            `Server error: ${response.status} - ${response.statusText}`,
         );
       }
 
