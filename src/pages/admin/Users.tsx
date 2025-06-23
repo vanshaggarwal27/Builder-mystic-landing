@@ -1179,6 +1179,261 @@ export default function AdminUsers() {
       </MobileLayout>
 
       <BottomNavigation />
+
+      {/* User Details Dialog */}
+      <Dialog open={isUserDetailsOpen} onOpenChange={setIsUserDetailsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              User Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+              {/* Basic Info */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-900 mb-3">
+                  Basic Information
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <User className="h-4 w-4 text-gray-500" />
+                    <div>
+                      <div className="text-sm text-gray-500">Full Name</div>
+                      <div className="font-medium">
+                        {`${selectedUser.profile?.firstName || "Unknown"} ${selectedUser.profile?.lastName || "User"}`}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-4 w-4 text-gray-500" />
+                    <div>
+                      <div className="text-sm text-gray-500">Email</div>
+                      <div className="font-medium">{selectedUser.email}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-4 h-4 rounded-full ${selectedUser.role === "student" ? "bg-blue-500" : selectedUser.role === "teacher" ? "bg-green-500" : "bg-purple-500"}`}
+                    ></div>
+                    <div>
+                      <div className="text-sm text-gray-500">Role</div>
+                      <div className="font-medium capitalize">
+                        {selectedUser.role}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Role-specific Information */}
+              {selectedUser.role === "student" && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-blue-900 mb-3">
+                    Student Information
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Student ID:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.studentId || "Not assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Grade/Class:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.grade || "Not assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Section:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.section || "Not assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Admission Date:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.admissionDate || "Not provided"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedUser.role === "teacher" && (
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-green-900 mb-3">
+                    Teacher Information
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Teacher ID:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.teacherId || "Not assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Department:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.department || "Not assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Position:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.position || "Not provided"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Experience:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.experience || "Not provided"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Joining Date:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.joiningDate || "Not provided"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedUser.role === "admin" && (
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-purple-900 mb-3">
+                    Administrator Information
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-purple-700">Admin ID:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.adminId || selectedUser._id}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-purple-700">Department:</span>
+                      <span className="font-medium">Administration</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Personal Information */}
+              {selectedUser.profile && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    Personal Information
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedUser.profile.phone && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Phone:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.phone}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.dateOfBirth && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Date of Birth:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.dateOfBirth}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.gender && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Gender:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.gender}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.bloodGroup && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Blood Group:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.bloodGroup}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.address && (
+                      <div>
+                        <div className="text-gray-700 mb-1">Address:</div>
+                        <div className="font-medium text-sm">
+                          {selectedUser.profile.address}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Emergency Contact for Students */}
+              {selectedUser.role === "student" && selectedUser.profile && (
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-orange-900 mb-3">
+                    Emergency Contact
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedUser.profile.parentName && (
+                      <div className="flex justify-between">
+                        <span className="text-orange-700">Parent Name:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.parentName}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.parentPhone && (
+                      <div className="flex justify-between">
+                        <span className="text-orange-700">Parent Phone:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.parentPhone}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.emergencyContact && (
+                      <div>
+                        <div className="text-orange-700 mb-1">
+                          Emergency Contact:
+                        </div>
+                        <div className="font-medium text-sm">
+                          {selectedUser.profile.emergencyContact}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsUserDetailsOpen(false)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast({
+                      title: "Edit User",
+                      description: "User editing functionality coming soon!",
+                    });
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  Edit User
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
