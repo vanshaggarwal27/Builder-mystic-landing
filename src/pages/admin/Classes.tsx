@@ -271,18 +271,35 @@ export default function AdminClasses() {
         <div className="px-6 py-6">
           {/* Info Banner */}
           <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg mb-6 border-l-4 border-indigo-400">
-            <h3 className="font-semibold text-gray-800 mb-1">
-              Real Classes Overview
-            </h3>
-            <p className="text-sm text-gray-600">
-              Classes are automatically created based on student assignments.
-              Students are grouped by their Grade-Section assignment.
-              <span className="block text-xs text-indigo-600 mt-1">
-                {classesList.length === 0
-                  ? "No classes found. Create students first to see classes here."
-                  : `Showing ${classesList.length} active classes with real students.`}
-              </span>
-            </p>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-800 mb-1">
+                  Real Classes Overview
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Classes are automatically created based on student
+                  assignments. Students are grouped by their Grade-Section
+                  assignment.
+                  <span className="block text-xs text-indigo-600 mt-1">
+                    {classesList.length === 0
+                      ? "No classes found. Create students with Grade-Section assignments."
+                      : `Showing ${classesList.length} active classes with real students.`}
+                  </span>
+                </p>
+              </div>
+              <Button
+                onClick={loadClasses}
+                variant="outline"
+                size="sm"
+                disabled={isLoadingClasses}
+                className="ml-3"
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-1 ${isLoadingClasses ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
+            </div>
           </div>
 
           {/* Stats Overview */}
