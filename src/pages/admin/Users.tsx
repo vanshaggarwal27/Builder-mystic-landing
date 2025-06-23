@@ -1227,6 +1227,14 @@ export default function AdminUsers() {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => handleEditUser(user.id)}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleDeleteUser(user.id)}
                       className="text-red-600 hover:text-red-700"
                     >
