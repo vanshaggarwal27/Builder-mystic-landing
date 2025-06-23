@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Search, RefreshCw } from "lucide-react";
+import {
+  Plus,
+  Search,
+  RefreshCw,
+  Eye,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
