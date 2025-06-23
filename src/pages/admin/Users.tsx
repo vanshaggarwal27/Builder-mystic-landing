@@ -71,6 +71,8 @@ export default function AdminUsers() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [usersList, setUsersList] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isUserDetailsOpen, setIsUserDetailsOpen] = useState(false);
   const { toast } = useToast();
 
   // Load users on component mount
