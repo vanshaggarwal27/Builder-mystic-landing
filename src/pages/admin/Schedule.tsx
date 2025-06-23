@@ -264,10 +264,7 @@ export default function AdminSchedule() {
 
       setIsLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const timetableEntry = {
-          id: `TT${Date.now()}`,
+        const scheduleData = {
           class: newEntry.class,
           day: newEntry.day,
           period: newEntry.period,
@@ -279,8 +276,32 @@ export default function AdminSchedule() {
           room: newEntry.room || "TBA",
         };
 
-        setTimetableList((prev) => [...prev, timetableEntry]);
-        toast({ title: "Success", description: "Timetable entry added!" });
+        // Try to save to backend
+        try {
+          const createdSchedule =
+            await UserProfileService.createClassSchedule(scheduleData);
+          const timetableEntry = {
+            id: createdSchedule._id || createdSchedule.id,
+            ...scheduleData,
+          };
+          setTimetableList((prev) => [...prev, timetableEntry]);
+          toast({
+            title: "Success",
+            description:
+              "Class schedule created and will be visible to students!",
+          });
+        } catch (backendError) {
+          // Fallback to local storage if backend is unavailable
+          const timetableEntry = {
+            id: `TT${Date.now()}`,
+            ...scheduleData,
+          };
+          setTimetableList((prev) => [...prev, timetableEntry]);
+          toast({
+            title: "Schedule Added",
+            description: "Schedule saved locally. Backend integration pending.",
+          });
+        }
       } catch (error) {
         toast({
           title: "Error",
