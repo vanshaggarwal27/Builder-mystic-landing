@@ -1285,6 +1285,14 @@ export default function AdminUsers() {
                       >
                         Details
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditUser(user.id)}
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        Edit
+                      </Button>
                       <Badge className="bg-blue-100 text-blue-700">
                         Student
                       </Badge>
