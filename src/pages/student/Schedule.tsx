@@ -129,7 +129,7 @@ export default function StudentSchedule() {
   return (
     <FadeTransition>
       <MobileLayout
-        title="Timetable"
+        title="Class Timetable"
         subtitle={`${userProfile?.grade || "Your Class"} • ${selectedWeek}`}
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
