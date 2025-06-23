@@ -421,14 +421,14 @@ export default function AdminSchedule() {
       >
         <div className="px-6 py-6">
           {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="grid grid-cols-3 gap-3 mb-6">
             <Button
               onClick={() => openCreateDialog("timetable")}
               className="bg-teal-600 hover:bg-teal-700 h-auto py-4"
             >
               <div className="text-center">
                 <Clock className="h-6 w-6 mx-auto mb-1" />
-                <div className="text-sm">Add Timetable</div>
+                <div className="text-sm">Add Schedule</div>
               </div>
             </Button>
             <Button
@@ -440,7 +440,32 @@ export default function AdminSchedule() {
                 <div className="text-sm">Add Event</div>
               </div>
             </Button>
+            <Button
+              onClick={loadSchedules}
+              variant="outline"
+              className="h-auto py-4"
+              disabled={isLoadingData}
+            >
+              <div className="text-center">
+                <RefreshCw
+                  className={`h-6 w-6 mx-auto mb-1 ${isLoadingData ? "animate-spin" : ""}`}
+                />
+                <div className="text-sm">Refresh</div>
+              </div>
+            </Button>
           </div>
+
+          {/* Loading Indicator */}
+          {isLoadingData && (
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-center space-x-2">
+                <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+                <span className="text-blue-700 text-sm">
+                  Loading schedules...
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Search */}
           <div className="relative mb-6">
