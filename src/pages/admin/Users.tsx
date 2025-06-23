@@ -1666,10 +1666,8 @@ export default function AdminUsers() {
                 </Button>
                 <Button
                   onClick={() => {
-                    toast({
-                      title: "Edit User",
-                      description: "User editing functionality coming soon!",
-                    });
+                    setIsUserDetailsOpen(false);
+                    handleEditUser(selectedUser._id);
                   }}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
