@@ -70,38 +70,57 @@ export default function AdminClasses() {
   const loadClasses = async () => {
     try {
       setIsLoadingClasses(true);
+      console.log("Loading classes from backend...");
+
       const data = await apiCall("/admin/users");
+      console.log("Raw user data from backend:", data);
 
       // Group students by their class assignment
       const classGroups = new Map<string, ClassData>();
+      let studentCount = 0;
 
       data.users.forEach((user: any) => {
-        if (user.role === "student" && user.profile?.grade) {
-          const className = user.profile.grade; // e.g., "Grade 10-A"
-          const level = className.split("-")[0].replace("Grade ", ""); // e.g., "10"
+        console.log("Processing user:", user);
+        if (user.role === "student") {
+          studentCount++;
 
-          if (!classGroups.has(className)) {
-            classGroups.set(className, {
-              id: className.replace(/\s+/g, "").toLowerCase(),
-              name: className,
-              level: level,
-              students: 0,
-              studentsList: [],
-              teacher: "Not assigned",
-              room: "Not assigned",
+          // Check multiple possible grade field locations
+          const grade = user.profile?.grade || user.grade || user.class;
+          console.log(`Student ${user.email} has grade/class:`, grade);
+
+          if (grade) {
+            const className = grade; // e.g., "Grade 10-A"
+            const level = className.split("-")[0].replace("Grade ", ""); // e.g., "10"
+
+            if (!classGroups.has(className)) {
+              classGroups.set(className, {
+                id: className.replace(/\s+/g, "").toLowerCase(),
+                name: className,
+                level: level,
+                students: 0,
+                studentsList: [],
+                teacher: "Not assigned",
+                room: "Not assigned",
+              });
+              console.log(`Created new class: ${className}`);
+            }
+
+            const classData = classGroups.get(className)!;
+            classData.students += 1;
+            classData.studentsList.push({
+              id: user._id,
+              name: `${user.profile?.firstName || "Unknown"} ${user.profile?.lastName || "User"}`,
+              email: user.email,
+              studentId: user.profile?.studentId,
             });
+          } else {
+            console.log(`Student ${user.email} has no grade/class assigned`);
           }
-
-          const classData = classGroups.get(className)!;
-          classData.students += 1;
-          classData.studentsList.push({
-            id: user._id,
-            name: `${user.profile.firstName} ${user.profile.lastName}`,
-            email: user.email,
-            studentId: user.profile.studentId,
-          });
         }
       });
+
+      console.log(`Total students found: ${studentCount}`);
+      console.log(`Classes created:`, Array.from(classGroups.keys()));
 
       // Convert Map to Array and sort by class name
       const realClasses = Array.from(classGroups.values()).sort((a, b) => {
@@ -115,15 +134,22 @@ export default function AdminClasses() {
       setClassesList(realClasses);
 
       if (realClasses.length === 0) {
-        toast({
-          title: "No Classes Found",
-          description:
-            "No students have been assigned to classes yet. Create some students first.",
-        });
+        if (studentCount === 0) {
+          toast({
+            title: "No Students Found",
+            description:
+              "No students exist in the system yet. Create some students first.",
+          });
+        } else {
+          toast({
+            title: "No Classes Found",
+            description: `Found ${studentCount} students but none have grade/class assignments. Check student profiles.`,
+          });
+        }
       } else {
         toast({
-          title: "Classes Loaded",
-          description: `Found ${realClasses.length} classes with students.`,
+          title: "Classes Loaded Successfully",
+          description: `Found ${realClasses.length} classes with ${studentCount} total students.`,
         });
       }
     } catch (error: any) {
