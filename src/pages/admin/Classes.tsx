@@ -206,10 +206,10 @@ export default function AdminClasses() {
   };
 
   const getLevelColor = (level: string) => {
-    if (["Nursery", "LKG", "UKG"].includes(level))
-      return "bg-pink-100 text-pink-700";
-    if (["1", "2", "3", "4", "5"].includes(level))
-      return "bg-blue-100 text-blue-700";
+    const numLevel = parseInt(level);
+    if (isNaN(numLevel)) return "bg-gray-100 text-gray-700";
+    if (numLevel <= 5) return "bg-blue-100 text-blue-700";
+    if (numLevel <= 8) return "bg-green-100 text-green-700";
     return "bg-purple-100 text-purple-700";
   };
 
