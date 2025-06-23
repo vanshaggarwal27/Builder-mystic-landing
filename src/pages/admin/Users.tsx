@@ -607,19 +607,39 @@ export default function AdminUsers() {
                           </Select>
                         </div>
                         <div>
-                          <Label htmlFor="studentId">Student ID</Label>
-                          <Input
-                            id="studentId"
-                            value={newUser.studentId}
-                            onChange={(e) =>
-                              setNewUser({
-                                ...newUser,
-                                studentId: e.target.value,
-                              })
+                          <Label htmlFor="section">Section *</Label>
+                          <Select
+                            value={newUser.section}
+                            onValueChange={(value) =>
+                              setNewUser({ ...newUser, section: value })
                             }
-                            placeholder="STU2024001"
-                          />
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select section" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="A">Section A</SelectItem>
+                              <SelectItem value="B">Section B</SelectItem>
+                              <SelectItem value="C">Section C</SelectItem>
+                              <SelectItem value="D">Section D</SelectItem>
+                              <SelectItem value="E">Section E</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="studentId">Student ID</Label>
+                        <Input
+                          id="studentId"
+                          value={newUser.studentId}
+                          onChange={(e) =>
+                            setNewUser({
+                              ...newUser,
+                              studentId: e.target.value,
+                            })
+                          }
+                          placeholder="STU2024001 (auto-generated if empty)"
+                        />
                       </div>
                       <div>
                         <Label htmlFor="admissionDate">Admission Date</Label>
