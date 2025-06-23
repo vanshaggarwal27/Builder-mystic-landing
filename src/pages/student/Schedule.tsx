@@ -44,10 +44,21 @@ export default function StudentSchedule() {
       const scheduleData = await UserProfileService.getUserSchedule();
       if (scheduleData.length > 0) {
         setSchedule(scheduleData);
-        toast({
-          title: "Schedule Loaded",
-          description: `Showing schedule for ${profile?.grade || "your class"}`,
-        });
+        // Check if this is real admin-created data or demo data
+        const isRealSchedule = scheduleData.some(
+          (item) => !item.id.startsWith("mon-") && !item.id.startsWith("tue-"),
+        );
+        if (isRealSchedule) {
+          toast({
+            title: "Class Schedule Loaded",
+            description: `Showing your assigned schedule for ${profile?.grade || "your class"}`,
+          });
+        } else {
+          toast({
+            title: "Demo Schedule",
+            description: `No schedule created yet for ${profile?.grade || "your class"}. Contact admin.`,
+          });
+        }
       } else {
         // Generate default schedule if no admin-created schedule exists
         const defaultSchedule = UserProfileService.generateDefaultSchedule(
@@ -58,8 +69,7 @@ export default function StudentSchedule() {
         setSchedule(defaultSchedule);
         toast({
           title: "Demo Schedule",
-          description:
-            "Showing demo schedule. Contact admin to add your class schedule.",
+          description: `No schedule found for ${profile?.grade || "your class"}. Showing demo data.`,
         });
       }
     } catch (error) {
