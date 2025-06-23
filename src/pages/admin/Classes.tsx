@@ -50,7 +50,7 @@ interface ClassData {
 export default function AdminClasses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [classesList, setClassesList] = useState(initialClasses);
+  const [classesList, setClassesList] = useState<ClassData[]>([]);
   const [newClass, setNewClass] = useState({
     name: "",
     level: "",
@@ -59,7 +59,86 @@ export default function AdminClasses() {
     capacity: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingClasses, setIsLoadingClasses] = useState(true);
   const { toast } = useToast();
+
+  // Load real classes from users on component mount
+  useEffect(() => {
+    loadClasses();
+  }, []);
+
+  const loadClasses = async () => {
+    try {
+      setIsLoadingClasses(true);
+      const data = await apiCall("/admin/users");
+
+      // Group students by their class assignment
+      const classGroups = new Map<string, ClassData>();
+
+      data.users.forEach((user: any) => {
+        if (user.role === "student" && user.profile?.grade) {
+          const className = user.profile.grade; // e.g., "Grade 10-A"
+          const level = className.split("-")[0].replace("Grade ", ""); // e.g., "10"
+
+          if (!classGroups.has(className)) {
+            classGroups.set(className, {
+              id: className.replace(/\s+/g, "").toLowerCase(),
+              name: className,
+              level: level,
+              students: 0,
+              studentsList: [],
+              teacher: "Not assigned",
+              room: "Not assigned",
+            });
+          }
+
+          const classData = classGroups.get(className)!;
+          classData.students += 1;
+          classData.studentsList.push({
+            id: user._id,
+            name: `${user.profile.firstName} ${user.profile.lastName}`,
+            email: user.email,
+            studentId: user.profile.studentId,
+          });
+        }
+      });
+
+      // Convert Map to Array and sort by class name
+      const realClasses = Array.from(classGroups.values()).sort((a, b) => {
+        // Sort by grade level first, then by section
+        const levelA = parseInt(a.level) || 0;
+        const levelB = parseInt(b.level) || 0;
+        if (levelA !== levelB) return levelA - levelB;
+        return a.name.localeCompare(b.name);
+      });
+
+      setClassesList(realClasses);
+
+      if (realClasses.length === 0) {
+        toast({
+          title: "No Classes Found",
+          description:
+            "No students have been assigned to classes yet. Create some students first.",
+        });
+      } else {
+        toast({
+          title: "Classes Loaded",
+          description: `Found ${realClasses.length} classes with students.`,
+        });
+      }
+    } catch (error: any) {
+      console.error("Error loading classes:", error);
+      setClassesList([]);
+      toast({
+        title: "Error Loading Classes",
+        description:
+          error.message || "Failed to load class data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingClasses(false);
+    }
+  };
 
   const levels = [
     "Nursery",
