@@ -246,9 +246,24 @@ export default function AdminUsers() {
       await loadUsers();
       resetForm();
     } catch (error: any) {
+      console.error("User creation error:", error);
+      let errorMessage = error.message || "Failed to create user";
+
+      // Provide specific guidance for common issues
+      if (error.message?.includes("Backend connection required")) {
+        errorMessage =
+          "Backend connection required to create users. Please ensure you're logged in with a real admin account and have internet connectivity.";
+      } else if (error.message?.includes("Session expired")) {
+        errorMessage =
+          "Your session has expired. Please login again to create users.";
+      } else if (error.message?.includes("User already exists")) {
+        errorMessage =
+          "A user with this email already exists. Please use a different email address.";
+      }
+
       toast({
-        title: "Error",
-        description: error.message || "Failed to create user",
+        title: "Cannot Create User",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
