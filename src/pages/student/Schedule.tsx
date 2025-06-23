@@ -40,24 +40,38 @@ export default function StudentSchedule() {
       const profile = await UserProfileService.getCurrentUserProfile();
       setUserProfile(profile);
 
-      // Load user's schedule
+      // Load user's class-specific schedule (this will now fetch admin-created schedules)
       const scheduleData = await UserProfileService.getUserSchedule();
       if (scheduleData.length > 0) {
         setSchedule(scheduleData);
+        toast({
+          title: "Schedule Loaded",
+          description: `Showing schedule for ${profile?.grade || "your class"}`,
+        });
       } else {
-        // Generate default schedule based on user's grade/role
+        // Generate default schedule if no admin-created schedule exists
         const defaultSchedule = UserProfileService.generateDefaultSchedule(
           user?.role || "student",
           profile?.grade,
           profile?.department,
         );
         setSchedule(defaultSchedule);
+        toast({
+          title: "Demo Schedule",
+          description:
+            "Showing demo schedule. Contact admin to add your class schedule.",
+        });
       }
     } catch (error) {
       console.error("Error loading schedule:", error);
       // Generate fallback schedule
       const fallbackSchedule = generateFallbackSchedule();
       setSchedule(fallbackSchedule);
+      toast({
+        title: "Offline Schedule",
+        description: "Showing fallback schedule. Check your connection.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
