@@ -29,113 +29,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { apiCall } from "@/contexts/AuthContext";
 
-const initialClasses = [
-  {
-    id: "NUR001",
-    name: "Nursery A",
-    level: "Nursery",
-    students: 25,
-    teacher: "Ms. Smith",
-    room: "101",
-  },
-  {
-    id: "LKG001",
-    name: "LKG A",
-    level: "LKG",
-    students: 30,
-    teacher: "Ms. Johnson",
-    room: "102",
-  },
-  {
-    id: "UKG001",
-    name: "UKG A",
-    level: "UKG",
-    students: 28,
-    teacher: "Ms. Brown",
-    room: "103",
-  },
-  {
-    id: "CLS1A",
-    name: "Class 1-A",
-    level: "1",
-    students: 35,
-    teacher: "Ms. Davis",
-    room: "201",
-  },
-  {
-    id: "CLS2A",
-    name: "Class 2-A",
-    level: "2",
-    students: 32,
-    teacher: "Mr. Wilson",
-    room: "202",
-  },
-  {
-    id: "CLS3A",
-    name: "Class 3-A",
-    level: "3",
-    students: 30,
-    teacher: "Ms. Taylor",
-    room: "203",
-  },
-  {
-    id: "CLS4A",
-    name: "Class 4-A",
-    level: "4",
-    students: 33,
-    teacher: "Mr. Anderson",
-    room: "204",
-  },
-  {
-    id: "CLS5A",
-    name: "Class 5-A",
-    level: "5",
-    students: 31,
-    teacher: "Ms. White",
-    room: "205",
-  },
-  {
-    id: "CLS6A",
-    name: "Class 6-A",
-    level: "6",
-    students: 29,
-    teacher: "Mr. Clark",
-    room: "301",
-  },
-  {
-    id: "CLS7A",
-    name: "Class 7-A",
-    level: "7",
-    students: 27,
-    teacher: "Ms. Garcia",
-    room: "302",
-  },
-  {
-    id: "CLS8A",
-    name: "Class 8-A",
-    level: "8",
-    students: 26,
-    teacher: "Mr. Martinez",
-    room: "303",
-  },
-  {
-    id: "CLS9A",
-    name: "Class 9-A",
-    level: "9",
-    students: 24,
-    teacher: "Ms. Rodriguez",
-    room: "304",
-  },
-  {
-    id: "CLS10A",
-    name: "Class 10-A",
-    level: "10",
-    students: 22,
-    teacher: "Mr. Lee",
-    room: "305",
-  },
-];
+// Interface for class data
+interface ClassData {
+  id: string;
+  name: string;
+  level: string;
+  students: number;
+  studentsList: Array<{
+    id: string;
+    name: string;
+    email: string;
+    studentId?: string;
+  }>;
+  teacher?: string;
+  room?: string;
+}
 
 export default function AdminClasses() {
   const [searchQuery, setSearchQuery] = useState("");
