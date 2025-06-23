@@ -67,6 +67,21 @@ export default function AdminClasses() {
     loadClasses();
   }, []);
 
+  // Auto-refresh when page becomes visible (user comes back from creating students)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log("Page became visible, refreshing classes...");
+        loadClasses();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   const loadClasses = async () => {
     try {
       setIsLoadingClasses(true);
