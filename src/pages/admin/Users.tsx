@@ -211,6 +211,193 @@ export default function AdminUsers() {
     }
   };
 
+  const handleEditUser = async (userId: string) => {
+    try {
+      const userData = await apiCall(`/admin/users/${userId}`);
+      const user = userData.user || userData;
+
+      // Pre-populate edit form with user data
+      setEditUser({
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        firstName: user.profile?.firstName || "",
+        lastName: user.profile?.lastName || "",
+        phone: user.profile?.phone || "",
+        dateOfBirth: user.profile?.dateOfBirth || "",
+        gender: user.profile?.gender || "",
+        address: user.profile?.address || "",
+        bloodGroup: user.profile?.bloodGroup || "",
+        grade: user.profile?.grade?.split("-")[0]?.replace("Grade ", "") || "",
+        section:
+          user.profile?.grade?.split("-")[1] || user.profile?.section || "",
+        department: user.profile?.department || "",
+        position: user.profile?.position || "",
+        experience: user.profile?.experience || "",
+        joiningDate: user.profile?.joiningDate || "",
+        admissionDate: user.profile?.admissionDate || "",
+        studentId: user.profile?.studentId || "",
+        teacherId: user.profile?.teacherId || "",
+        subjects: user.profile?.subjects || "",
+        emergencyContact: user.profile?.emergencyContact || "",
+        parentName: user.profile?.parentName || "",
+        parentPhone: user.profile?.parentPhone || "",
+      });
+
+      setIsEditDialogOpen(true);
+    } catch (error: any) {
+      // Fallback to local user data if API fails
+      const user = usersList.find((u) => u.id === userId);
+      if (user) {
+        setEditUser({
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          firstName: user.name.split(" ")[0] || "",
+          lastName: user.name.split(" ").slice(1).join(" ") || "",
+          phone: "",
+          dateOfBirth: "",
+          gender: "",
+          address: "",
+          bloodGroup: "",
+          grade: user.grade?.split("-")[0]?.replace("Grade ", "") || "",
+          section: user.grade?.split("-")[1] || "",
+          department: user.department || "",
+          position: "",
+          experience: "",
+          joiningDate: "",
+          admissionDate: "",
+          studentId: "",
+          teacherId: "",
+          subjects: "",
+          emergencyContact: "",
+          parentName: "",
+          parentPhone: "",
+        });
+        setIsEditDialogOpen(true);
+        toast({
+          title: "Limited Edit Mode",
+          description:
+            "Editing with cached data. Some fields may not be available.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Unable to load user data for editing",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editUser.firstName || !editUser.lastName || !editUser.email) {
+      toast({
+        title: "Error",
+        description:
+          "Please fill in all required fields (First Name, Last Name, Email)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsEditLoading(true);
+    try {
+      // Prepare update data
+      const updateData = {
+        email: editUser.email,
+        firstName: editUser.firstName,
+        lastName: editUser.lastName,
+        phone: editUser.phone,
+        dateOfBirth: editUser.dateOfBirth,
+        gender: editUser.gender,
+        address: editUser.address,
+        bloodGroup: editUser.bloodGroup,
+
+        // Student-specific fields
+        ...(editUser.role === "student" && {
+          grade: `Grade ${editUser.grade}-${editUser.section}`,
+          section: editUser.section,
+          studentId: editUser.studentId,
+          admissionDate: editUser.admissionDate,
+          parentName: editUser.parentName,
+          parentPhone: editUser.parentPhone,
+          emergencyContact: editUser.emergencyContact,
+        }),
+
+        // Teacher-specific fields
+        ...(editUser.role === "teacher" && {
+          department: editUser.department,
+          teacherId: editUser.teacherId,
+          position: editUser.position,
+          experience: editUser.experience,
+          subjects: editUser.subjects,
+          joiningDate: editUser.joiningDate,
+        }),
+      };
+
+      const data = await apiCall(`/admin/users/${editUser.id}`, {
+        method: "PUT",
+        body: JSON.stringify(updateData),
+      });
+
+      toast({
+        title: "Success",
+        description: `${editUser.role.charAt(0).toUpperCase() + editUser.role.slice(1)} profile updated successfully!`,
+      });
+
+      // Reload users list to show updated data
+      await loadUsers();
+      setIsEditDialogOpen(false);
+
+      // Reset edit form
+      setEditUser({
+        id: "",
+        email: "",
+        role: "",
+        firstName: "",
+        lastName: "",
+        phone: "",
+        dateOfBirth: "",
+        gender: "",
+        address: "",
+        bloodGroup: "",
+        grade: "",
+        section: "",
+        department: "",
+        position: "",
+        experience: "",
+        joiningDate: "",
+        admissionDate: "",
+        studentId: "",
+        teacherId: "",
+        subjects: "",
+        emergencyContact: "",
+        parentName: "",
+        parentPhone: "",
+      });
+    } catch (error: any) {
+      console.error("User update error:", error);
+      let errorMessage = error.message || "Failed to update user";
+
+      if (error.message?.includes("Session expired")) {
+        errorMessage =
+          "Your session has expired. Please login again to update users.";
+      } else if (error.message?.includes("User not found")) {
+        errorMessage =
+          "User not found. They may have been deleted by another admin.";
+      }
+
+      toast({
+        title: "Cannot Update User",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsEditLoading(false);
+    }
+  };
+
   const handleCreateUser = async () => {
     // Validation
     if (
