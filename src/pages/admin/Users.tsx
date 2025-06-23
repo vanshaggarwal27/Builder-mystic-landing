@@ -1045,7 +1045,19 @@ export default function AdminUsers() {
                         </div>
                       </div>
                     </div>
-                    <Badge className="bg-blue-100 text-blue-700">Student</Badge>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleShowUserDetails(user.id)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Details
+                      </Button>
+                      <Badge className="bg-blue-100 text-blue-700">
+                        Student
+                      </Badge>
+                    </div>
                   </div>
                 ))}
               {filteredUsers.filter((user) => user.role === "student")
