@@ -270,6 +270,7 @@ export default function AdminUsers() {
       address: "",
       bloodGroup: "",
       grade: "",
+      section: "",
       department: "",
       position: "",
       experience: "",
