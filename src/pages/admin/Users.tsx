@@ -212,7 +212,8 @@ export default function AdminUsers() {
 
         // Student-specific fields
         ...(newUser.role === "student" && {
-          grade: newUser.grade,
+          grade: `${newUser.grade}-${newUser.section}`, // Combine grade and section
+          section: newUser.section,
           studentId: newUser.studentId || `STU${Date.now()}`,
           admissionDate: newUser.admissionDate,
           parentName: newUser.parentName,
