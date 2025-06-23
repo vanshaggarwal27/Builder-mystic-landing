@@ -221,15 +221,18 @@ export default function AdminClasses() {
 
   const stats = {
     total: classesList.length,
-    prePrimary: classesList.filter((c) =>
-      ["Nursery", "LKG", "UKG"].includes(c.level),
-    ).length,
-    primary: classesList.filter((c) =>
-      ["1", "2", "3", "4", "5"].includes(c.level),
-    ).length,
-    secondary: classesList.filter((c) =>
-      ["6", "7", "8", "9", "10"].includes(c.level),
-    ).length,
+    primary: classesList.filter((c) => {
+      const level = parseInt(c.level);
+      return level >= 1 && level <= 5;
+    }).length,
+    secondary: classesList.filter((c) => {
+      const level = parseInt(c.level);
+      return level >= 6 && level <= 10;
+    }).length,
+    higherSecondary: classesList.filter((c) => {
+      const level = parseInt(c.level);
+      return level >= 11 && level <= 12;
+    }).length,
     totalStudents: classesList.reduce((sum, c) => sum + c.students, 0),
   };
 
