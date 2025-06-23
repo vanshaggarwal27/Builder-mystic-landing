@@ -155,10 +155,10 @@ export default function AdminUsers() {
     }
 
     // Role-specific validation
-    if (newUser.role === "student" && !newUser.grade) {
+    if (newUser.role === "student" && (!newUser.grade || !newUser.section)) {
       toast({
         title: "Error",
-        description: "Please select a grade for the student",
+        description: "Please select both grade and section for the student",
         variant: "destructive",
       });
       return;
