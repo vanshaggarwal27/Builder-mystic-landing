@@ -55,6 +55,7 @@ export default function AdminUsers() {
     address: "",
     bloodGroup: "",
     grade: "",
+    section: "",
     department: "",
     position: "",
     experience: "",
@@ -154,10 +155,10 @@ export default function AdminUsers() {
     }
 
     // Role-specific validation
-    if (newUser.role === "student" && !newUser.grade) {
+    if (newUser.role === "student" && (!newUser.grade || !newUser.section)) {
       toast({
         title: "Error",
-        description: "Please select a grade for the student",
+        description: "Please select both grade and section for the student",
         variant: "destructive",
       });
       return;
@@ -211,7 +212,8 @@ export default function AdminUsers() {
 
         // Student-specific fields
         ...(newUser.role === "student" && {
-          grade: newUser.grade,
+          grade: `${newUser.grade}-${newUser.section}`, // Combine grade and section
+          section: newUser.section,
           studentId: newUser.studentId || `STU${Date.now()}`,
           admissionDate: newUser.admissionDate,
           parentName: newUser.parentName,
@@ -244,9 +246,24 @@ export default function AdminUsers() {
       await loadUsers();
       resetForm();
     } catch (error: any) {
+      console.error("User creation error:", error);
+      let errorMessage = error.message || "Failed to create user";
+
+      // Provide specific guidance for common issues
+      if (error.message?.includes("Backend connection required")) {
+        errorMessage =
+          "Backend connection required to create users. Please ensure you're logged in with a real admin account and have internet connectivity.";
+      } else if (error.message?.includes("Session expired")) {
+        errorMessage =
+          "Your session has expired. Please login again to create users.";
+      } else if (error.message?.includes("User already exists")) {
+        errorMessage =
+          "A user with this email already exists. Please use a different email address.";
+      }
+
       toast({
-        title: "Error",
-        description: error.message || "Failed to create user",
+        title: "Cannot Create User",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -268,6 +285,7 @@ export default function AdminUsers() {
       address: "",
       bloodGroup: "",
       grade: "",
+      section: "",
       department: "",
       position: "",
       experience: "",
@@ -605,19 +623,39 @@ export default function AdminUsers() {
                           </Select>
                         </div>
                         <div>
-                          <Label htmlFor="studentId">Student ID</Label>
-                          <Input
-                            id="studentId"
-                            value={newUser.studentId}
-                            onChange={(e) =>
-                              setNewUser({
-                                ...newUser,
-                                studentId: e.target.value,
-                              })
+                          <Label htmlFor="section">Section *</Label>
+                          <Select
+                            value={newUser.section}
+                            onValueChange={(value) =>
+                              setNewUser({ ...newUser, section: value })
                             }
-                            placeholder="STU2024001"
-                          />
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select section" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="A">Section A</SelectItem>
+                              <SelectItem value="B">Section B</SelectItem>
+                              <SelectItem value="C">Section C</SelectItem>
+                              <SelectItem value="D">Section D</SelectItem>
+                              <SelectItem value="E">Section E</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="studentId">Student ID</Label>
+                        <Input
+                          id="studentId"
+                          value={newUser.studentId}
+                          onChange={(e) =>
+                            setNewUser({
+                              ...newUser,
+                              studentId: e.target.value,
+                            })
+                          }
+                          placeholder="STU2024001 (auto-generated if empty)"
+                        />
                       </div>
                       <div>
                         <Label htmlFor="admissionDate">Admission Date</Label>

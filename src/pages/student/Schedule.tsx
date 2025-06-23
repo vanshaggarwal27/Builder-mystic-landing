@@ -40,24 +40,48 @@ export default function StudentSchedule() {
       const profile = await UserProfileService.getCurrentUserProfile();
       setUserProfile(profile);
 
-      // Load user's schedule
+      // Load user's class-specific schedule (this will now fetch admin-created schedules)
       const scheduleData = await UserProfileService.getUserSchedule();
       if (scheduleData.length > 0) {
         setSchedule(scheduleData);
+        // Check if this is real admin-created data or demo data
+        const isRealSchedule = scheduleData.some(
+          (item) => !item.id.startsWith("mon-") && !item.id.startsWith("tue-"),
+        );
+        if (isRealSchedule) {
+          toast({
+            title: "Class Schedule Loaded",
+            description: `Showing your assigned schedule for ${profile?.grade || "your class"}`,
+          });
+        } else {
+          toast({
+            title: "Demo Schedule",
+            description: `No schedule created yet for ${profile?.grade || "your class"}. Contact admin.`,
+          });
+        }
       } else {
-        // Generate default schedule based on user's grade/role
+        // Generate default schedule if no admin-created schedule exists
         const defaultSchedule = UserProfileService.generateDefaultSchedule(
           user?.role || "student",
           profile?.grade,
           profile?.department,
         );
         setSchedule(defaultSchedule);
+        toast({
+          title: "Demo Schedule",
+          description: `No schedule found for ${profile?.grade || "your class"}. Showing demo data.`,
+        });
       }
     } catch (error) {
       console.error("Error loading schedule:", error);
       // Generate fallback schedule
       const fallbackSchedule = generateFallbackSchedule();
       setSchedule(fallbackSchedule);
+      toast({
+        title: "Offline Schedule",
+        description: "Showing fallback schedule. Check your connection.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +139,7 @@ export default function StudentSchedule() {
   return (
     <FadeTransition>
       <MobileLayout
-        title="Timetable"
+        title="Class Timetable"
         subtitle={`${userProfile?.grade || "Your Class"} • ${selectedWeek}`}
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"

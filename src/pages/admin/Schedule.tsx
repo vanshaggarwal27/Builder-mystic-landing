@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -7,6 +7,7 @@ import {
   Edit,
   Trash2,
   BookOpen,
+  RefreshCw,
 } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { UserProfileService } from "@/lib/userProfileService";
 
 const initialTimetable = [
   {
@@ -126,7 +128,44 @@ export default function AdminSchedule() {
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const { toast } = useToast();
+
+  // Load schedules from backend on component mount
+  useEffect(() => {
+    loadSchedules();
+  }, []);
+
+  const loadSchedules = async () => {
+    try {
+      setIsLoadingData(true);
+      const schedules = await UserProfileService.getClassSchedules();
+
+      if (schedules && schedules.length > 0) {
+        // Convert backend schedules to frontend format
+        const formattedSchedules = schedules.map((schedule: any) => ({
+          id: schedule._id || schedule.id,
+          class: schedule.class,
+          day: schedule.day,
+          period: schedule.period,
+          subject: schedule.subject,
+          teacher: schedule.teacher,
+          time: schedule.time,
+          room: schedule.room,
+        }));
+        setTimetableList(formattedSchedules);
+      }
+    } catch (error) {
+      console.error("Failed to load schedules:", error);
+      // Keep using the demo data as fallback
+      toast({
+        title: "Info",
+        description: "Using demo schedule data. Backend integration pending.",
+      });
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
 
   const handleEditEntry = (id: string, type: "timetable" | "event") => {
     if (type === "timetable") {
@@ -162,10 +201,25 @@ export default function AdminSchedule() {
     }
   };
 
-  const handleDeleteEntry = (id: string, type: "timetable" | "event") => {
+  const handleDeleteEntry = async (id: string, type: "timetable" | "event") => {
     if (type === "timetable") {
-      setTimetableList((prev) => prev.filter((t) => t.id !== id));
-      toast({ title: "Success", description: "Timetable entry deleted!" });
+      try {
+        // Try to delete from backend
+        await UserProfileService.deleteClassSchedule(id);
+        setTimetableList((prev) => prev.filter((t) => t.id !== id));
+        toast({
+          title: "Success",
+          description:
+            "Class schedule deleted! Students will no longer see this schedule.",
+        });
+      } catch (error) {
+        // Fallback to local deletion if backend is unavailable
+        setTimetableList((prev) => prev.filter((t) => t.id !== id));
+        toast({
+          title: "Schedule Removed",
+          description: "Schedule removed locally. Backend integration pending.",
+        });
+      }
     } else {
       setEventsList((prev) => prev.filter((e) => e.id !== id));
       toast({ title: "Success", description: "Event deleted!" });
@@ -182,16 +236,42 @@ export default function AdminSchedule() {
   ];
   const periods = ["1", "2", "3", "4", "5", "6", "7", "8"];
   const classes = [
-    "Class 1-A",
-    "Class 2-A",
-    "Class 3-A",
-    "Class 4-A",
-    "Class 5-A",
-    "Class 6-A",
-    "Class 7-A",
-    "Class 8-A",
-    "Class 9-A",
-    "Class 10-A",
+    "Grade 1-A",
+    "Grade 1-B",
+    "Grade 1-C",
+    "Grade 2-A",
+    "Grade 2-B",
+    "Grade 2-C",
+    "Grade 3-A",
+    "Grade 3-B",
+    "Grade 3-C",
+    "Grade 4-A",
+    "Grade 4-B",
+    "Grade 4-C",
+    "Grade 5-A",
+    "Grade 5-B",
+    "Grade 5-C",
+    "Grade 6-A",
+    "Grade 6-B",
+    "Grade 6-C",
+    "Grade 7-A",
+    "Grade 7-B",
+    "Grade 7-C",
+    "Grade 8-A",
+    "Grade 8-B",
+    "Grade 8-C",
+    "Grade 9-A",
+    "Grade 9-B",
+    "Grade 9-C",
+    "Grade 10-A",
+    "Grade 10-B",
+    "Grade 10-C",
+    "Grade 11-A",
+    "Grade 11-B",
+    "Grade 11-C",
+    "Grade 12-A",
+    "Grade 12-B",
+    "Grade 12-C",
   ];
   const subjects = [
     "Mathematics",
@@ -225,10 +305,7 @@ export default function AdminSchedule() {
 
       setIsLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const timetableEntry = {
-          id: `TT${Date.now()}`,
+        const scheduleData = {
           class: newEntry.class,
           day: newEntry.day,
           period: newEntry.period,
@@ -240,8 +317,32 @@ export default function AdminSchedule() {
           room: newEntry.room || "TBA",
         };
 
-        setTimetableList((prev) => [...prev, timetableEntry]);
-        toast({ title: "Success", description: "Timetable entry added!" });
+        // Try to save to backend
+        try {
+          const createdSchedule =
+            await UserProfileService.createClassSchedule(scheduleData);
+          const timetableEntry = {
+            id: createdSchedule._id || createdSchedule.id,
+            ...scheduleData,
+          };
+          setTimetableList((prev) => [...prev, timetableEntry]);
+          toast({
+            title: "Success",
+            description:
+              "Class schedule created and will be visible to students!",
+          });
+        } catch (backendError) {
+          // Fallback to local storage if backend is unavailable
+          const timetableEntry = {
+            id: `TT${Date.now()}`,
+            ...scheduleData,
+          };
+          setTimetableList((prev) => [...prev, timetableEntry]);
+          toast({
+            title: "Schedule Added",
+            description: "Schedule saved locally. Backend integration pending.",
+          });
+        }
       } catch (error) {
         toast({
           title: "Error",
@@ -346,14 +447,14 @@ export default function AdminSchedule() {
       >
         <div className="px-6 py-6">
           {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="grid grid-cols-3 gap-3 mb-6">
             <Button
               onClick={() => openCreateDialog("timetable")}
               className="bg-teal-600 hover:bg-teal-700 h-auto py-4"
             >
               <div className="text-center">
                 <Clock className="h-6 w-6 mx-auto mb-1" />
-                <div className="text-sm">Add Timetable</div>
+                <div className="text-sm">Add Schedule</div>
               </div>
             </Button>
             <Button
@@ -365,7 +466,32 @@ export default function AdminSchedule() {
                 <div className="text-sm">Add Event</div>
               </div>
             </Button>
+            <Button
+              onClick={loadSchedules}
+              variant="outline"
+              className="h-auto py-4"
+              disabled={isLoadingData}
+            >
+              <div className="text-center">
+                <RefreshCw
+                  className={`h-6 w-6 mx-auto mb-1 ${isLoadingData ? "animate-spin" : ""}`}
+                />
+                <div className="text-sm">Refresh</div>
+              </div>
+            </Button>
           </div>
+
+          {/* Loading Indicator */}
+          {isLoadingData && (
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-center space-x-2">
+                <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+                <span className="text-blue-700 text-sm">
+                  Loading schedules...
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Search */}
           <div className="relative mb-6">

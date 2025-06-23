@@ -1,5 +1,13 @@
-import React, { useState } from "react";
-import { Plus, Search, Edit, Trash2, Users, BookOpen } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Users,
+  BookOpen,
+  RefreshCw,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
@@ -21,118 +29,28 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { apiCall } from "@/contexts/AuthContext";
 
-const initialClasses = [
-  {
-    id: "NUR001",
-    name: "Nursery A",
-    level: "Nursery",
-    students: 25,
-    teacher: "Ms. Smith",
-    room: "101",
-  },
-  {
-    id: "LKG001",
-    name: "LKG A",
-    level: "LKG",
-    students: 30,
-    teacher: "Ms. Johnson",
-    room: "102",
-  },
-  {
-    id: "UKG001",
-    name: "UKG A",
-    level: "UKG",
-    students: 28,
-    teacher: "Ms. Brown",
-    room: "103",
-  },
-  {
-    id: "CLS1A",
-    name: "Class 1-A",
-    level: "1",
-    students: 35,
-    teacher: "Ms. Davis",
-    room: "201",
-  },
-  {
-    id: "CLS2A",
-    name: "Class 2-A",
-    level: "2",
-    students: 32,
-    teacher: "Mr. Wilson",
-    room: "202",
-  },
-  {
-    id: "CLS3A",
-    name: "Class 3-A",
-    level: "3",
-    students: 30,
-    teacher: "Ms. Taylor",
-    room: "203",
-  },
-  {
-    id: "CLS4A",
-    name: "Class 4-A",
-    level: "4",
-    students: 33,
-    teacher: "Mr. Anderson",
-    room: "204",
-  },
-  {
-    id: "CLS5A",
-    name: "Class 5-A",
-    level: "5",
-    students: 31,
-    teacher: "Ms. White",
-    room: "205",
-  },
-  {
-    id: "CLS6A",
-    name: "Class 6-A",
-    level: "6",
-    students: 29,
-    teacher: "Mr. Clark",
-    room: "301",
-  },
-  {
-    id: "CLS7A",
-    name: "Class 7-A",
-    level: "7",
-    students: 27,
-    teacher: "Ms. Garcia",
-    room: "302",
-  },
-  {
-    id: "CLS8A",
-    name: "Class 8-A",
-    level: "8",
-    students: 26,
-    teacher: "Mr. Martinez",
-    room: "303",
-  },
-  {
-    id: "CLS9A",
-    name: "Class 9-A",
-    level: "9",
-    students: 24,
-    teacher: "Ms. Rodriguez",
-    room: "304",
-  },
-  {
-    id: "CLS10A",
-    name: "Class 10-A",
-    level: "10",
-    students: 22,
-    teacher: "Mr. Lee",
-    room: "305",
-  },
-];
+// Interface for class data
+interface ClassData {
+  id: string;
+  name: string;
+  level: string;
+  students: number;
+  studentsList: Array<{
+    id: string;
+    name: string;
+    email: string;
+    studentId?: string;
+  }>;
+  teacher?: string;
+  room?: string;
+}
 
 export default function AdminClasses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [classesList, setClassesList] = useState(initialClasses);
+  const [classesList, setClassesList] = useState<ClassData[]>([]);
   const [newClass, setNewClass] = useState({
     name: "",
     level: "",
@@ -141,12 +59,129 @@ export default function AdminClasses() {
     capacity: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingClasses, setIsLoadingClasses] = useState(true);
   const { toast } = useToast();
 
+  // Load real classes from users on component mount
+  useEffect(() => {
+    loadClasses();
+  }, []);
+
+  // Auto-refresh when page becomes visible (user comes back from creating students)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log("Page became visible, refreshing classes...");
+        loadClasses();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  const loadClasses = async () => {
+    try {
+      setIsLoadingClasses(true);
+      console.log("Loading classes from backend...");
+
+      const data = await apiCall("/admin/users");
+      console.log("Raw user data from backend:", data);
+
+      // Group students by their class assignment
+      const classGroups = new Map<string, ClassData>();
+      let studentCount = 0;
+
+      data.users.forEach((user: any) => {
+        console.log("Processing user:", user);
+        if (user.role === "student") {
+          studentCount++;
+
+          // Check multiple possible grade field locations
+          const grade = user.profile?.grade || user.grade || user.class;
+          console.log(`Student ${user.email} has grade/class:`, grade);
+
+          if (grade) {
+            const className = grade; // e.g., "Grade 10-A"
+            const level = className.split("-")[0].replace("Grade ", ""); // e.g., "10"
+
+            if (!classGroups.has(className)) {
+              classGroups.set(className, {
+                id: className.replace(/\s+/g, "").toLowerCase(),
+                name: className,
+                level: level,
+                students: 0,
+                studentsList: [],
+                teacher: "Not assigned",
+                room: "Not assigned",
+              });
+              console.log(`Created new class: ${className}`);
+            }
+
+            const classData = classGroups.get(className)!;
+            classData.students += 1;
+            classData.studentsList.push({
+              id: user._id,
+              name: `${user.profile?.firstName || "Unknown"} ${user.profile?.lastName || "User"}`,
+              email: user.email,
+              studentId: user.profile?.studentId,
+            });
+          } else {
+            console.log(`Student ${user.email} has no grade/class assigned`);
+          }
+        }
+      });
+
+      console.log(`Total students found: ${studentCount}`);
+      console.log(`Classes created:`, Array.from(classGroups.keys()));
+
+      // Convert Map to Array and sort by class name
+      const realClasses = Array.from(classGroups.values()).sort((a, b) => {
+        // Sort by grade level first, then by section
+        const levelA = parseInt(a.level) || 0;
+        const levelB = parseInt(b.level) || 0;
+        if (levelA !== levelB) return levelA - levelB;
+        return a.name.localeCompare(b.name);
+      });
+
+      setClassesList(realClasses);
+
+      if (realClasses.length === 0) {
+        if (studentCount === 0) {
+          toast({
+            title: "No Students Found",
+            description:
+              "No students exist in the system yet. Create some students first.",
+          });
+        } else {
+          toast({
+            title: "No Classes Found",
+            description: `Found ${studentCount} students but none have grade/class assignments. Check student profiles.`,
+          });
+        }
+      } else {
+        toast({
+          title: "Classes Loaded Successfully",
+          description: `Found ${realClasses.length} classes with ${studentCount} total students.`,
+        });
+      }
+    } catch (error: any) {
+      console.error("Error loading classes:", error);
+      setClassesList([]);
+      toast({
+        title: "Error Loading Classes",
+        description:
+          error.message || "Failed to load class data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingClasses(false);
+    }
+  };
+
   const levels = [
-    "Nursery",
-    "LKG",
-    "UKG",
     "1",
     "2",
     "3",
@@ -157,84 +192,74 @@ export default function AdminClasses() {
     "8",
     "9",
     "10",
+    "11",
+    "12",
   ];
 
   const handleCreateClass = async () => {
-    if (
-      !newClass.name ||
-      !newClass.level ||
-      !newClass.teacher ||
-      !newClass.room
-    ) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const newClassEntry = {
-        id: `CLS${Date.now()}`,
-        name: newClass.name,
-        level: newClass.level,
-        students: 0,
-        teacher: newClass.teacher,
-        room: newClass.room,
-      };
-
-      setClassesList((prev) => [...prev, newClassEntry]);
-
-      toast({
-        title: "Success",
-        description: "Class created successfully!",
-      });
-
-      setIsCreateDialogOpen(false);
-      setNewClass({ name: "", level: "", teacher: "", room: "", capacity: "" });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create class",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // For real classes, we don't create classes directly
+    // Classes are created automatically when students are assigned
+    toast({
+      title: "Classes Auto-Created",
+      description:
+        "Classes are automatically created when you assign students to Grade-Section combinations. Create students instead.",
+    });
+    setIsCreateDialogOpen(false);
   };
 
   const getLevelColor = (level: string) => {
-    if (["Nursery", "LKG", "UKG"].includes(level))
-      return "bg-pink-100 text-pink-700";
-    if (["1", "2", "3", "4", "5"].includes(level))
-      return "bg-blue-100 text-blue-700";
+    const numLevel = parseInt(level);
+    if (isNaN(numLevel)) return "bg-gray-100 text-gray-700";
+    if (numLevel <= 5) return "bg-blue-100 text-blue-700";
+    if (numLevel <= 8) return "bg-green-100 text-green-700";
     return "bg-purple-100 text-purple-700";
   };
 
   const filteredClasses = classesList.filter(
     (cls) =>
       cls.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cls.teacher.toLowerCase().includes(searchQuery.toLowerCase()),
+      (cls.teacher &&
+        cls.teacher.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   const stats = {
     total: classesList.length,
-    prePrimary: classesList.filter((c) =>
-      ["Nursery", "LKG", "UKG"].includes(c.level),
-    ).length,
-    primary: classesList.filter((c) =>
-      ["1", "2", "3", "4", "5"].includes(c.level),
-    ).length,
-    secondary: classesList.filter((c) =>
-      ["6", "7", "8", "9", "10"].includes(c.level),
-    ).length,
+    primary: classesList.filter((c) => {
+      const level = parseInt(c.level);
+      return level >= 1 && level <= 5;
+    }).length,
+    secondary: classesList.filter((c) => {
+      const level = parseInt(c.level);
+      return level >= 6 && level <= 10;
+    }).length,
+    higherSecondary: classesList.filter((c) => {
+      const level = parseInt(c.level);
+      return level >= 11 && level <= 12;
+    }).length,
     totalStudents: classesList.reduce((sum, c) => sum + c.students, 0),
   };
+
+  if (isLoadingClasses) {
+    return (
+      <>
+        <MobileLayout
+          title="Class Management"
+          headerGradient="from-indigo-600 to-purple-600"
+          className="pb-20"
+        >
+          <div className="px-6 py-6">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <RefreshCw className="h-8 w-8 animate-spin mx-auto text-indigo-600 mb-4" />
+                <p className="text-gray-600">Loading classes...</p>
+              </div>
+            </div>
+          </div>
+        </MobileLayout>
+        <BottomNavigation />
+      </>
+    );
+  }
 
   return (
     <>
@@ -244,6 +269,39 @@ export default function AdminClasses() {
         className="pb-20"
       >
         <div className="px-6 py-6">
+          {/* Info Banner */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg mb-6 border-l-4 border-indigo-400">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-800 mb-1">
+                  Real Classes Overview
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Classes are automatically created based on student
+                  assignments. Students are grouped by their Grade-Section
+                  assignment.
+                  <span className="block text-xs text-indigo-600 mt-1">
+                    {classesList.length === 0
+                      ? "No classes found. Create students with Grade-Section assignments."
+                      : `Showing ${classesList.length} active classes with real students.`}
+                  </span>
+                </p>
+              </div>
+              <Button
+                onClick={loadClasses}
+                variant="outline"
+                size="sm"
+                disabled={isLoadingClasses}
+                className="ml-3"
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-1 ${isLoadingClasses ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
+            </div>
+          </div>
+
           {/* Stats Overview */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -259,20 +317,20 @@ export default function AdminClasses() {
               <div className="text-sm text-gray-600">Total Students</div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-lg font-bold text-pink-600">
-                {stats.prePrimary}
+              <div className="text-lg font-bold text-blue-600">
+                {stats.primary}
               </div>
-              <div className="text-sm text-gray-600">Pre-Primary</div>
+              <div className="text-sm text-gray-600">Primary (1-5)</div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-lg font-bold text-blue-600">
-                {stats.primary + stats.secondary}
+              <div className="text-lg font-bold text-purple-600">
+                {stats.secondary + stats.higherSecondary}
               </div>
-              <div className="text-sm text-gray-600">Primary + Secondary</div>
+              <div className="text-sm text-gray-600">Secondary (6-12)</div>
             </div>
           </div>
 
-          {/* Search and Add */}
+          {/* Search and Actions */}
           <div className="flex gap-3 mb-6">
             <div className="flex-1 relative">
               <Input
@@ -283,139 +341,185 @@ export default function AdminClasses() {
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             </div>
-            <Dialog
-              open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
+            <Button
+              onClick={loadClasses}
+              variant="outline"
+              size="icon"
+              disabled={isLoadingClasses}
             >
-              <DialogTrigger asChild>
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Class
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create New Class</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="className">Class Name *</Label>
-                    <Input
-                      id="className"
-                      value={newClass.name}
-                      onChange={(e) =>
-                        setNewClass({ ...newClass, name: e.target.value })
-                      }
-                      placeholder="e.g., Class 5-A"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="level">Level *</Label>
-                    <Select
-                      value={newClass.level}
-                      onValueChange={(value) =>
-                        setNewClass({ ...newClass, level: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {levels.map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="teacher">Class Teacher *</Label>
-                    <Input
-                      id="teacher"
-                      value={newClass.teacher}
-                      onChange={(e) =>
-                        setNewClass({ ...newClass, teacher: e.target.value })
-                      }
-                      placeholder="e.g., Ms. Smith"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="room">Room Number *</Label>
-                    <Input
-                      id="room"
-                      value={newClass.room}
-                      onChange={(e) =>
-                        setNewClass({ ...newClass, room: e.target.value })
-                      }
-                      placeholder="e.g., 101"
-                    />
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsCreateDialogOpen(false)}
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleCreateClass}
-                      disabled={isLoading}
-                      className="flex-1 bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      {isLoading ? "Creating..." : "Create Class"}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+              <RefreshCw
+                className={`h-4 w-4 ${isLoadingClasses ? "animate-spin" : ""}`}
+              />
+            </Button>
           </div>
+
+          {/* Debug Section - only show in development */}
+          {process.env.NODE_ENV === "development" && (
+            <div className="bg-yellow-50 p-3 rounded-lg mb-4 border border-yellow-200">
+              <h4 className="text-sm font-medium text-yellow-800 mb-2">
+                Debug Info:
+              </h4>
+              <div className="text-xs text-yellow-700 space-y-1">
+                <div>Classes found: {classesList.length}</div>
+                <div>Total students: {stats.totalStudents}</div>
+                <div>Check browser console for detailed logs</div>
+                <Button
+                  onClick={() => {
+                    console.log("Current classes state:", classesList);
+                    toast({
+                      title: "Debug Info",
+                      description: `${classesList.length} classes, ${stats.totalStudents} students. Check console for details.`,
+                    });
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="mt-2"
+                >
+                  Log Debug Info
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {classesList.length === 0 && (
+            <div className="text-center py-12">
+              <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No Classes Yet
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Classes are automatically created when you assign students to
+                Grade-Section combinations like "Grade 10-A".
+              </p>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => (window.location.href = "/admin/users")}
+                  className="bg-indigo-600 hover:bg-indigo-700 block mx-auto"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Students
+                </Button>
+                <Button
+                  onClick={loadClasses}
+                  variant="outline"
+                  disabled={isLoadingClasses}
+                  className="block mx-auto"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-2 ${isLoadingClasses ? "animate-spin" : ""}`}
+                  />
+                  Try Loading Again
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Classes List */}
-          <div className="space-y-3">
-            {filteredClasses.map((cls) => (
-              <div key={cls.id} className="bg-white rounded-xl p-4 shadow-sm">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{cls.name}</h3>
-                    <p className="text-sm text-gray-600">Room {cls.room}</p>
+          {classesList.length > 0 && (
+            <div className="space-y-3">
+              {filteredClasses.map((cls) => (
+                <div key={cls.id} className="bg-white rounded-xl p-4 shadow-sm">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">
+                        {cls.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">Room {cls.room}</p>
+                    </div>
+                    <Badge className={getLevelColor(cls.level)}>
+                      Grade {cls.level}
+                    </Badge>
                   </div>
-                  <Badge className={getLevelColor(cls.level)}>
-                    {cls.level === "Nursery" ||
-                    cls.level === "LKG" ||
-                    cls.level === "UKG"
-                      ? cls.level
-                      : `Class ${cls.level}`}
-                  </Badge>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-3">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Users className="h-4 w-4 mr-2" />
-                    {cls.students} Students
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Users className="h-4 w-4 mr-2" />
+                      {cls.students} Students
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      {cls.teacher}
+                    </div>
                   </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    {cls.teacher}
-                  </div>
-                </div>
 
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Users className="h-4 w-4 mr-1" />
-                    Students
-                  </Button>
+                  {/* Student List Preview */}
+                  <div className="mb-3">
+                    <div className="text-xs text-gray-500 mb-2">Students:</div>
+                    <div className="flex flex-wrap gap-1">
+                      {cls.studentsList.slice(0, 3).map((student) => (
+                        <span
+                          key={student.id}
+                          className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                        >
+                          {student.name}
+                        </span>
+                      ))}
+                      {cls.studentsList.length > 3 && (
+                        <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                          +{cls.studentsList.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        toast({
+                          title: "Class Details",
+                          description: `${cls.name} has ${cls.students} students. Class editing coming soon!`,
+                        });
+                      }}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      View Details
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        const studentNames = cls.studentsList
+                          .map((s) => s.name)
+                          .join(", ");
+                        toast({
+                          title: `${cls.name} Students`,
+                          description: studentNames || "No students assigned",
+                        });
+                      }}
+                    >
+                      <Users className="h-4 w-4 mr-1" />
+                      View Students
+                    </Button>
+                  </div>
                 </div>
+              ))}
+            </div>
+          )}
+
+          {/* Filtered Results Message */}
+          {classesList.length > 0 &&
+            filteredClasses.length === 0 &&
+            searchQuery && (
+              <div className="text-center py-8 text-gray-500">
+                <p>No classes found matching "{searchQuery}"</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSearchQuery("")}
+                  className="mt-2"
+                >
+                  Clear Search
+                </Button>
               </div>
-            ))}
-          </div>
+            )}
         </div>
       </MobileLayout>
+
       <BottomNavigation />
     </>
   );
