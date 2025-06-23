@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Users,
-  BookOpen,
-  RefreshCw,
-} from "lucide-react";
+import { Plus, Search, Edit, Trash2, Users, BookOpen, RefreshCw } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
@@ -117,8 +109,7 @@ export default function AdminClasses() {
       if (realClasses.length === 0) {
         toast({
           title: "No Classes Found",
-          description:
-            "No students have been assigned to classes yet. Create some students first.",
+          description: "No students have been assigned to classes yet. Create some students first.",
         });
       } else {
         toast({
@@ -131,8 +122,7 @@ export default function AdminClasses() {
       setClassesList([]);
       toast({
         title: "Error Loading Classes",
-        description:
-          error.message || "Failed to load class data. Please try again.",
+        description: error.message || "Failed to load class data. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -244,7 +234,32 @@ export default function AdminClasses() {
         className="pb-20"
       >
         <div className="px-6 py-6">
-          {/* Stats Overview */}
+          {/* Loading State */}
+          {isLoadingClasses && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <RefreshCw className="h-8 w-8 animate-spin mx-auto text-indigo-600 mb-4" />
+                <p className="text-gray-600">Loading classes...</p>
+              </div>
+            </div>
+          )}
+
+          {!isLoadingClasses && (
+            <>
+              {/* Info Banner */}
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg mb-6 border-l-4 border-indigo-400">
+                <h3 className="font-semibold text-gray-800 mb-1">
+                  Real Classes Overview
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Classes are automatically created based on student assignments. Students are grouped by their Grade-Section assignment.
+                  <span className="block text-xs text-indigo-600 mt-1">
+                    {classesList.length === 0 ? "No classes found. Create students first to see classes here." : `Showing ${classesList.length} active classes with real students.`}
+                  </span>
+                </p>
+              </div>
+
+              {/* Stats Overview */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="text-2xl font-bold text-indigo-600">
