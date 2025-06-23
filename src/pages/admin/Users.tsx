@@ -1678,6 +1678,432 @@ export default function AdminUsers() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit User Profile</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+            {/* Basic Information */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm text-gray-700">
+                Basic Information
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editFirstName">First Name *</Label>
+                  <Input
+                    id="editFirstName"
+                    value={editUser.firstName}
+                    onChange={(e) =>
+                      setEditUser({
+                        ...editUser,
+                        firstName: e.target.value,
+                      })
+                    }
+                    placeholder="John"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editLastName">Last Name *</Label>
+                  <Input
+                    id="editLastName"
+                    value={editUser.lastName}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, lastName: e.target.value })
+                    }
+                    placeholder="Doe"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="editEmail">Email Address *</Label>
+                <Input
+                  id="editEmail"
+                  type="email"
+                  value={editUser.email}
+                  onChange={(e) =>
+                    setEditUser({ ...editUser, email: e.target.value })
+                  }
+                  placeholder="john.doe@shkva.edu"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="editRole">Role</Label>
+                <Input
+                  id="editRole"
+                  value={editUser.role}
+                  disabled
+                  className="bg-gray-100"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Role cannot be changed after account creation
+                </p>
+              </div>
+            </div>
+
+            {/* Personal Information */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm text-gray-700">
+                Personal Information
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editPhone">Phone Number</Label>
+                  <Input
+                    id="editPhone"
+                    value={editUser.phone}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, phone: e.target.value })
+                    }
+                    placeholder="+1 234 567 8900"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editDateOfBirth">Date of Birth</Label>
+                  <Input
+                    id="editDateOfBirth"
+                    type="date"
+                    value={editUser.dateOfBirth}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, dateOfBirth: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editGender">Gender</Label>
+                  <Select
+                    value={editUser.gender}
+                    onValueChange={(value) =>
+                      setEditUser({ ...editUser, gender: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="editBloodGroup">Blood Group</Label>
+                  <Select
+                    value={editUser.bloodGroup}
+                    onValueChange={(value) =>
+                      setEditUser({ ...editUser, bloodGroup: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select blood group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="A+">A+</SelectItem>
+                      <SelectItem value="A-">A-</SelectItem>
+                      <SelectItem value="B+">B+</SelectItem>
+                      <SelectItem value="B-">B-</SelectItem>
+                      <SelectItem value="AB+">AB+</SelectItem>
+                      <SelectItem value="AB-">AB-</SelectItem>
+                      <SelectItem value="O+">O+</SelectItem>
+                      <SelectItem value="O-">O-</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="editAddress">Address</Label>
+                <Input
+                  id="editAddress"
+                  value={editUser.address}
+                  onChange={(e) =>
+                    setEditUser({ ...editUser, address: e.target.value })
+                  }
+                  placeholder="123 Main Street, City, State"
+                />
+              </div>
+            </div>
+
+            {/* Student-specific fields */}
+            {editUser.role === "student" && (
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm text-gray-700">
+                  Student Information
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editGrade">Grade *</Label>
+                    <Select
+                      value={editUser.grade}
+                      onValueChange={(value) =>
+                        setEditUser({ ...editUser, grade: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select grade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                          (grade) => (
+                            <SelectItem key={grade} value={grade.toString()}>
+                              Grade {grade}
+                            </SelectItem>
+                          ),
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editSection">Section *</Label>
+                    <Select
+                      value={editUser.section}
+                      onValueChange={(value) =>
+                        setEditUser({ ...editUser, section: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select section" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["A", "B", "C", "D"].map((section) => (
+                          <SelectItem key={section} value={section}>
+                            Section {section}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editStudentId">Student ID</Label>
+                    <Input
+                      id="editStudentId"
+                      value={editUser.studentId}
+                      onChange={(e) =>
+                        setEditUser({ ...editUser, studentId: e.target.value })
+                      }
+                      placeholder="STU2024001"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editAdmissionDate">Admission Date</Label>
+                    <Input
+                      id="editAdmissionDate"
+                      type="date"
+                      value={editUser.admissionDate}
+                      onChange={(e) =>
+                        setEditUser({
+                          ...editUser,
+                          admissionDate: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editParentName">Parent Name</Label>
+                    <Input
+                      id="editParentName"
+                      value={editUser.parentName}
+                      onChange={(e) =>
+                        setEditUser({ ...editUser, parentName: e.target.value })
+                      }
+                      placeholder="Parent's full name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editParentPhone">Parent Phone</Label>
+                    <Input
+                      id="editParentPhone"
+                      value={editUser.parentPhone}
+                      onChange={(e) =>
+                        setEditUser({
+                          ...editUser,
+                          parentPhone: e.target.value,
+                        })
+                      }
+                      placeholder="+1 234 567 8900"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="editEmergencyContact">
+                    Emergency Contact
+                  </Label>
+                  <Input
+                    id="editEmergencyContact"
+                    value={editUser.emergencyContact}
+                    onChange={(e) =>
+                      setEditUser({
+                        ...editUser,
+                        emergencyContact: e.target.value,
+                      })
+                    }
+                    placeholder="Emergency contact details"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Teacher-specific fields */}
+            {editUser.role === "teacher" && (
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm text-gray-700">
+                  Teacher Information
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editDepartment">Department *</Label>
+                    <Select
+                      value={editUser.department}
+                      onValueChange={(value) =>
+                        setEditUser({ ...editUser, department: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Mathematics">Mathematics</SelectItem>
+                        <SelectItem value="English">English</SelectItem>
+                        <SelectItem value="Science">Science</SelectItem>
+                        <SelectItem value="Physics">Physics</SelectItem>
+                        <SelectItem value="Chemistry">Chemistry</SelectItem>
+                        <SelectItem value="Biology">Biology</SelectItem>
+                        <SelectItem value="History">History</SelectItem>
+                        <SelectItem value="Geography">Geography</SelectItem>
+                        <SelectItem value="Computer Science">
+                          Computer Science
+                        </SelectItem>
+                        <SelectItem value="Physical Education">
+                          Physical Education
+                        </SelectItem>
+                        <SelectItem value="Art">Art</SelectItem>
+                        <SelectItem value="Music">Music</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editTeacherId">Teacher ID</Label>
+                    <Input
+                      id="editTeacherId"
+                      value={editUser.teacherId}
+                      onChange={(e) =>
+                        setEditUser({ ...editUser, teacherId: e.target.value })
+                      }
+                      placeholder="TCH2024001"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editPosition">Position</Label>
+                    <Select
+                      value={editUser.position}
+                      onValueChange={(value) =>
+                        setEditUser({ ...editUser, position: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select position" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Junior Teacher">
+                          Junior Teacher
+                        </SelectItem>
+                        <SelectItem value="Senior Teacher">
+                          Senior Teacher
+                        </SelectItem>
+                        <SelectItem value="Head of Department">
+                          Head of Department
+                        </SelectItem>
+                        <SelectItem value="Assistant Principal">
+                          Assistant Principal
+                        </SelectItem>
+                        <SelectItem value="Principal">Principal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editExperience">Experience</Label>
+                    <Input
+                      id="editExperience"
+                      value={editUser.experience}
+                      onChange={(e) =>
+                        setEditUser({ ...editUser, experience: e.target.value })
+                      }
+                      placeholder="5 Years"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="editSubjects">Subjects/Specialization</Label>
+                  <Input
+                    id="editSubjects"
+                    value={editUser.subjects}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, subjects: e.target.value })
+                    }
+                    placeholder="Mathematics, Algebra, Calculus"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editJoiningDate">Joining Date</Label>
+                  <Input
+                    id="editJoiningDate"
+                    type="date"
+                    value={editUser.joiningDate}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, joiningDate: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Instructions */}
+            <div className="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-400">
+              <p className="text-sm text-yellow-700">
+                <strong>Note:</strong> Changes will be saved immediately.
+                {editUser.role === "student" &&
+                  " Grade and section changes will affect class assignments."}
+                {editUser.role === "teacher" &&
+                  " Department changes may affect teaching assignments."}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateUser}
+                disabled={isEditLoading}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                {isEditLoading ? "Updating..." : "Save Changes"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
