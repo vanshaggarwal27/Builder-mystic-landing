@@ -353,6 +353,34 @@ export default function AdminClasses() {
             </Button>
           </div>
 
+          {/* Debug Section - only show in development */}
+          {process.env.NODE_ENV === "development" && (
+            <div className="bg-yellow-50 p-3 rounded-lg mb-4 border border-yellow-200">
+              <h4 className="text-sm font-medium text-yellow-800 mb-2">
+                Debug Info:
+              </h4>
+              <div className="text-xs text-yellow-700 space-y-1">
+                <div>Classes found: {classesList.length}</div>
+                <div>Total students: {stats.totalStudents}</div>
+                <div>Check browser console for detailed logs</div>
+                <Button
+                  onClick={() => {
+                    console.log("Current classes state:", classesList);
+                    toast({
+                      title: "Debug Info",
+                      description: `${classesList.length} classes, ${stats.totalStudents} students. Check console for details.`,
+                    });
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="mt-2"
+                >
+                  Log Debug Info
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Empty State */}
           {classesList.length === 0 && (
             <div className="text-center py-12">
@@ -362,15 +390,28 @@ export default function AdminClasses() {
               </h3>
               <p className="text-gray-600 mb-4">
                 Classes are automatically created when you assign students to
-                Grade-Section combinations.
+                Grade-Section combinations like "Grade 10-A".
               </p>
-              <Button
-                onClick={() => (window.location.href = "/admin/users")}
-                className="bg-indigo-600 hover:bg-indigo-700"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Students
-              </Button>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => (window.location.href = "/admin/users")}
+                  className="bg-indigo-600 hover:bg-indigo-700 block mx-auto"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Students
+                </Button>
+                <Button
+                  onClick={loadClasses}
+                  variant="outline"
+                  disabled={isLoadingClasses}
+                  className="block mx-auto"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-2 ${isLoadingClasses ? "animate-spin" : ""}`}
+                  />
+                  Try Loading Again
+                </Button>
+              </div>
             </div>
           )}
 
