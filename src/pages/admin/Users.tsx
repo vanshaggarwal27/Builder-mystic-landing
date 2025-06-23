@@ -82,6 +82,33 @@ export default function AdminUsers() {
   const [usersList, setUsersList] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isUserDetailsOpen, setIsUserDetailsOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editUser, setEditUser] = useState({
+    id: "",
+    email: "",
+    role: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    dateOfBirth: "",
+    gender: "",
+    address: "",
+    bloodGroup: "",
+    grade: "",
+    section: "",
+    department: "",
+    position: "",
+    experience: "",
+    joiningDate: "",
+    admissionDate: "",
+    studentId: "",
+    teacherId: "",
+    subjects: "",
+    emergencyContact: "",
+    parentName: "",
+    parentPhone: "",
+  });
+  const [isEditLoading, setIsEditLoading] = useState(false);
   const { toast } = useToast();
 
   // Load users on component mount
