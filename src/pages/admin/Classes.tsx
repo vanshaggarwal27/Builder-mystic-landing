@@ -99,13 +99,74 @@ export default function AdminClasses() {
         if (user.role === "student") {
           studentCount++;
 
-          // Check multiple possible grade field locations
-          const grade = user.profile?.grade || user.grade || user.class;
+          // Check multiple possible grade field locations with more comprehensive search
+          let grade = null;
+
+          // Check various possible locations for grade information
+          if (user.profile) {
+            grade =
+              user.profile.grade ||
+              user.profile.class ||
+              user.profile.section ||
+              user.profile.gradeSection ||
+              user.profile.Grade ||
+              user.profile.Class;
+          }
+
+          // Fallback to top-level fields
+          if (!grade) {
+            grade =
+              user.grade ||
+              user.class ||
+              user.section ||
+              user.gradeSection ||
+              user.Grade ||
+              user.Class;
+          }
+
+          // If still no grade but has profile data, try to construct from separate fields
+          if (!grade && user.profile) {
+            const gradeNum =
+              user.profile.gradeLevel ||
+              user.profile.standard ||
+              user.profile.year;
+            const section =
+              user.profile.section ||
+              user.profile.division ||
+              user.profile.stream;
+            if (gradeNum && section) {
+              grade = `Grade ${gradeNum}-${section}`;
+            } else if (gradeNum) {
+              grade = `Grade ${gradeNum}-A`; // Default section
+            }
+          }
+
           console.log(`Student ${user.email} has grade/class:`, grade);
+          console.log(`Full user profile:`, user.profile);
 
           if (grade) {
-            const className = grade; // e.g., "Grade 10-A"
-            const level = className.split("-")[0].replace("Grade ", ""); // e.g., "10"
+            // Normalize the grade format to "Grade X-Y"
+            let className = grade;
+            if (!className.startsWith("Grade ")) {
+              // If it's just "10-A" or "10A", convert to "Grade 10-A"
+              if (/^\d+[-]?[A-Z]?$/i.test(className)) {
+                const match = className.match(/^(\d+)[-]?([A-Z]?)$/i);
+                if (match) {
+                  const gradeNum = match[1];
+                  const section = match[2] || "A";
+                  className = `Grade ${gradeNum}-${section}`;
+                }
+              } else {
+                className = `Grade ${className}`;
+              }
+            }
+
+            // Ensure format is "Grade X-Y"
+            if (!className.includes("-") && className !== "Grade ") {
+              className = `${className}-A`; // Default to section A
+            }
+
+            const level = className.split("-")[0].replace("Grade ", "").trim();
 
             if (!classGroups.has(className)) {
               classGroups.set(className, {
@@ -124,12 +185,17 @@ export default function AdminClasses() {
             classData.students += 1;
             classData.studentsList.push({
               id: user._id,
-              name: `${user.profile?.firstName || "Unknown"} ${user.profile?.lastName || "User"}`,
+              name: `${user.profile?.firstName || user.profile?.name || user.name || "Unknown"} ${user.profile?.lastName || "User"}`.trim(),
               email: user.email,
-              studentId: user.profile?.studentId,
+              studentId: user.profile?.studentId || user.studentId,
             });
           } else {
             console.log(`Student ${user.email} has no grade/class assigned`);
+            console.log(`Available user fields:`, Object.keys(user));
+            console.log(
+              `Available profile fields:`,
+              user.profile ? Object.keys(user.profile) : "No profile",
+            );
           }
         }
       });
