@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Search, Edit, Trash2, Users, BookOpen, RefreshCw } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Users,
+  BookOpen,
+  RefreshCw,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
@@ -109,7 +117,8 @@ export default function AdminClasses() {
       if (realClasses.length === 0) {
         toast({
           title: "No Classes Found",
-          description: "No students have been assigned to classes yet. Create some students first.",
+          description:
+            "No students have been assigned to classes yet. Create some students first.",
         });
       } else {
         toast({
@@ -122,7 +131,8 @@ export default function AdminClasses() {
       setClassesList([]);
       toast({
         title: "Error Loading Classes",
-        description: error.message || "Failed to load class data. Please try again.",
+        description:
+          error.message || "Failed to load class data. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -131,9 +141,6 @@ export default function AdminClasses() {
   };
 
   const levels = [
-    "Nursery",
-    "LKG",
-    "UKG",
     "1",
     "2",
     "3",
@@ -144,55 +151,19 @@ export default function AdminClasses() {
     "8",
     "9",
     "10",
+    "11",
+    "12",
   ];
 
   const handleCreateClass = async () => {
-    if (
-      !newClass.name ||
-      !newClass.level ||
-      !newClass.teacher ||
-      !newClass.room
-    ) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const newClassEntry = {
-        id: `CLS${Date.now()}`,
-        name: newClass.name,
-        level: newClass.level,
-        students: 0,
-        teacher: newClass.teacher,
-        room: newClass.room,
-      };
-
-      setClassesList((prev) => [...prev, newClassEntry]);
-
-      toast({
-        title: "Success",
-        description: "Class created successfully!",
-      });
-
-      setIsCreateDialogOpen(false);
-      setNewClass({ name: "", level: "", teacher: "", room: "", capacity: "" });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create class",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // For real classes, we don't create classes directly
+    // Classes are created automatically when students are assigned
+    toast({
+      title: "Classes Auto-Created",
+      description:
+        "Classes are automatically created when you assign students to Grade-Section combinations. Create students instead.",
+    });
+    setIsCreateDialogOpen(false);
   };
 
   const getLevelColor = (level: string) => {
@@ -206,7 +177,8 @@ export default function AdminClasses() {
   const filteredClasses = classesList.filter(
     (cls) =>
       cls.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cls.teacher.toLowerCase().includes(searchQuery.toLowerCase()),
+      (cls.teacher &&
+        cls.teacher.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   const stats = {
@@ -226,6 +198,28 @@ export default function AdminClasses() {
     totalStudents: classesList.reduce((sum, c) => sum + c.students, 0),
   };
 
+  if (isLoadingClasses) {
+    return (
+      <>
+        <MobileLayout
+          title="Class Management"
+          headerGradient="from-indigo-600 to-purple-600"
+          className="pb-20"
+        >
+          <div className="px-6 py-6">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <RefreshCw className="h-8 w-8 animate-spin mx-auto text-indigo-600 mb-4" />
+                <p className="text-gray-600">Loading classes...</p>
+              </div>
+            </div>
+          </div>
+        </MobileLayout>
+        <BottomNavigation />
+      </>
+    );
+  }
+
   return (
     <>
       <MobileLayout
@@ -234,32 +228,23 @@ export default function AdminClasses() {
         className="pb-20"
       >
         <div className="px-6 py-6">
-          {/* Loading State */}
-          {isLoadingClasses && (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <RefreshCw className="h-8 w-8 animate-spin mx-auto text-indigo-600 mb-4" />
-                <p className="text-gray-600">Loading classes...</p>
-              </div>
-            </div>
-          )}
+          {/* Info Banner */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg mb-6 border-l-4 border-indigo-400">
+            <h3 className="font-semibold text-gray-800 mb-1">
+              Real Classes Overview
+            </h3>
+            <p className="text-sm text-gray-600">
+              Classes are automatically created based on student assignments.
+              Students are grouped by their Grade-Section assignment.
+              <span className="block text-xs text-indigo-600 mt-1">
+                {classesList.length === 0
+                  ? "No classes found. Create students first to see classes here."
+                  : `Showing ${classesList.length} active classes with real students.`}
+              </span>
+            </p>
+          </div>
 
-          {!isLoadingClasses && (
-            <>
-              {/* Info Banner */}
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg mb-6 border-l-4 border-indigo-400">
-                <h3 className="font-semibold text-gray-800 mb-1">
-                  Real Classes Overview
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Classes are automatically created based on student assignments. Students are grouped by their Grade-Section assignment.
-                  <span className="block text-xs text-indigo-600 mt-1">
-                    {classesList.length === 0 ? "No classes found. Create students first to see classes here." : `Showing ${classesList.length} active classes with real students.`}
-                  </span>
-                </p>
-              </div>
-
-              {/* Stats Overview */}
+          {/* Stats Overview */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="text-2xl font-bold text-indigo-600">
@@ -287,7 +272,7 @@ export default function AdminClasses() {
             </div>
           </div>
 
-          {/* Search and Add */}
+          {/* Search and Actions */}
           <div className="flex gap-3 mb-6">
             <div className="flex-1 relative">
               <Input
@@ -298,139 +283,144 @@ export default function AdminClasses() {
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             </div>
-            <Dialog
-              open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
+            <Button
+              onClick={loadClasses}
+              variant="outline"
+              size="icon"
+              disabled={isLoadingClasses}
             >
-              <DialogTrigger asChild>
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Class
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create New Class</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="className">Class Name *</Label>
-                    <Input
-                      id="className"
-                      value={newClass.name}
-                      onChange={(e) =>
-                        setNewClass({ ...newClass, name: e.target.value })
-                      }
-                      placeholder="e.g., Class 5-A"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="level">Level *</Label>
-                    <Select
-                      value={newClass.level}
-                      onValueChange={(value) =>
-                        setNewClass({ ...newClass, level: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {levels.map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="teacher">Class Teacher *</Label>
-                    <Input
-                      id="teacher"
-                      value={newClass.teacher}
-                      onChange={(e) =>
-                        setNewClass({ ...newClass, teacher: e.target.value })
-                      }
-                      placeholder="e.g., Ms. Smith"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="room">Room Number *</Label>
-                    <Input
-                      id="room"
-                      value={newClass.room}
-                      onChange={(e) =>
-                        setNewClass({ ...newClass, room: e.target.value })
-                      }
-                      placeholder="e.g., 101"
-                    />
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsCreateDialogOpen(false)}
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleCreateClass}
-                      disabled={isLoading}
-                      className="flex-1 bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      {isLoading ? "Creating..." : "Create Class"}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+              <RefreshCw
+                className={`h-4 w-4 ${isLoadingClasses ? "animate-spin" : ""}`}
+              />
+            </Button>
           </div>
+
+          {/* Empty State */}
+          {classesList.length === 0 && (
+            <div className="text-center py-12">
+              <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No Classes Yet
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Classes are automatically created when you assign students to
+                Grade-Section combinations.
+              </p>
+              <Button
+                onClick={() => (window.location.href = "/admin/users")}
+                className="bg-indigo-600 hover:bg-indigo-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Students
+              </Button>
+            </div>
+          )}
 
           {/* Classes List */}
-          <div className="space-y-3">
-            {filteredClasses.map((cls) => (
-              <div key={cls.id} className="bg-white rounded-xl p-4 shadow-sm">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{cls.name}</h3>
-                    <p className="text-sm text-gray-600">Room {cls.room}</p>
+          {classesList.length > 0 && (
+            <div className="space-y-3">
+              {filteredClasses.map((cls) => (
+                <div key={cls.id} className="bg-white rounded-xl p-4 shadow-sm">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">
+                        {cls.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">Room {cls.room}</p>
+                    </div>
+                    <Badge className={getLevelColor(cls.level)}>
+                      Grade {cls.level}
+                    </Badge>
                   </div>
-                  <Badge className={getLevelColor(cls.level)}>
-                    {cls.level === "Nursery" ||
-                    cls.level === "LKG" ||
-                    cls.level === "UKG"
-                      ? cls.level
-                      : `Class ${cls.level}`}
-                  </Badge>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-3">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Users className="h-4 w-4 mr-2" />
-                    {cls.students} Students
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Users className="h-4 w-4 mr-2" />
+                      {cls.students} Students
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      {cls.teacher}
+                    </div>
                   </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    {cls.teacher}
-                  </div>
-                </div>
 
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Users className="h-4 w-4 mr-1" />
-                    Students
-                  </Button>
+                  {/* Student List Preview */}
+                  <div className="mb-3">
+                    <div className="text-xs text-gray-500 mb-2">Students:</div>
+                    <div className="flex flex-wrap gap-1">
+                      {cls.studentsList.slice(0, 3).map((student) => (
+                        <span
+                          key={student.id}
+                          className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                        >
+                          {student.name}
+                        </span>
+                      ))}
+                      {cls.studentsList.length > 3 && (
+                        <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                          +{cls.studentsList.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        toast({
+                          title: "Class Details",
+                          description: `${cls.name} has ${cls.students} students. Class editing coming soon!`,
+                        });
+                      }}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      View Details
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        const studentNames = cls.studentsList
+                          .map((s) => s.name)
+                          .join(", ");
+                        toast({
+                          title: `${cls.name} Students`,
+                          description: studentNames || "No students assigned",
+                        });
+                      }}
+                    >
+                      <Users className="h-4 w-4 mr-1" />
+                      View Students
+                    </Button>
+                  </div>
                 </div>
+              ))}
+            </div>
+          )}
+
+          {/* Filtered Results Message */}
+          {classesList.length > 0 &&
+            filteredClasses.length === 0 &&
+            searchQuery && (
+              <div className="text-center py-8 text-gray-500">
+                <p>No classes found matching "{searchQuery}"</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSearchQuery("")}
+                  className="mt-2"
+                >
+                  Clear Search
+                </Button>
               </div>
-            ))}
-          </div>
+            )}
         </div>
       </MobileLayout>
+
       <BottomNavigation />
     </>
   );
