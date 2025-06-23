@@ -274,16 +274,16 @@ export default function AdminClasses() {
               <div className="text-sm text-gray-600">Total Students</div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-lg font-bold text-pink-600">
-                {stats.prePrimary}
+              <div className="text-lg font-bold text-blue-600">
+                {stats.primary}
               </div>
-              <div className="text-sm text-gray-600">Pre-Primary</div>
+              <div className="text-sm text-gray-600">Primary (1-5)</div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-lg font-bold text-blue-600">
-                {stats.primary + stats.secondary}
+              <div className="text-lg font-bold text-purple-600">
+                {stats.secondary + stats.higherSecondary}
               </div>
-              <div className="text-sm text-gray-600">Primary + Secondary</div>
+              <div className="text-sm text-gray-600">Secondary (6-12)</div>
             </div>
           </div>
 
