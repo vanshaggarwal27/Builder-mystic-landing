@@ -128,7 +128,44 @@ export default function AdminSchedule() {
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const { toast } = useToast();
+
+  // Load schedules from backend on component mount
+  useEffect(() => {
+    loadSchedules();
+  }, []);
+
+  const loadSchedules = async () => {
+    try {
+      setIsLoadingData(true);
+      const schedules = await UserProfileService.getClassSchedules();
+
+      if (schedules && schedules.length > 0) {
+        // Convert backend schedules to frontend format
+        const formattedSchedules = schedules.map((schedule: any) => ({
+          id: schedule._id || schedule.id,
+          class: schedule.class,
+          day: schedule.day,
+          period: schedule.period,
+          subject: schedule.subject,
+          teacher: schedule.teacher,
+          time: schedule.time,
+          room: schedule.room,
+        }));
+        setTimetableList(formattedSchedules);
+      }
+    } catch (error) {
+      console.error("Failed to load schedules:", error);
+      // Keep using the demo data as fallback
+      toast({
+        title: "Info",
+        description: "Using demo schedule data. Backend integration pending.",
+      });
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
 
   const handleEditEntry = (id: string, type: "timetable" | "event") => {
     if (type === "timetable") {
