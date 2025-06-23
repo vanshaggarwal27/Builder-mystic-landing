@@ -128,7 +128,7 @@ export default function AdminUsers() {
       setUsersList((prev) => prev.filter((user) => user.id !== userId));
       toast({
         title: "Success",
-        description: "User deleted successfully!",
+        description: "User deleted successfully",
       });
     } catch (error: any) {
       toast({
@@ -136,6 +136,42 @@ export default function AdminUsers() {
         description: error.message || "Failed to delete user",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleShowUserDetails = async (userId: string) => {
+    try {
+      const userData = await apiCall(`/admin/users/${userId}`);
+      setSelectedUser(userData.user || userData);
+      setIsUserDetailsOpen(true);
+    } catch (error: any) {
+      // Fallback to local user data if API fails
+      const user = usersList.find((u) => u.id === userId);
+      if (user) {
+        setSelectedUser({
+          _id: user.id,
+          email: user.email,
+          role: user.role,
+          profile: {
+            firstName: user.name.split(" ")[0] || "Unknown",
+            lastName: user.name.split(" ").slice(1).join(" ") || "User",
+            grade: user.grade,
+            department: user.department,
+          },
+        });
+        setIsUserDetailsOpen(true);
+        toast({
+          title: "Viewing Local Data",
+          description:
+            "Showing cached user information. Some details may be limited.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Unable to load user details",
+          variant: "destructive",
+        });
+      }
     }
   };
 
