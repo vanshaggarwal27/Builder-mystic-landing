@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { UserProfileService } from "@/lib/userProfileService";
 
 const initialTimetable = [
   {
