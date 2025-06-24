@@ -85,12 +85,57 @@ router.post(
             user: user._id,
             studentId: studentId || `STU${Date.now()}`,
             grade: grade || "",
+            section: req.body.section || "",
+            rollNumber: req.body.rollNumber || "",
+            academicYear: req.body.academicYear || "2024-25",
             admissionDate: admissionDate ? new Date(admissionDate) : null,
             parentName: parentName || "",
             parentPhone: parentPhone || "",
             emergencyContact: emergencyContact || "",
             ...otherData,
           });
+
+          await roleProfile.save();
+
+          // Auto-assign student to appropriate class if it exists
+          if (grade && req.body.section) {
+            try {
+              const className = `Grade ${grade}-${req.body.section}`;
+              let studentClass = await Class.findOne({
+                grade: grade,
+                section: req.body.section,
+              });
+
+              // If class doesn't exist, create it
+              if (!studentClass) {
+                studentClass = new Class({
+                  name: className,
+                  grade: grade,
+                  section: req.body.section,
+                  academicYear: req.body.academicYear || "2024-25",
+                  room: `Room ${grade}${req.body.section}`,
+                  capacity: 40,
+                  students: [roleProfile._id],
+                });
+                await studentClass.save();
+                console.log(
+                  `Created new class: ${className} for student ${studentId}`,
+                );
+              } else {
+                // Add student to existing class
+                if (!studentClass.students.includes(roleProfile._id)) {
+                  studentClass.students.push(roleProfile._id);
+                  await studentClass.save();
+                  console.log(
+                    `Added student ${studentId} to existing class: ${className}`,
+                  );
+                }
+              }
+            } catch (classError) {
+              console.error("Error assigning student to class:", classError);
+              // Don't fail the user creation if class assignment fails
+            }
+          }
           break;
         case "teacher":
           roleProfile = new Teacher({
