@@ -75,13 +75,16 @@ export default function AdminClasses() {
   const [classesList, setClassesList] = useState<ClassData[]>([]);
   const [newClass, setNewClass] = useState({
     name: "",
-    level: "",
-    teacher: "",
+    grade: "",
+    section: "",
     room: "",
-    capacity: "",
+    capacity: "40",
+    academicYear: "2024-25",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
+  const [selectedClass, setSelectedClass] = useState<ClassData | null>(null);
+  const [isClassDetailsOpen, setIsClassDetailsOpen] = useState(false);
   const { toast } = useToast();
 
   // Load real classes from users on component mount
