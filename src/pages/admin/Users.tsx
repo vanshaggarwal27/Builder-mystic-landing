@@ -316,13 +316,17 @@ export default function AdminUsers() {
 
         // Student-specific fields
         ...(editUser.role === "student" && {
-          grade: `Grade ${editUser.grade}-${editUser.section}`,
-          section: editUser.section,
+          grade: editUser.grade, // Keep grade separate
+          section: editUser.section, // Keep section separate
           studentId: editUser.studentId,
           admissionDate: editUser.admissionDate,
           parentName: editUser.parentName,
           parentPhone: editUser.parentPhone,
           emergencyContact: editUser.emergencyContact,
+          academicYear: "2024-25", // Add academic year
+          rollNumber:
+            editUser.rollNumber ||
+            `${editUser.grade}${editUser.section}${Date.now().toString().slice(-3)}`, // Ensure roll number exists
         }),
 
         // Teacher-specific fields
