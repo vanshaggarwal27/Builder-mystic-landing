@@ -240,36 +240,46 @@ export default function AdminClasses() {
     setIsClassDetailsOpen(true);
   };
 
-  const getLevelColor = (level: string) => {
-    const numLevel = parseInt(level);
+  const getLevelColor = (grade: string) => {
+    const numLevel = parseInt(grade);
     if (isNaN(numLevel)) return "bg-gray-100 text-gray-700";
     if (numLevel <= 5) return "bg-blue-100 text-blue-700";
     if (numLevel <= 8) return "bg-green-100 text-green-700";
     return "bg-purple-100 text-purple-700";
   };
 
+  const getCapacityColor = (current: number, capacity: number) => {
+    const percentage = (current / capacity) * 100;
+    if (percentage >= 90) return "text-red-600";
+    if (percentage >= 75) return "text-orange-600";
+    return "text-green-600";
+  };
+
   const filteredClasses = classesList.filter(
     (cls) =>
       cls.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (cls.teacher &&
-        cls.teacher.toLowerCase().includes(searchQuery.toLowerCase())),
+      cls.room.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const stats = {
     total: classesList.length,
     primary: classesList.filter((c) => {
-      const level = parseInt(c.level);
+      const level = parseInt(c.grade);
       return level >= 1 && level <= 5;
     }).length,
     secondary: classesList.filter((c) => {
-      const level = parseInt(c.level);
+      const level = parseInt(c.grade);
       return level >= 6 && level <= 10;
     }).length,
     higherSecondary: classesList.filter((c) => {
-      const level = parseInt(c.level);
+      const level = parseInt(c.grade);
       return level >= 11 && level <= 12;
     }).length,
-    totalStudents: classesList.reduce((sum, c) => sum + c.students, 0),
+    totalStudents: classesList.reduce(
+      (sum, c) => sum + (c.students?.length || 0),
+      0,
+    ),
+    totalCapacity: classesList.reduce((sum, c) => sum + c.capacity, 0),
   };
 
   if (isLoadingClasses) {
