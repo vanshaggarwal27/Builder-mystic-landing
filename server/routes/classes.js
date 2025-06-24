@@ -28,9 +28,11 @@ router.get("/", [auth, auth.requireRole(["admin"])], async (req, res) => {
                 _id: student._id,
                 studentId: student.studentId,
                 grade: student.grade,
+                section: student.section,
                 admissionDate: student.admissionDate,
                 parentName: student.parentName,
                 parentPhone: student.parentPhone,
+                emergencyContact: student.emergencyContact,
                 profile: {
                   firstName: student.user.profile.firstName,
                   lastName: student.user.profile.lastName,
