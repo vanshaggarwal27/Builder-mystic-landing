@@ -218,6 +218,152 @@ router.get("/users", [auth, auth.requireRole(["admin"])], async (req, res) => {
   }
 });
 
+// Update user (admin only)
+router.put(
+  "/users/:id",
+  [auth, auth.requireRole(["admin"])],
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const {
+        email,
+        firstName,
+        lastName,
+        phone,
+        dateOfBirth,
+        gender,
+        address,
+        bloodGroup,
+        // Student specific fields
+        grade,
+        section,
+        studentId,
+        admissionDate,
+        parentName,
+        parentPhone,
+        emergencyContact,
+        rollNumber,
+        academicYear,
+        // Teacher specific fields
+        department,
+        teacherId,
+        position,
+        experience,
+        subjects,
+        joiningDate,
+      } = req.body;
+
+      // Update main user profile
+      user.email = email || user.email;
+      user.profile.firstName = firstName || user.profile.firstName;
+      user.profile.lastName = lastName || user.profile.lastName;
+      user.profile.phone = phone || user.profile.phone;
+      user.profile.dateOfBirth = dateOfBirth
+        ? new Date(dateOfBirth)
+        : user.profile.dateOfBirth;
+      user.profile.gender = gender || user.profile.gender;
+      user.profile.address = address || user.profile.address;
+      user.profile.bloodGroup = bloodGroup || user.profile.bloodGroup;
+
+      await user.save();
+
+      // Update role-specific profile
+      switch (user.role) {
+        case "student":
+          const studentProfile = await Student.findOne({ user: user._id });
+          if (studentProfile) {
+            const oldGrade = studentProfile.grade;
+            const oldSection = studentProfile.section;
+
+            studentProfile.grade = grade || studentProfile.grade;
+            studentProfile.section = section || studentProfile.section;
+            studentProfile.studentId = studentId || studentProfile.studentId;
+            studentProfile.rollNumber = rollNumber || studentProfile.rollNumber;
+            studentProfile.academicYear =
+              academicYear || studentProfile.academicYear;
+            studentProfile.admissionDate = admissionDate
+              ? new Date(admissionDate)
+              : studentProfile.admissionDate;
+            studentProfile.parentName = parentName || studentProfile.parentName;
+            studentProfile.parentPhone =
+              parentPhone || studentProfile.parentPhone;
+            studentProfile.emergencyContact =
+              emergencyContact || studentProfile.emergencyContact;
+
+            await studentProfile.save();
+
+            // Handle class reassignment if grade or section changed
+            if (
+              (grade && grade !== oldGrade) ||
+              (section && section !== oldSection)
+            ) {
+              // Remove from old class
+              if (oldGrade && oldSection) {
+                const oldClass = await Class.findOne({
+                  grade: oldGrade,
+                  section: oldSection,
+                });
+                if (oldClass) {
+                  oldClass.students = oldClass.students.filter(
+                    (student) => !student.equals(studentProfile._id),
+                  );
+                  await oldClass.save();
+                }
+              }
+
+              // Add to new class
+              if (grade && section) {
+                const className = `Grade ${grade}-${section}`;
+                let newClass = await Class.findOne({ grade, section });
+
+                if (!newClass) {
+                  newClass = new Class({
+                    name: className,
+                    grade,
+                    section,
+                    academicYear: academicYear || "2024-25",
+                    room: `Room ${grade}${section}`,
+                    capacity: 40,
+                    students: [studentProfile._id],
+                  });
+                } else {
+                  if (!newClass.students.includes(studentProfile._id)) {
+                    newClass.students.push(studentProfile._id);
+                  }
+                }
+                await newClass.save();
+              }
+            }
+          }
+          break;
+        case "teacher":
+          const teacherProfile = await Teacher.findOne({ user: user._id });
+          if (teacherProfile) {
+            teacherProfile.department = department || teacherProfile.department;
+            teacherProfile.teacherId = teacherId || teacherProfile.teacherId;
+            teacherProfile.position = position || teacherProfile.position;
+            teacherProfile.experience = experience || teacherProfile.experience;
+            teacherProfile.subjects = subjects || teacherProfile.subjects;
+            teacherProfile.joiningDate = joiningDate
+              ? new Date(joiningDate)
+              : teacherProfile.joiningDate;
+            await teacherProfile.save();
+          }
+          break;
+      }
+
+      res.json({ message: "User updated successfully" });
+    } catch (error) {
+      console.error("Update user error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
 // Delete user (admin only)
 router.delete(
   "/users/:id",
@@ -229,10 +375,29 @@ router.delete(
         return res.status(404).json({ error: "User not found" });
       }
 
-      // Also delete role-specific profile
+      // Also delete role-specific profile and remove from classes
       switch (user.role) {
         case "student":
-          await Student.findOneAndDelete({ user: user._id });
+          const studentProfile = await Student.findOneAndDelete({
+            user: user._id,
+          });
+          if (
+            studentProfile &&
+            studentProfile.grade &&
+            studentProfile.section
+          ) {
+            // Remove student from class
+            const studentClass = await Class.findOne({
+              grade: studentProfile.grade,
+              section: studentProfile.section,
+            });
+            if (studentClass) {
+              studentClass.students = studentClass.students.filter(
+                (student) => !student.equals(studentProfile._id),
+              );
+              await studentClass.save();
+            }
+          }
           break;
         case "teacher":
           await Teacher.findOneAndDelete({ user: user._id });
