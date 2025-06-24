@@ -2,6 +2,7 @@ const express = require("express");
 const { body, validationResult } = require("express-validator");
 const auth = require("../middleware/auth");
 const { User, Student, Teacher, Admin } = require("../models/User");
+const Class = require("../models/Class");
 
 const router = express.Router();
 
@@ -80,10 +81,23 @@ router.post(
       let roleProfile;
       switch (role) {
         case "student":
+          // Parse grade and section if grade is in format "10-A"
+          let parsedGrade = grade || "";
+          let parsedSection = "";
+          if (grade && grade.includes("-")) {
+            const parts = grade.split("-");
+            parsedGrade = parts[0];
+            parsedSection = parts[1];
+          } else {
+            parsedGrade = grade || "";
+            parsedSection = section || "";
+          }
+
           roleProfile = new Student({
             user: user._id,
             studentId: studentId || `STU${Date.now()}`,
-            grade: grade || "",
+            grade: parsedGrade,
+            section: parsedSection,
             admissionDate: admissionDate ? new Date(admissionDate) : null,
             parentName: parentName || "",
             parentPhone: parentPhone || "",
@@ -114,6 +128,38 @@ router.post(
 
       await roleProfile.save();
 
+      // Auto-assign student to class if it exists
+      if (role === "student" && roleProfile.grade && roleProfile.section) {
+        try {
+          const className = `Grade ${roleProfile.grade}-${roleProfile.section}`;
+          const existingClass = await Class.findOne({ name: className });
+
+          if (existingClass) {
+            // Check if class has capacity
+            if (existingClass.students.length < existingClass.capacity) {
+              // Add student to class
+              existingClass.students.push(roleProfile._id);
+              await existingClass.save();
+
+              console.log(
+                `Student ${roleProfile.studentId} automatically assigned to class: ${className}`,
+              );
+            } else {
+              console.log(
+                `Class ${className} is at full capacity, student not auto-assigned`,
+              );
+            }
+          } else {
+            console.log(
+              `Class ${className} not found, student not auto-assigned`,
+            );
+          }
+        } catch (classError) {
+          console.error("Error auto-assigning student to class:", classError);
+          // Don't fail user creation if class assignment fails
+        }
+      }
+
       res.status(201).json({
         message: "User created successfully",
         user: {
@@ -121,6 +167,7 @@ router.post(
           email: user.email,
           role: user.role,
           profile: user.profile,
+          roleData: roleProfile,
         },
       });
     } catch (error) {

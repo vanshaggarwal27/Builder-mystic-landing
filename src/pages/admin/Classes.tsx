@@ -358,6 +358,122 @@ export default function AdminClasses() {
                   </div>
                 </Button>
               </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Create New Class</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="grade">Grade *</Label>
+                      <Select
+                        value={newClass.grade}
+                        onValueChange={(value) =>
+                          setNewClass({ ...newClass, grade: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select grade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {levels.map((level) => (
+                            <SelectItem key={level} value={level}>
+                              Grade {level}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="section">Section *</Label>
+                      <Select
+                        value={newClass.section}
+                        onValueChange={(value) =>
+                          setNewClass({ ...newClass, section: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select section" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sections.map((section) => (
+                            <SelectItem key={section} value={section}>
+                              Section {section}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="room">Room Number</Label>
+                    <Input
+                      id="room"
+                      value={newClass.room}
+                      onChange={(e) =>
+                        setNewClass({ ...newClass, room: e.target.value })
+                      }
+                      placeholder="e.g., 101, Lab-A, Auditorium"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="capacity">Class Capacity</Label>
+                    <Input
+                      id="capacity"
+                      type="number"
+                      value={newClass.capacity}
+                      onChange={(e) =>
+                        setNewClass({ ...newClass, capacity: e.target.value })
+                      }
+                      placeholder="40"
+                      min="1"
+                      max="100"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="academicYear">Academic Year</Label>
+                    <Input
+                      id="academicYear"
+                      value={newClass.academicYear}
+                      onChange={(e) =>
+                        setNewClass({
+                          ...newClass,
+                          academicYear: e.target.value,
+                        })
+                      }
+                      placeholder="2024-25"
+                    />
+                  </div>
+
+                  <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
+                    <p className="text-sm text-blue-700">
+                      <strong>Note:</strong> After creating the class, you can
+                      assign students to it from the User Management section and
+                      create schedules from the Schedule Management section.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsCreateDialogOpen(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleCreateClass}
+                      disabled={isLoading}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      {isLoading ? "Creating..." : "Create Class"}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
             </Dialog>
             <Button
               onClick={() => (window.location.href = "/admin/users")}
@@ -617,121 +733,6 @@ export default function AdminClasses() {
       </MobileLayout>
 
       <BottomNavigation />
-
-      {/* Create Class Dialog */}
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Create New Class</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="grade">Grade *</Label>
-              <Select
-                value={newClass.grade}
-                onValueChange={(value) =>
-                  setNewClass({ ...newClass, grade: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select grade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {levels.map((level) => (
-                    <SelectItem key={level} value={level}>
-                      Grade {level}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="section">Section *</Label>
-              <Select
-                value={newClass.section}
-                onValueChange={(value) =>
-                  setNewClass({ ...newClass, section: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select section" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sections.map((section) => (
-                    <SelectItem key={section} value={section}>
-                      Section {section}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="room">Room Number</Label>
-            <Input
-              id="room"
-              value={newClass.room}
-              onChange={(e) =>
-                setNewClass({ ...newClass, room: e.target.value })
-              }
-              placeholder="e.g., 101, Lab-A, Auditorium"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="capacity">Class Capacity</Label>
-            <Input
-              id="capacity"
-              type="number"
-              value={newClass.capacity}
-              onChange={(e) =>
-                setNewClass({ ...newClass, capacity: e.target.value })
-              }
-              placeholder="40"
-              min="1"
-              max="100"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="academicYear">Academic Year</Label>
-            <Input
-              id="academicYear"
-              value={newClass.academicYear}
-              onChange={(e) =>
-                setNewClass({ ...newClass, academicYear: e.target.value })
-              }
-              placeholder="2024-25"
-            />
-          </div>
-
-          <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
-            <p className="text-sm text-blue-700">
-              <strong>Note:</strong> After creating the class, you can assign
-              students to it from the User Management section and create
-              schedules from the Schedule Management section.
-            </p>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => setIsCreateDialogOpen(false)}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreateClass}
-              disabled={isLoading}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700"
-            >
-              {isLoading ? "Creating..." : "Create Class"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
 
       {/* Class Details Dialog */}
       <Dialog open={isClassDetailsOpen} onOpenChange={setIsClassDetailsOpen}>
