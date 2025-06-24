@@ -148,6 +148,7 @@ router.post(
             joiningDate: joiningDate ? new Date(joiningDate) : null,
             ...otherData,
           });
+          await roleProfile.save();
           break;
         case "admin":
           roleProfile = new Admin({
@@ -155,10 +156,9 @@ router.post(
             adminId: `ADM${Date.now()}`,
             ...otherData,
           });
+          await roleProfile.save();
           break;
       }
-
-      await roleProfile.save();
 
       res.status(201).json({
         message: "User created successfully",
