@@ -226,6 +226,15 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
     },
   });
 
+  // Parse response text once
+  const responseText = await response.text();
+  let data;
+  try {
+    data = responseText ? JSON.parse(responseText) : {};
+  } catch (parseError) {
+    data = { error: responseText || "Invalid response" };
+  }
+
   if (!response.ok) {
     if (response.status === 401) {
       // Token expired or invalid
@@ -234,16 +243,13 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
       throw new Error("Session expired. Please login again.");
     }
 
-    // Clone the response to avoid body stream already read error
-    const responseClone = response.clone();
-    let errorText;
-    try {
-      errorText = await response.text();
-    } catch (e) {
-      errorText = `API call failed: ${response.status}`;
-    }
-    throw new Error(errorText || `API call failed: ${response.status}`);
+    const errorMessage =
+      data.error ||
+      data.message ||
+      responseText ||
+      `API call failed: ${response.status}`;
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  return data;
 }
