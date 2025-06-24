@@ -11,11 +11,49 @@ router.get("/", [auth, auth.requireRole(["admin"])], async (req, res) => {
   try {
     const classes = await Class.find()
       .populate("classTeacher", "profile teacherId")
-      .populate("students", "profile studentId")
       .populate("subjects.teacher", "profile teacherId")
       .sort({ grade: 1, section: 1 });
 
-    res.json({ classes });
+    // Manually populate students with their full profile data
+    const classesWithStudents = await Promise.all(
+      classes.map(async (classDoc) => {
+        const populatedStudents = await Promise.all(
+          classDoc.students.map(async (studentId) => {
+            const student = await Student.findById(studentId).populate(
+              "user",
+              "profile",
+            );
+            if (student && student.user) {
+              return {
+                _id: student._id,
+                studentId: student.studentId,
+                grade: student.grade,
+                admissionDate: student.admissionDate,
+                parentName: student.parentName,
+                parentPhone: student.parentPhone,
+                profile: {
+                  firstName: student.user.profile.firstName,
+                  lastName: student.user.profile.lastName,
+                  phone: student.user.profile.phone,
+                  dateOfBirth: student.user.profile.dateOfBirth,
+                  gender: student.user.profile.gender,
+                  bloodGroup: student.user.profile.bloodGroup,
+                  address: student.user.profile.address,
+                },
+              };
+            }
+            return null;
+          }),
+        );
+
+        return {
+          ...classDoc.toObject(),
+          students: populatedStudents.filter((student) => student !== null),
+        };
+      }),
+    );
+
+    res.json({ classes: classesWithStudents });
   } catch (error) {
     console.error("Get classes error:", error);
     res.status(500).json({ error: "Server error" });
