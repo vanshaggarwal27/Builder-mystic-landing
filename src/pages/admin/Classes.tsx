@@ -463,19 +463,19 @@ export default function AdminClasses() {
             <div className="text-center py-12">
               <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                No Classes Yet
+                No Classes Created Yet
               </h3>
               <p className="text-gray-600 mb-4">
-                Classes are automatically created when you assign students to
-                Grade-Section combinations like "Grade 10-A".
+                Start by creating classes for different grades and sections.
+                Students can then be assigned to these classes.
               </p>
               <div className="space-y-3">
                 <Button
-                  onClick={() => (window.location.href = "/admin/users")}
+                  onClick={() => setIsCreateDialogOpen(true)}
                   className="bg-indigo-600 hover:bg-indigo-700 block mx-auto"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Students
+                  Create First Class
                 </Button>
                 <Button
                   onClick={loadClasses}
@@ -486,7 +486,7 @@ export default function AdminClasses() {
                   <RefreshCw
                     className={`h-4 w-4 mr-2 ${isLoadingClasses ? "animate-spin" : ""}`}
                   />
-                  Try Loading Again
+                  Refresh
                 </Button>
               </div>
             </div>
