@@ -317,16 +317,15 @@ export default function AdminClasses() {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-800 mb-1">
-                  Real Classes Overview
+                  Class Management System
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Classes are automatically created based on student
-                  assignments. Students are grouped by their Grade-Section
-                  assignment.
+                  Create and manage classes, then assign students to them. Each
+                  class can have its own schedule and capacity.
                   <span className="block text-xs text-indigo-600 mt-1">
                     {classesList.length === 0
-                      ? "No classes found. Create students with Grade-Section assignments."
-                      : `Showing ${classesList.length} active classes with real students.`}
+                      ? "No classes created yet. Create your first class!"
+                      : `Managing ${classesList.length} classes with ${stats.totalStudents} total students.`}
                   </span>
                 </p>
               </div>
