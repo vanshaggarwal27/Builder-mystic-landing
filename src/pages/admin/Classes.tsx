@@ -617,6 +617,252 @@ export default function AdminClasses() {
       </MobileLayout>
 
       <BottomNavigation />
+
+      {/* Create Class Dialog */}
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Create New Class</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="grade">Grade *</Label>
+              <Select
+                value={newClass.grade}
+                onValueChange={(value) =>
+                  setNewClass({ ...newClass, grade: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select grade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {levels.map((level) => (
+                    <SelectItem key={level} value={level}>
+                      Grade {level}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="section">Section *</Label>
+              <Select
+                value={newClass.section}
+                onValueChange={(value) =>
+                  setNewClass({ ...newClass, section: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select section" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sections.map((section) => (
+                    <SelectItem key={section} value={section}>
+                      Section {section}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="room">Room Number</Label>
+            <Input
+              id="room"
+              value={newClass.room}
+              onChange={(e) =>
+                setNewClass({ ...newClass, room: e.target.value })
+              }
+              placeholder="e.g., 101, Lab-A, Auditorium"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="capacity">Class Capacity</Label>
+            <Input
+              id="capacity"
+              type="number"
+              value={newClass.capacity}
+              onChange={(e) =>
+                setNewClass({ ...newClass, capacity: e.target.value })
+              }
+              placeholder="40"
+              min="1"
+              max="100"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="academicYear">Academic Year</Label>
+            <Input
+              id="academicYear"
+              value={newClass.academicYear}
+              onChange={(e) =>
+                setNewClass({ ...newClass, academicYear: e.target.value })
+              }
+              placeholder="2024-25"
+            />
+          </div>
+
+          <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
+            <p className="text-sm text-blue-700">
+              <strong>Note:</strong> After creating the class, you can assign
+              students to it from the User Management section and create
+              schedules from the Schedule Management section.
+            </p>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateDialogOpen(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateClass}
+              disabled={isLoading}
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+            >
+              {isLoading ? "Creating..." : "Create Class"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+
+      {/* Class Details Dialog */}
+      <Dialog open={isClassDetailsOpen} onOpenChange={setIsClassDetailsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              {selectedClass?.name} Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedClass && (
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+              {/* Class Info */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-900 mb-3">
+                  Class Information
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Grade:</span>
+                    <span className="font-medium">
+                      Grade {selectedClass.grade}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Section:</span>
+                    <span className="font-medium">{selectedClass.section}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Room:</span>
+                    <span className="font-medium">{selectedClass.room}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Capacity:</span>
+                    <span className="font-medium">
+                      {selectedClass.capacity} students
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Enrolled:</span>
+                    <span
+                      className={`font-medium ${getCapacityColor(selectedClass.students?.length || 0, selectedClass.capacity)}`}
+                    >
+                      {selectedClass.students?.length || 0} students
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Students List */}
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-blue-900 mb-3">
+                  Enrolled Students
+                </h3>
+                {selectedClass.students && selectedClass.students.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedClass.students.map((student) => (
+                      <div
+                        key={student._id}
+                        className="flex justify-between items-center text-sm"
+                      >
+                        <span className="text-blue-800">
+                          {student.profile.firstName} {student.profile.lastName}
+                        </span>
+                        <span className="text-blue-600 font-medium">
+                          {student.studentId}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-blue-700 text-sm">
+                    No students assigned yet. Add students from User Management.
+                  </p>
+                )}
+              </div>
+
+              {/* Schedule Info */}
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-green-900 mb-3">
+                  Class Schedule
+                </h3>
+                {selectedClass.schedule && selectedClass.schedule.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedClass.schedule
+                      .slice(0, 3)
+                      .map((schedule, index) => (
+                        <div key={index} className="text-sm text-green-800">
+                          <span className="font-medium">{schedule.day}</span> -
+                          <span className="ml-1">{schedule.subject}</span>
+                          <span className="text-green-600 ml-1">
+                            ({schedule.startTime}-{schedule.endTime})
+                          </span>
+                        </div>
+                      ))}
+                    {selectedClass.schedule.length > 3 && (
+                      <p className="text-green-600 text-sm">
+                        +{selectedClass.schedule.length - 3} more periods
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-green-700 text-sm">
+                    No schedule created yet. Add schedule from Schedule
+                    Management.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsClassDetailsOpen(false)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsClassDetailsOpen(false);
+                    window.location.href = "/admin/users";
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  Manage Students
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
