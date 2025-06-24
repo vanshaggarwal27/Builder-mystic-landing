@@ -316,7 +316,9 @@ export default function AdminUsers() {
 
         // Student-specific fields
         ...(editUser.role === "student" && {
-          grade: `Grade ${editUser.grade}-${editUser.section}`,
+          grade: editUser.section
+            ? `${editUser.grade}-${editUser.section}`
+            : editUser.grade,
           section: editUser.section,
           studentId: editUser.studentId,
           admissionDate: editUser.admissionDate,
@@ -336,8 +338,14 @@ export default function AdminUsers() {
         }),
       };
 
+      console.log("Updating user with ID:", editUser.id);
+      console.log("Update data:", updateData);
+
       const data = await apiCall(`/admin/users/${editUser.id}`, {
         method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(updateData),
       });
 

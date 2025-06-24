@@ -95,20 +95,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password, role }),
       });
 
-      // Check content type to determine how to parse
-      const contentType = response.headers.get("content-type");
+      // Parse response body only once
       let data;
-
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
+      try {
         const responseText = await response.text();
-        try {
-          data = responseText ? JSON.parse(responseText) : {};
-        } catch (parseError) {
-          console.error("❌ JSON parse error:", parseError);
-          throw new Error("Invalid response from server");
-        }
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch (parseError) {
+        console.error("❌ JSON parse error:", parseError);
+        throw new Error("Invalid response from server");
       }
 
       if (!response.ok) {
@@ -232,6 +226,20 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
     },
   });
 
+  console.log(`API Call: ${options.method || "GET"} ${url}`, {
+    status: response.status,
+    statusText: response.statusText,
+  });
+
+  // Parse response text once
+  const responseText = await response.text();
+  let data;
+  try {
+    data = responseText ? JSON.parse(responseText) : {};
+  } catch (parseError) {
+    data = { error: responseText || "Invalid response" };
+  }
+
   if (!response.ok) {
     if (response.status === 401) {
       // Token expired or invalid
@@ -240,16 +248,13 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
       throw new Error("Session expired. Please login again.");
     }
 
-    // Clone the response to avoid body stream already read error
-    const responseClone = response.clone();
-    let errorText;
-    try {
-      errorText = await response.text();
-    } catch (e) {
-      errorText = `API call failed: ${response.status}`;
-    }
-    throw new Error(errorText || `API call failed: ${response.status}`);
+    const errorMessage =
+      data.error ||
+      data.message ||
+      responseText ||
+      `API call failed: ${response.status}`;
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  return data;
 }

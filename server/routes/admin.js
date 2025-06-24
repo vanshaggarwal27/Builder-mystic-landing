@@ -6,6 +6,11 @@ const Class = require("../models/Class");
 
 const router = express.Router();
 
+// Test route to verify admin routes are working
+router.get("/test", (req, res) => {
+  res.json({ message: "Admin routes are working", timestamp: new Date() });
+});
+
 // Create new user (admin only)
 router.post(
   "/users",
@@ -160,13 +165,19 @@ router.post(
         }
       }
 
+      // Merge role data into profile for frontend compatibility
+      const mergedProfile = {
+        ...user.profile,
+        ...(roleProfile ? roleProfile.toObject() : {}),
+      };
+
       res.status(201).json({
         message: "User created successfully",
         user: {
           id: user._id,
           email: user.email,
           role: user.role,
-          profile: user.profile,
+          profile: mergedProfile,
           roleData: roleProfile,
         },
       });
@@ -182,7 +193,7 @@ router.get("/users", [auth, auth.requireRole(["admin"])], async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
 
-    // Get role-specific data for each user
+    // Get role-specific data for each user and merge into profile
     const usersWithRoleData = await Promise.all(
       users.map(async (user) => {
         let roleData = {};
@@ -198,8 +209,15 @@ router.get("/users", [auth, auth.requireRole(["admin"])], async (req, res) => {
             break;
         }
 
+        // Merge role data into profile for frontend compatibility
+        const mergedProfile = {
+          ...user.profile,
+          ...(roleData || {}),
+        };
+
         return {
           ...user.toObject(),
+          profile: mergedProfile,
           roleData: roleData || {},
         };
       }),
@@ -211,6 +229,239 @@ router.get("/users", [auth, auth.requireRole(["admin"])], async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+// Get single user details (admin only)
+router.get(
+  "/users/:id",
+  [auth, auth.requireRole(["admin"])],
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get role-specific data
+      let roleData = {};
+      switch (user.role) {
+        case "student":
+          roleData = await Student.findOne({ user: user._id }).lean();
+          break;
+        case "teacher":
+          roleData = await Teacher.findOne({ user: user._id }).lean();
+          break;
+        case "admin":
+          roleData = await Admin.findOne({ user: user._id }).lean();
+          break;
+      }
+
+      // Merge role data into profile for frontend compatibility
+      const mergedProfile = {
+        ...user.profile,
+        ...(roleData || {}),
+      };
+
+      res.json({
+        user: {
+          ...user.toObject(),
+          profile: mergedProfile,
+          roleData: roleData || {},
+        },
+      });
+    } catch (error) {
+      console.error("Get user details error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
+// Update user (admin only)
+router.put(
+  "/users/:id",
+  [
+    auth,
+    auth.requireRole(["admin"]),
+    body("email").optional().isEmail().normalizeEmail(),
+    body("firstName").optional().trim().isLength({ min: 2 }),
+    body("lastName").optional().trim().isLength({ min: 2 }),
+  ],
+  async (req, res) => {
+    try {
+      console.log("UPDATE USER REQUEST - ID:", req.params.id);
+      console.log("UPDATE USER REQUEST - Body:", req.body);
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log("Validation errors:", errors.array());
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const userId = req.params.id;
+      const {
+        email,
+        firstName,
+        lastName,
+        phone,
+        dateOfBirth,
+        gender,
+        address,
+        bloodGroup,
+        // Student specific fields
+        grade,
+        studentId,
+        admissionDate,
+        parentName,
+        parentPhone,
+        emergencyContact,
+        // Teacher specific fields
+        department,
+        teacherId,
+        position,
+        experience,
+        subjects,
+        joiningDate,
+        ...otherData
+      } = req.body;
+
+      // Find the user
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Check if email is being changed and if it's already taken
+      if (email && email !== user.email) {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          return res.status(400).json({ error: "Email already exists" });
+        }
+        user.email = email;
+      }
+
+      // Update user profile
+      if (firstName !== undefined) user.profile.firstName = firstName;
+      if (lastName !== undefined) user.profile.lastName = lastName;
+      if (phone !== undefined) user.profile.phone = phone;
+      if (dateOfBirth !== undefined)
+        user.profile.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null;
+      if (gender !== undefined) user.profile.gender = gender;
+      if (address !== undefined) user.profile.address = address;
+      if (bloodGroup !== undefined) user.profile.bloodGroup = bloodGroup;
+
+      await user.save();
+
+      // Update role-specific profile
+      let roleProfile;
+      switch (user.role) {
+        case "student":
+          roleProfile = await Student.findOne({ user: user._id });
+          if (roleProfile) {
+            // Parse grade and section if grade is in format "10-A"
+            if (grade !== undefined) {
+              if (grade.includes("-")) {
+                const parts = grade.split("-");
+                roleProfile.grade = parts[0];
+                roleProfile.section = parts[1];
+              } else {
+                roleProfile.grade = grade;
+              }
+            }
+            if (studentId !== undefined) roleProfile.studentId = studentId;
+            if (admissionDate !== undefined)
+              roleProfile.admissionDate = admissionDate
+                ? new Date(admissionDate)
+                : null;
+            if (parentName !== undefined) roleProfile.parentName = parentName;
+            if (parentPhone !== undefined)
+              roleProfile.parentPhone = parentPhone;
+            if (emergencyContact !== undefined)
+              roleProfile.emergencyContact = emergencyContact;
+
+            // Update other fields
+            Object.keys(otherData).forEach((key) => {
+              if (otherData[key] !== undefined) {
+                roleProfile[key] = otherData[key];
+              }
+            });
+
+            await roleProfile.save();
+          }
+          break;
+
+        case "teacher":
+          roleProfile = await Teacher.findOne({ user: user._id });
+          if (roleProfile) {
+            if (teacherId !== undefined) roleProfile.teacherId = teacherId;
+            if (department !== undefined) roleProfile.department = department;
+            if (position !== undefined) roleProfile.position = position;
+            if (experience !== undefined) roleProfile.experience = experience;
+            if (subjects !== undefined) roleProfile.subjects = subjects;
+            if (joiningDate !== undefined)
+              roleProfile.joiningDate = joiningDate
+                ? new Date(joiningDate)
+                : null;
+
+            // Update other fields
+            Object.keys(otherData).forEach((key) => {
+              if (otherData[key] !== undefined) {
+                roleProfile[key] = otherData[key];
+              }
+            });
+
+            await roleProfile.save();
+          }
+          break;
+
+        case "admin":
+          roleProfile = await Admin.findOne({ user: user._id });
+          if (roleProfile) {
+            // Update other fields
+            Object.keys(otherData).forEach((key) => {
+              if (otherData[key] !== undefined) {
+                roleProfile[key] = otherData[key];
+              }
+            });
+
+            await roleProfile.save();
+          }
+          break;
+      }
+
+      // Return updated user with role data
+      const updatedUser = await User.findById(userId);
+      let updatedRoleData = {};
+      switch (user.role) {
+        case "student":
+          updatedRoleData = await Student.findOne({ user: user._id }).lean();
+          break;
+        case "teacher":
+          updatedRoleData = await Teacher.findOne({ user: user._id }).lean();
+          break;
+        case "admin":
+          updatedRoleData = await Admin.findOne({ user: user._id }).lean();
+          break;
+      }
+
+      // Merge role data into profile for frontend compatibility
+      const mergedProfile = {
+        ...updatedUser.profile,
+        ...(updatedRoleData || {}),
+      };
+
+      res.json({
+        message: "User updated successfully",
+        user: {
+          ...updatedUser.toObject(),
+          profile: mergedProfile,
+          roleData: updatedRoleData || {},
+        },
+      });
+    } catch (error) {
+      console.error("Update user error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
 
 // Delete user (admin only)
 router.delete(
