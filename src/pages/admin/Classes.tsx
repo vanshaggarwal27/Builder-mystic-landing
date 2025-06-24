@@ -112,150 +112,21 @@ export default function AdminClasses() {
       setIsLoadingClasses(true);
       console.log("Loading classes from backend...");
 
-      const data = await apiCall("/admin/users");
-      console.log("Raw user data from backend:", data);
+      const data = await apiCall("/classes");
+      console.log("Classes data from backend:", data);
 
-      // Group students by their class assignment
-      const classGroups = new Map<string, ClassData>();
-      let studentCount = 0;
+      setClassesList(data.classes || []);
 
-      data.users.forEach((user: any) => {
-        console.log("Processing user:", user);
-        if (user.role === "student") {
-          studentCount++;
-
-          // Check multiple possible grade field locations with more comprehensive search
-          let grade = null;
-
-          // Check various possible locations for grade information
-          if (user.profile) {
-            grade =
-              user.profile.grade ||
-              user.profile.class ||
-              user.profile.section ||
-              user.profile.gradeSection ||
-              user.profile.Grade ||
-              user.profile.Class;
-          }
-
-          // Fallback to top-level fields
-          if (!grade) {
-            grade =
-              user.grade ||
-              user.class ||
-              user.section ||
-              user.gradeSection ||
-              user.Grade ||
-              user.Class;
-          }
-
-          // If still no grade but has profile data, try to construct from separate fields
-          if (!grade && user.profile) {
-            const gradeNum =
-              user.profile.gradeLevel ||
-              user.profile.standard ||
-              user.profile.year;
-            const section =
-              user.profile.section ||
-              user.profile.division ||
-              user.profile.stream;
-            if (gradeNum && section) {
-              grade = `Grade ${gradeNum}-${section}`;
-            } else if (gradeNum) {
-              grade = `Grade ${gradeNum}-A`; // Default section
-            }
-          }
-
-          console.log(`Student ${user.email} has grade/class:`, grade);
-          console.log(`Full user profile:`, user.profile);
-
-          if (grade) {
-            // Normalize the grade format to "Grade X-Y"
-            let className = grade;
-            if (!className.startsWith("Grade ")) {
-              // If it's just "10-A" or "10A", convert to "Grade 10-A"
-              if (/^\d+[-]?[A-Z]?$/i.test(className)) {
-                const match = className.match(/^(\d+)[-]?([A-Z]?)$/i);
-                if (match) {
-                  const gradeNum = match[1];
-                  const section = match[2] || "A";
-                  className = `Grade ${gradeNum}-${section}`;
-                }
-              } else {
-                className = `Grade ${className}`;
-              }
-            }
-
-            // Ensure format is "Grade X-Y"
-            if (!className.includes("-") && className !== "Grade ") {
-              className = `${className}-A`; // Default to section A
-            }
-
-            const level = className.split("-")[0].replace("Grade ", "").trim();
-
-            if (!classGroups.has(className)) {
-              classGroups.set(className, {
-                id: className.replace(/\s+/g, "").toLowerCase(),
-                name: className,
-                level: level,
-                students: 0,
-                studentsList: [],
-                teacher: "Not assigned",
-                room: "Not assigned",
-              });
-              console.log(`Created new class: ${className}`);
-            }
-
-            const classData = classGroups.get(className)!;
-            classData.students += 1;
-            classData.studentsList.push({
-              id: user._id,
-              name: `${user.profile?.firstName || user.profile?.name || user.name || "Unknown"} ${user.profile?.lastName || "User"}`.trim(),
-              email: user.email,
-              studentId: user.profile?.studentId || user.studentId,
-            });
-          } else {
-            console.log(`Student ${user.email} has no grade/class assigned`);
-            console.log(`Available user fields:`, Object.keys(user));
-            console.log(
-              `Available profile fields:`,
-              user.profile ? Object.keys(user.profile) : "No profile",
-            );
-          }
-        }
-      });
-
-      console.log(`Total students found: ${studentCount}`);
-      console.log(`Classes created:`, Array.from(classGroups.keys()));
-
-      // Convert Map to Array and sort by class name
-      const realClasses = Array.from(classGroups.values()).sort((a, b) => {
-        // Sort by grade level first, then by section
-        const levelA = parseInt(a.level) || 0;
-        const levelB = parseInt(b.level) || 0;
-        if (levelA !== levelB) return levelA - levelB;
-        return a.name.localeCompare(b.name);
-      });
-
-      setClassesList(realClasses);
-
-      if (realClasses.length === 0) {
-        if (studentCount === 0) {
-          toast({
-            title: "No Students Found",
-            description:
-              "No students exist in the system yet. Create some students first.",
-          });
-        } else {
-          toast({
-            title: "No Classes Found",
-            description: `Found ${studentCount} students but none have grade/class assignments. Check student profiles.`,
-          });
-        }
-      } else {
+      if (data.classes && data.classes.length > 0) {
         toast({
           title: "Classes Loaded Successfully",
-          description: `Found ${realClasses.length} classes with ${studentCount} total students.`,
+          description: `Found ${data.classes.length} classes.`,
+        });
+      } else {
+        toast({
+          title: "No Classes Found",
+          description:
+            "No classes have been created yet. Create your first class!",
         });
       }
     } catch (error: any) {
