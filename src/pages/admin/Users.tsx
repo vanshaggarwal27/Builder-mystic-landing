@@ -338,8 +338,14 @@ export default function AdminUsers() {
         }),
       };
 
+      console.log("Updating user with ID:", editUser.id);
+      console.log("Update data:", updateData);
+
       const data = await apiCall(`/admin/users/${editUser.id}`, {
         method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(updateData),
       });
 
