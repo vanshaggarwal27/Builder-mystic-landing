@@ -7,6 +7,8 @@ import {
   Users,
   BookOpen,
   RefreshCw,
+  UserPlus,
+  Calendar,
 } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
@@ -33,18 +35,38 @@ import { apiCall } from "@/contexts/AuthContext";
 
 // Interface for class data
 interface ClassData {
-  id: string;
+  _id: string;
   name: string;
-  level: string;
-  students: number;
-  studentsList: Array<{
-    id: string;
-    name: string;
-    email: string;
-    studentId?: string;
+  grade: string;
+  section: string;
+  room: string;
+  capacity: number;
+  studentCount: number;
+  students: Array<{
+    _id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+    studentId: string;
   }>;
-  teacher?: string;
-  room?: string;
+  classTeacher?: {
+    _id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+    teacherId: string;
+  };
+  schedule: Array<{
+    day: string;
+    period: string;
+    subject: string;
+    startTime: string;
+    endTime: string;
+  }>;
+  academicYear: string;
+  isActive: boolean;
 }
 
 export default function AdminClasses() {
