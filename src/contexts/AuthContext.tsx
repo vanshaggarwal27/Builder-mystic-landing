@@ -226,6 +226,11 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
     },
   });
 
+  console.log(`API Call: ${options.method || "GET"} ${url}`, {
+    status: response.status,
+    statusText: response.statusText,
+  });
+
   // Parse response text once
   const responseText = await response.text();
   let data;
