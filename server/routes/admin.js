@@ -6,6 +6,11 @@ const Class = require("../models/Class");
 
 const router = express.Router();
 
+// Test route to verify admin routes are working
+router.get("/test", (req, res) => {
+  res.json({ message: "Admin routes are working", timestamp: new Date() });
+});
+
 // Create new user (admin only)
 router.post(
   "/users",
