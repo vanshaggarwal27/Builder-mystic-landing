@@ -86,6 +86,7 @@ const adminRoutes = require("./routes/admin");
 const assignmentRoutes = require("./routes/assignments");
 const noticeRoutes = require("./routes/notices");
 const attendanceRoutes = require("./routes/attendance");
+const classRoutes = require("./routes/classes");
 
 // Use Routes
 app.use("/api/auth", authRoutes);
@@ -95,6 +96,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/classes", classRoutes);
 
 // Health Check with detailed information
 app.get("/api/health", (req, res) => {

@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Search, RefreshCw } from "lucide-react";
+import {
+  Plus,
+  Search,
+  RefreshCw,
+  Eye,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
@@ -71,6 +80,35 @@ export default function AdminUsers() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [usersList, setUsersList] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isUserDetailsOpen, setIsUserDetailsOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editUser, setEditUser] = useState({
+    id: "",
+    email: "",
+    role: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    dateOfBirth: "",
+    gender: "",
+    address: "",
+    bloodGroup: "",
+    grade: "",
+    section: "",
+    department: "",
+    position: "",
+    experience: "",
+    joiningDate: "",
+    admissionDate: "",
+    studentId: "",
+    teacherId: "",
+    subjects: "",
+    emergencyContact: "",
+    parentName: "",
+    parentPhone: "",
+  });
+  const [isEditLoading, setIsEditLoading] = useState(false);
   const { toast } = useToast();
 
   // Load users on component mount
@@ -126,7 +164,7 @@ export default function AdminUsers() {
       setUsersList((prev) => prev.filter((user) => user.id !== userId));
       toast({
         title: "Success",
-        description: "User deleted successfully!",
+        description: "User deleted successfully",
       });
     } catch (error: any) {
       toast({
@@ -134,6 +172,229 @@ export default function AdminUsers() {
         description: error.message || "Failed to delete user",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleShowUserDetails = async (userId: string) => {
+    try {
+      const userData = await apiCall(`/admin/users/${userId}`);
+      setSelectedUser(userData.user || userData);
+      setIsUserDetailsOpen(true);
+    } catch (error: any) {
+      // Fallback to local user data if API fails
+      const user = usersList.find((u) => u.id === userId);
+      if (user) {
+        setSelectedUser({
+          _id: user.id,
+          email: user.email,
+          role: user.role,
+          profile: {
+            firstName: user.name.split(" ")[0] || "Unknown",
+            lastName: user.name.split(" ").slice(1).join(" ") || "User",
+            grade: user.grade,
+            department: user.department,
+          },
+        });
+        setIsUserDetailsOpen(true);
+        toast({
+          title: "Viewing Local Data",
+          description:
+            "Showing cached user information. Some details may be limited.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Unable to load user details",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleEditUser = async (userId: string) => {
+    try {
+      const userData = await apiCall(`/admin/users/${userId}`);
+      const user = userData.user || userData;
+
+      // Pre-populate edit form with user data
+      setEditUser({
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        firstName: user.profile?.firstName || "",
+        lastName: user.profile?.lastName || "",
+        phone: user.profile?.phone || "",
+        dateOfBirth: user.profile?.dateOfBirth || "",
+        gender: user.profile?.gender || "",
+        address: user.profile?.address || "",
+        bloodGroup: user.profile?.bloodGroup || "",
+        grade: user.profile?.grade?.split("-")[0]?.replace("Grade ", "") || "",
+        section:
+          user.profile?.grade?.split("-")[1] || user.profile?.section || "",
+        department: user.profile?.department || "",
+        position: user.profile?.position || "",
+        experience: user.profile?.experience || "",
+        joiningDate: user.profile?.joiningDate || "",
+        admissionDate: user.profile?.admissionDate || "",
+        studentId: user.profile?.studentId || "",
+        teacherId: user.profile?.teacherId || "",
+        subjects: user.profile?.subjects || "",
+        emergencyContact: user.profile?.emergencyContact || "",
+        parentName: user.profile?.parentName || "",
+        parentPhone: user.profile?.parentPhone || "",
+      });
+
+      setIsEditDialogOpen(true);
+    } catch (error: any) {
+      // Fallback to local user data if API fails
+      const user = usersList.find((u) => u.id === userId);
+      if (user) {
+        setEditUser({
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          firstName: user.name.split(" ")[0] || "",
+          lastName: user.name.split(" ").slice(1).join(" ") || "",
+          phone: "",
+          dateOfBirth: "",
+          gender: "",
+          address: "",
+          bloodGroup: "",
+          grade: user.grade?.split("-")[0]?.replace("Grade ", "") || "",
+          section: user.grade?.split("-")[1] || "",
+          department: user.department || "",
+          position: "",
+          experience: "",
+          joiningDate: "",
+          admissionDate: "",
+          studentId: "",
+          teacherId: "",
+          subjects: "",
+          emergencyContact: "",
+          parentName: "",
+          parentPhone: "",
+        });
+        setIsEditDialogOpen(true);
+        toast({
+          title: "Limited Edit Mode",
+          description:
+            "Editing with cached data. Some fields may not be available.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Unable to load user data for editing",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editUser.firstName || !editUser.lastName || !editUser.email) {
+      toast({
+        title: "Error",
+        description:
+          "Please fill in all required fields (First Name, Last Name, Email)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsEditLoading(true);
+    try {
+      // Prepare update data
+      const updateData = {
+        email: editUser.email,
+        firstName: editUser.firstName,
+        lastName: editUser.lastName,
+        phone: editUser.phone,
+        dateOfBirth: editUser.dateOfBirth,
+        gender: editUser.gender,
+        address: editUser.address,
+        bloodGroup: editUser.bloodGroup,
+
+        // Student-specific fields
+        ...(editUser.role === "student" && {
+          grade: `Grade ${editUser.grade}-${editUser.section}`,
+          section: editUser.section,
+          studentId: editUser.studentId,
+          admissionDate: editUser.admissionDate,
+          parentName: editUser.parentName,
+          parentPhone: editUser.parentPhone,
+          emergencyContact: editUser.emergencyContact,
+        }),
+
+        // Teacher-specific fields
+        ...(editUser.role === "teacher" && {
+          department: editUser.department,
+          teacherId: editUser.teacherId,
+          position: editUser.position,
+          experience: editUser.experience,
+          subjects: editUser.subjects,
+          joiningDate: editUser.joiningDate,
+        }),
+      };
+
+      const data = await apiCall(`/admin/users/${editUser.id}`, {
+        method: "PUT",
+        body: JSON.stringify(updateData),
+      });
+
+      toast({
+        title: "Success",
+        description: `${editUser.role.charAt(0).toUpperCase() + editUser.role.slice(1)} profile updated successfully!`,
+      });
+
+      // Reload users list to show updated data
+      await loadUsers();
+      setIsEditDialogOpen(false);
+
+      // Reset edit form
+      setEditUser({
+        id: "",
+        email: "",
+        role: "",
+        firstName: "",
+        lastName: "",
+        phone: "",
+        dateOfBirth: "",
+        gender: "",
+        address: "",
+        bloodGroup: "",
+        grade: "",
+        section: "",
+        department: "",
+        position: "",
+        experience: "",
+        joiningDate: "",
+        admissionDate: "",
+        studentId: "",
+        teacherId: "",
+        subjects: "",
+        emergencyContact: "",
+        parentName: "",
+        parentPhone: "",
+      });
+    } catch (error: any) {
+      console.error("User update error:", error);
+      let errorMessage = error.message || "Failed to update user";
+
+      if (error.message?.includes("Session expired")) {
+        errorMessage =
+          "Your session has expired. Please login again to update users.";
+      } else if (error.message?.includes("User not found")) {
+        errorMessage =
+          "User not found. They may have been deleted by another admin.";
+      }
+
+      toast({
+        title: "Cannot Update User",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsEditLoading(false);
     }
   };
 
@@ -958,6 +1219,22 @@ export default function AdminUsers() {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => handleShowUserDetails(user.id)}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      Details
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditUser(user.id)}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleDeleteUser(user.id)}
                       className="text-red-600 hover:text-red-700"
                     >
@@ -999,7 +1276,27 @@ export default function AdminUsers() {
                         </div>
                       </div>
                     </div>
-                    <Badge className="bg-blue-100 text-blue-700">Student</Badge>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleShowUserDetails(user.id)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Details
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditUser(user.id)}
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        Edit
+                      </Button>
+                      <Badge className="bg-blue-100 text-blue-700">
+                        Student
+                      </Badge>
+                    </div>
                   </div>
                 ))}
               {filteredUsers.filter((user) => user.role === "student")
@@ -1036,9 +1333,27 @@ export default function AdminUsers() {
                         </div>
                       </div>
                     </div>
-                    <Badge className="bg-green-100 text-green-700">
-                      Teacher
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleShowUserDetails(user.id)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Details
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditUser(user.id)}
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        Edit
+                      </Button>
+                      <Badge className="bg-green-100 text-green-700">
+                        Teacher
+                      </Badge>
+                    </div>
                   </div>
                 ))}
               {filteredUsers.filter((user) => user.role === "teacher")
@@ -1075,9 +1390,27 @@ export default function AdminUsers() {
                         </div>
                       </div>
                     </div>
-                    <Badge className="bg-purple-100 text-purple-700">
-                      Admin
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleShowUserDetails(user.id)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Details
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditUser(user.id)}
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        Edit
+                      </Button>
+                      <Badge className="bg-purple-100 text-purple-700">
+                        Admin
+                      </Badge>
+                    </div>
                   </div>
                 ))}
               {filteredUsers.filter((user) => user.role === "admin").length ===
@@ -1092,6 +1425,685 @@ export default function AdminUsers() {
       </MobileLayout>
 
       <BottomNavigation />
+
+      {/* User Details Dialog */}
+      <Dialog open={isUserDetailsOpen} onOpenChange={setIsUserDetailsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              User Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+              {/* Basic Info */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-900 mb-3">
+                  Basic Information
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <User className="h-4 w-4 text-gray-500" />
+                    <div>
+                      <div className="text-sm text-gray-500">Full Name</div>
+                      <div className="font-medium">
+                        {`${selectedUser.profile?.firstName || "Unknown"} ${selectedUser.profile?.lastName || "User"}`}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-4 w-4 text-gray-500" />
+                    <div>
+                      <div className="text-sm text-gray-500">Email</div>
+                      <div className="font-medium">{selectedUser.email}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-4 h-4 rounded-full ${selectedUser.role === "student" ? "bg-blue-500" : selectedUser.role === "teacher" ? "bg-green-500" : "bg-purple-500"}`}
+                    ></div>
+                    <div>
+                      <div className="text-sm text-gray-500">Role</div>
+                      <div className="font-medium capitalize">
+                        {selectedUser.role}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Role-specific Information */}
+              {selectedUser.role === "student" && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-blue-900 mb-3">
+                    Student Information
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Student ID:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.studentId || "Not assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Grade/Class:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.grade || "Not assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Section:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.section || "Not assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Admission Date:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.admissionDate || "Not provided"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedUser.role === "teacher" && (
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-green-900 mb-3">
+                    Teacher Information
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Teacher ID:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.teacherId || "Not assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Department:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.department || "Not assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Position:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.position || "Not provided"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Experience:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.experience || "Not provided"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Joining Date:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.joiningDate || "Not provided"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedUser.role === "admin" && (
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-purple-900 mb-3">
+                    Administrator Information
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-purple-700">Admin ID:</span>
+                      <span className="font-medium">
+                        {selectedUser.profile?.adminId || selectedUser._id}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-purple-700">Department:</span>
+                      <span className="font-medium">Administration</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Personal Information */}
+              {selectedUser.profile && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    Personal Information
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedUser.profile.phone && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Phone:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.phone}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.dateOfBirth && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Date of Birth:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.dateOfBirth}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.gender && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Gender:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.gender}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.bloodGroup && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Blood Group:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.bloodGroup}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.address && (
+                      <div>
+                        <div className="text-gray-700 mb-1">Address:</div>
+                        <div className="font-medium text-sm">
+                          {selectedUser.profile.address}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Emergency Contact for Students */}
+              {selectedUser.role === "student" && selectedUser.profile && (
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-orange-900 mb-3">
+                    Emergency Contact
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedUser.profile.parentName && (
+                      <div className="flex justify-between">
+                        <span className="text-orange-700">Parent Name:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.parentName}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.parentPhone && (
+                      <div className="flex justify-between">
+                        <span className="text-orange-700">Parent Phone:</span>
+                        <span className="font-medium">
+                          {selectedUser.profile.parentPhone}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.profile.emergencyContact && (
+                      <div>
+                        <div className="text-orange-700 mb-1">
+                          Emergency Contact:
+                        </div>
+                        <div className="font-medium text-sm">
+                          {selectedUser.profile.emergencyContact}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsUserDetailsOpen(false)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsUserDetailsOpen(false);
+                    handleEditUser(selectedUser._id);
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  Edit User
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit User Profile</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+            {/* Basic Information */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm text-gray-700">
+                Basic Information
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editFirstName">First Name *</Label>
+                  <Input
+                    id="editFirstName"
+                    value={editUser.firstName}
+                    onChange={(e) =>
+                      setEditUser({
+                        ...editUser,
+                        firstName: e.target.value,
+                      })
+                    }
+                    placeholder="John"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editLastName">Last Name *</Label>
+                  <Input
+                    id="editLastName"
+                    value={editUser.lastName}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, lastName: e.target.value })
+                    }
+                    placeholder="Doe"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="editEmail">Email Address *</Label>
+                <Input
+                  id="editEmail"
+                  type="email"
+                  value={editUser.email}
+                  onChange={(e) =>
+                    setEditUser({ ...editUser, email: e.target.value })
+                  }
+                  placeholder="john.doe@shkva.edu"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="editRole">Role</Label>
+                <Input
+                  id="editRole"
+                  value={editUser.role}
+                  disabled
+                  className="bg-gray-100"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Role cannot be changed after account creation
+                </p>
+              </div>
+            </div>
+
+            {/* Personal Information */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm text-gray-700">
+                Personal Information
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editPhone">Phone Number</Label>
+                  <Input
+                    id="editPhone"
+                    value={editUser.phone}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, phone: e.target.value })
+                    }
+                    placeholder="+1 234 567 8900"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editDateOfBirth">Date of Birth</Label>
+                  <Input
+                    id="editDateOfBirth"
+                    type="date"
+                    value={editUser.dateOfBirth}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, dateOfBirth: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editGender">Gender</Label>
+                  <Select
+                    value={editUser.gender}
+                    onValueChange={(value) =>
+                      setEditUser({ ...editUser, gender: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="editBloodGroup">Blood Group</Label>
+                  <Select
+                    value={editUser.bloodGroup}
+                    onValueChange={(value) =>
+                      setEditUser({ ...editUser, bloodGroup: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select blood group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="A+">A+</SelectItem>
+                      <SelectItem value="A-">A-</SelectItem>
+                      <SelectItem value="B+">B+</SelectItem>
+                      <SelectItem value="B-">B-</SelectItem>
+                      <SelectItem value="AB+">AB+</SelectItem>
+                      <SelectItem value="AB-">AB-</SelectItem>
+                      <SelectItem value="O+">O+</SelectItem>
+                      <SelectItem value="O-">O-</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="editAddress">Address</Label>
+                <Input
+                  id="editAddress"
+                  value={editUser.address}
+                  onChange={(e) =>
+                    setEditUser({ ...editUser, address: e.target.value })
+                  }
+                  placeholder="123 Main Street, City, State"
+                />
+              </div>
+            </div>
+
+            {/* Student-specific fields */}
+            {editUser.role === "student" && (
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm text-gray-700">
+                  Student Information
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editGrade">Grade *</Label>
+                    <Select
+                      value={editUser.grade}
+                      onValueChange={(value) =>
+                        setEditUser({ ...editUser, grade: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select grade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                          (grade) => (
+                            <SelectItem key={grade} value={grade.toString()}>
+                              Grade {grade}
+                            </SelectItem>
+                          ),
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editSection">Section *</Label>
+                    <Select
+                      value={editUser.section}
+                      onValueChange={(value) =>
+                        setEditUser({ ...editUser, section: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select section" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["A", "B", "C", "D"].map((section) => (
+                          <SelectItem key={section} value={section}>
+                            Section {section}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editStudentId">Student ID</Label>
+                    <Input
+                      id="editStudentId"
+                      value={editUser.studentId}
+                      onChange={(e) =>
+                        setEditUser({ ...editUser, studentId: e.target.value })
+                      }
+                      placeholder="STU2024001"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editAdmissionDate">Admission Date</Label>
+                    <Input
+                      id="editAdmissionDate"
+                      type="date"
+                      value={editUser.admissionDate}
+                      onChange={(e) =>
+                        setEditUser({
+                          ...editUser,
+                          admissionDate: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editParentName">Parent Name</Label>
+                    <Input
+                      id="editParentName"
+                      value={editUser.parentName}
+                      onChange={(e) =>
+                        setEditUser({ ...editUser, parentName: e.target.value })
+                      }
+                      placeholder="Parent's full name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editParentPhone">Parent Phone</Label>
+                    <Input
+                      id="editParentPhone"
+                      value={editUser.parentPhone}
+                      onChange={(e) =>
+                        setEditUser({
+                          ...editUser,
+                          parentPhone: e.target.value,
+                        })
+                      }
+                      placeholder="+1 234 567 8900"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="editEmergencyContact">
+                    Emergency Contact
+                  </Label>
+                  <Input
+                    id="editEmergencyContact"
+                    value={editUser.emergencyContact}
+                    onChange={(e) =>
+                      setEditUser({
+                        ...editUser,
+                        emergencyContact: e.target.value,
+                      })
+                    }
+                    placeholder="Emergency contact details"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Teacher-specific fields */}
+            {editUser.role === "teacher" && (
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm text-gray-700">
+                  Teacher Information
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editDepartment">Department *</Label>
+                    <Select
+                      value={editUser.department}
+                      onValueChange={(value) =>
+                        setEditUser({ ...editUser, department: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Mathematics">Mathematics</SelectItem>
+                        <SelectItem value="English">English</SelectItem>
+                        <SelectItem value="Science">Science</SelectItem>
+                        <SelectItem value="Physics">Physics</SelectItem>
+                        <SelectItem value="Chemistry">Chemistry</SelectItem>
+                        <SelectItem value="Biology">Biology</SelectItem>
+                        <SelectItem value="History">History</SelectItem>
+                        <SelectItem value="Geography">Geography</SelectItem>
+                        <SelectItem value="Computer Science">
+                          Computer Science
+                        </SelectItem>
+                        <SelectItem value="Physical Education">
+                          Physical Education
+                        </SelectItem>
+                        <SelectItem value="Art">Art</SelectItem>
+                        <SelectItem value="Music">Music</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editTeacherId">Teacher ID</Label>
+                    <Input
+                      id="editTeacherId"
+                      value={editUser.teacherId}
+                      onChange={(e) =>
+                        setEditUser({ ...editUser, teacherId: e.target.value })
+                      }
+                      placeholder="TCH2024001"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editPosition">Position</Label>
+                    <Select
+                      value={editUser.position}
+                      onValueChange={(value) =>
+                        setEditUser({ ...editUser, position: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select position" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Junior Teacher">
+                          Junior Teacher
+                        </SelectItem>
+                        <SelectItem value="Senior Teacher">
+                          Senior Teacher
+                        </SelectItem>
+                        <SelectItem value="Head of Department">
+                          Head of Department
+                        </SelectItem>
+                        <SelectItem value="Assistant Principal">
+                          Assistant Principal
+                        </SelectItem>
+                        <SelectItem value="Principal">Principal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editExperience">Experience</Label>
+                    <Input
+                      id="editExperience"
+                      value={editUser.experience}
+                      onChange={(e) =>
+                        setEditUser({ ...editUser, experience: e.target.value })
+                      }
+                      placeholder="5 Years"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="editSubjects">Subjects/Specialization</Label>
+                  <Input
+                    id="editSubjects"
+                    value={editUser.subjects}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, subjects: e.target.value })
+                    }
+                    placeholder="Mathematics, Algebra, Calculus"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editJoiningDate">Joining Date</Label>
+                  <Input
+                    id="editJoiningDate"
+                    type="date"
+                    value={editUser.joiningDate}
+                    onChange={(e) =>
+                      setEditUser({ ...editUser, joiningDate: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Instructions */}
+            <div className="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-400">
+              <p className="text-sm text-yellow-700">
+                <strong>Note:</strong> Changes will be saved immediately.
+                {editUser.role === "student" &&
+                  " Grade and section changes will affect class assignments."}
+                {editUser.role === "teacher" &&
+                  " Department changes may affect teaching assignments."}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateUser}
+                disabled={isEditLoading}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                {isEditLoading ? "Updating..." : "Save Changes"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

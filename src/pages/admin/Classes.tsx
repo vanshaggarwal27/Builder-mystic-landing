@@ -7,6 +7,8 @@ import {
   Users,
   BookOpen,
   RefreshCw,
+  UserPlus,
+  Calendar,
 } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
@@ -33,18 +35,38 @@ import { apiCall } from "@/contexts/AuthContext";
 
 // Interface for class data
 interface ClassData {
-  id: string;
+  _id: string;
   name: string;
-  level: string;
-  students: number;
-  studentsList: Array<{
-    id: string;
-    name: string;
-    email: string;
-    studentId?: string;
+  grade: string;
+  section: string;
+  room: string;
+  capacity: number;
+  studentCount: number;
+  students: Array<{
+    _id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+    studentId: string;
   }>;
-  teacher?: string;
-  room?: string;
+  classTeacher?: {
+    _id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+    teacherId: string;
+  };
+  schedule: Array<{
+    day: string;
+    period: string;
+    subject: string;
+    startTime: string;
+    endTime: string;
+  }>;
+  academicYear: string;
+  isActive: boolean;
 }
 
 export default function AdminClasses() {
@@ -53,13 +75,16 @@ export default function AdminClasses() {
   const [classesList, setClassesList] = useState<ClassData[]>([]);
   const [newClass, setNewClass] = useState({
     name: "",
-    level: "",
-    teacher: "",
+    grade: "",
+    section: "",
     room: "",
-    capacity: "",
+    capacity: "40",
+    academicYear: "2024-25",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
+  const [selectedClass, setSelectedClass] = useState<ClassData | null>(null);
+  const [isClassDetailsOpen, setIsClassDetailsOpen] = useState(false);
   const { toast } = useToast();
 
   // Load real classes from users on component mount
@@ -87,84 +112,21 @@ export default function AdminClasses() {
       setIsLoadingClasses(true);
       console.log("Loading classes from backend...");
 
-      const data = await apiCall("/admin/users");
-      console.log("Raw user data from backend:", data);
+      const data = await apiCall("/classes");
+      console.log("Classes data from backend:", data);
 
-      // Group students by their class assignment
-      const classGroups = new Map<string, ClassData>();
-      let studentCount = 0;
+      setClassesList(data.classes || []);
 
-      data.users.forEach((user: any) => {
-        console.log("Processing user:", user);
-        if (user.role === "student") {
-          studentCount++;
-
-          // Check multiple possible grade field locations
-          const grade = user.profile?.grade || user.grade || user.class;
-          console.log(`Student ${user.email} has grade/class:`, grade);
-
-          if (grade) {
-            const className = grade; // e.g., "Grade 10-A"
-            const level = className.split("-")[0].replace("Grade ", ""); // e.g., "10"
-
-            if (!classGroups.has(className)) {
-              classGroups.set(className, {
-                id: className.replace(/\s+/g, "").toLowerCase(),
-                name: className,
-                level: level,
-                students: 0,
-                studentsList: [],
-                teacher: "Not assigned",
-                room: "Not assigned",
-              });
-              console.log(`Created new class: ${className}`);
-            }
-
-            const classData = classGroups.get(className)!;
-            classData.students += 1;
-            classData.studentsList.push({
-              id: user._id,
-              name: `${user.profile?.firstName || "Unknown"} ${user.profile?.lastName || "User"}`,
-              email: user.email,
-              studentId: user.profile?.studentId,
-            });
-          } else {
-            console.log(`Student ${user.email} has no grade/class assigned`);
-          }
-        }
-      });
-
-      console.log(`Total students found: ${studentCount}`);
-      console.log(`Classes created:`, Array.from(classGroups.keys()));
-
-      // Convert Map to Array and sort by class name
-      const realClasses = Array.from(classGroups.values()).sort((a, b) => {
-        // Sort by grade level first, then by section
-        const levelA = parseInt(a.level) || 0;
-        const levelB = parseInt(b.level) || 0;
-        if (levelA !== levelB) return levelA - levelB;
-        return a.name.localeCompare(b.name);
-      });
-
-      setClassesList(realClasses);
-
-      if (realClasses.length === 0) {
-        if (studentCount === 0) {
-          toast({
-            title: "No Students Found",
-            description:
-              "No students exist in the system yet. Create some students first.",
-          });
-        } else {
-          toast({
-            title: "No Classes Found",
-            description: `Found ${studentCount} students but none have grade/class assignments. Check student profiles.`,
-          });
-        }
-      } else {
+      if (data.classes && data.classes.length > 0) {
         toast({
           title: "Classes Loaded Successfully",
-          description: `Found ${realClasses.length} classes with ${studentCount} total students.`,
+          description: `Found ${data.classes.length} classes.`,
+        });
+      } else {
+        toast({
+          title: "No Classes Found",
+          description:
+            "No classes have been created yet. Create your first class!",
         });
       }
     } catch (error: any) {
@@ -196,47 +158,128 @@ export default function AdminClasses() {
     "12",
   ];
 
+  const sections = ["A", "B", "C", "D"];
+
   const handleCreateClass = async () => {
-    // For real classes, we don't create classes directly
-    // Classes are created automatically when students are assigned
-    toast({
-      title: "Classes Auto-Created",
-      description:
-        "Classes are automatically created when you assign students to Grade-Section combinations. Create students instead.",
-    });
-    setIsCreateDialogOpen(false);
+    if (!newClass.grade || !newClass.section) {
+      toast({
+        title: "Error",
+        description: "Please select both grade and section",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const className = `Grade ${newClass.grade}-${newClass.section}`;
+      const classData = {
+        name: className,
+        grade: newClass.grade,
+        section: newClass.section,
+        room: newClass.room || "Not assigned",
+        capacity: parseInt(newClass.capacity) || 40,
+        academicYear: newClass.academicYear,
+      };
+
+      await apiCall("/classes", {
+        method: "POST",
+        body: JSON.stringify(classData),
+      });
+
+      toast({
+        title: "Class Created Successfully",
+        description: `${className} has been created with capacity of ${classData.capacity} students.`,
+      });
+
+      await loadClasses();
+      setIsCreateDialogOpen(false);
+      setNewClass({
+        name: "",
+        grade: "",
+        section: "",
+        room: "",
+        capacity: "40",
+        academicYear: "2024-25",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error Creating Class",
+        description:
+          error.message || "Failed to create class. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const getLevelColor = (level: string) => {
-    const numLevel = parseInt(level);
+  const handleDeleteClass = async (classId: string) => {
+    try {
+      await apiCall(`/classes/${classId}`, {
+        method: "DELETE",
+      });
+
+      toast({
+        title: "Class Deleted",
+        description: "Class has been deleted successfully.",
+      });
+
+      await loadClasses();
+    } catch (error: any) {
+      toast({
+        title: "Error Deleting Class",
+        description: error.message || "Failed to delete class.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewClassDetails = async (classData: ClassData) => {
+    setSelectedClass(classData);
+    setIsClassDetailsOpen(true);
+  };
+
+  const getLevelColor = (grade: string) => {
+    const numLevel = parseInt(grade);
     if (isNaN(numLevel)) return "bg-gray-100 text-gray-700";
     if (numLevel <= 5) return "bg-blue-100 text-blue-700";
     if (numLevel <= 8) return "bg-green-100 text-green-700";
     return "bg-purple-100 text-purple-700";
   };
 
+  const getCapacityColor = (current: number, capacity: number) => {
+    const percentage = (current / capacity) * 100;
+    if (percentage >= 90) return "text-red-600";
+    if (percentage >= 75) return "text-orange-600";
+    return "text-green-600";
+  };
+
   const filteredClasses = classesList.filter(
     (cls) =>
       cls.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (cls.teacher &&
-        cls.teacher.toLowerCase().includes(searchQuery.toLowerCase())),
+      cls.room.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const stats = {
     total: classesList.length,
     primary: classesList.filter((c) => {
-      const level = parseInt(c.level);
+      const level = parseInt(c.grade);
       return level >= 1 && level <= 5;
     }).length,
     secondary: classesList.filter((c) => {
-      const level = parseInt(c.level);
+      const level = parseInt(c.grade);
       return level >= 6 && level <= 10;
     }).length,
     higherSecondary: classesList.filter((c) => {
-      const level = parseInt(c.level);
+      const level = parseInt(c.grade);
       return level >= 11 && level <= 12;
     }).length,
-    totalStudents: classesList.reduce((sum, c) => sum + c.students, 0),
+    totalStudents: classesList.reduce(
+      (sum, c) => sum + (c.students?.length || 0),
+      0,
+    ),
+    totalCapacity: classesList.reduce((sum, c) => sum + c.capacity, 0),
   };
 
   if (isLoadingClasses) {
@@ -274,16 +317,15 @@ export default function AdminClasses() {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-800 mb-1">
-                  Real Classes Overview
+                  Class Management System
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Classes are automatically created based on student
-                  assignments. Students are grouped by their Grade-Section
-                  assignment.
+                  Create and manage classes, then assign students to them. Each
+                  class can have its own schedule and capacity.
                   <span className="block text-xs text-indigo-600 mt-1">
                     {classesList.length === 0
-                      ? "No classes found. Create students with Grade-Section assignments."
-                      : `Showing ${classesList.length} active classes with real students.`}
+                      ? "No classes created yet. Create your first class!"
+                      : `Managing ${classesList.length} classes with ${stats.totalStudents} total students.`}
                   </span>
                 </p>
               </div>
@@ -302,6 +344,41 @@ export default function AdminClasses() {
             </div>
           </div>
 
+          {/* Quick Actions */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            <Dialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button className="bg-indigo-600 hover:bg-indigo-700 h-auto py-4">
+                  <div className="text-center">
+                    <Plus className="h-6 w-6 mx-auto mb-1" />
+                    <div className="text-sm">Create Class</div>
+                  </div>
+                </Button>
+              </DialogTrigger>
+            </Dialog>
+            <Button
+              onClick={() => (window.location.href = "/admin/users")}
+              className="bg-blue-600 hover:bg-blue-700 h-auto py-4"
+            >
+              <div className="text-center">
+                <UserPlus className="h-6 w-6 mx-auto mb-1" />
+                <div className="text-sm">Add Students</div>
+              </div>
+            </Button>
+            <Button
+              onClick={() => (window.location.href = "/admin/schedule")}
+              className="bg-green-600 hover:bg-green-700 h-auto py-4"
+            >
+              <div className="text-center">
+                <Calendar className="h-6 w-6 mx-auto mb-1" />
+                <div className="text-sm">Manage Schedule</div>
+              </div>
+            </Button>
+          </div>
+
           {/* Stats Overview */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -314,7 +391,7 @@ export default function AdminClasses() {
               <div className="text-2xl font-bold text-green-600">
                 {stats.totalStudents}
               </div>
-              <div className="text-sm text-gray-600">Total Students</div>
+              <div className="text-sm text-gray-600">Enrolled Students</div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="text-lg font-bold text-blue-600">
@@ -386,19 +463,19 @@ export default function AdminClasses() {
             <div className="text-center py-12">
               <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                No Classes Yet
+                No Classes Created Yet
               </h3>
               <p className="text-gray-600 mb-4">
-                Classes are automatically created when you assign students to
-                Grade-Section combinations like "Grade 10-A".
+                Start by creating classes for different grades and sections.
+                Students can then be assigned to these classes.
               </p>
               <div className="space-y-3">
                 <Button
-                  onClick={() => (window.location.href = "/admin/users")}
+                  onClick={() => setIsCreateDialogOpen(true)}
                   className="bg-indigo-600 hover:bg-indigo-700 block mx-auto"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Students
+                  Create First Class
                 </Button>
                 <Button
                   onClick={loadClasses}
@@ -409,7 +486,7 @@ export default function AdminClasses() {
                   <RefreshCw
                     className={`h-4 w-4 mr-2 ${isLoadingClasses ? "animate-spin" : ""}`}
                   />
-                  Try Loading Again
+                  Refresh
                 </Button>
               </div>
             </div>
@@ -419,7 +496,10 @@ export default function AdminClasses() {
           {classesList.length > 0 && (
             <div className="space-y-3">
               {filteredClasses.map((cls) => (
-                <div key={cls.id} className="bg-white rounded-xl p-4 shadow-sm">
+                <div
+                  key={cls._id}
+                  className="bg-white rounded-xl p-4 shadow-sm"
+                >
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-semibold text-gray-900">
@@ -427,39 +507,68 @@ export default function AdminClasses() {
                       </h3>
                       <p className="text-sm text-gray-600">Room {cls.room}</p>
                     </div>
-                    <Badge className={getLevelColor(cls.level)}>
-                      Grade {cls.level}
+                    <Badge className={getLevelColor(cls.grade)}>
+                      Grade {cls.grade}
                     </Badge>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-3">
                     <div className="flex items-center text-sm text-gray-600">
                       <Users className="h-4 w-4 mr-2" />
-                      {cls.students} Students
+                      <span
+                        className={getCapacityColor(
+                          cls.students?.length || 0,
+                          cls.capacity,
+                        )}
+                      >
+                        {cls.students?.length || 0}/{cls.capacity}
+                      </span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <BookOpen className="h-4 w-4 mr-2" />
-                      {cls.teacher}
+                      {cls.classTeacher
+                        ? `${cls.classTeacher.profile.firstName} ${cls.classTeacher.profile.lastName}`
+                        : "No teacher assigned"}
                     </div>
                   </div>
 
                   {/* Student List Preview */}
-                  <div className="mb-3">
-                    <div className="text-xs text-gray-500 mb-2">Students:</div>
-                    <div className="flex flex-wrap gap-1">
-                      {cls.studentsList.slice(0, 3).map((student) => (
-                        <span
-                          key={student.id}
-                          className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
-                        >
-                          {student.name}
-                        </span>
-                      ))}
-                      {cls.studentsList.length > 3 && (
-                        <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                          +{cls.studentsList.length - 3} more
-                        </span>
-                      )}
+                  {cls.students && cls.students.length > 0 && (
+                    <div className="mb-3">
+                      <div className="text-xs text-gray-500 mb-2">
+                        Students:
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {cls.students.slice(0, 3).map((student) => (
+                          <span
+                            key={student._id}
+                            className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                          >
+                            {student.profile.firstName}{" "}
+                            {student.profile.lastName}
+                          </span>
+                        ))}
+                        {cls.students.length > 3 && (
+                          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                            +{cls.students.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Capacity and Schedule Info */}
+                  <div className="bg-gray-50 p-2 rounded-lg mb-3">
+                    <div className="flex justify-between text-xs text-gray-600">
+                      <span>
+                        Capacity:{" "}
+                        {(
+                          ((cls.students?.length || 0) / cls.capacity) *
+                          100
+                        ).toFixed(0)}
+                        % filled
+                      </span>
+                      <span>Schedule: {cls.schedule?.length || 0} periods</span>
                     </div>
                   </div>
 
@@ -468,32 +577,19 @@ export default function AdminClasses() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => {
-                        toast({
-                          title: "Class Details",
-                          description: `${cls.name} has ${cls.students} students. Class editing coming soon!`,
-                        });
-                      }}
+                      onClick={() => handleViewClassDetails(cls)}
                     >
                       <Edit className="h-4 w-4 mr-1" />
-                      View Details
+                      Manage
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1"
-                      onClick={() => {
-                        const studentNames = cls.studentsList
-                          .map((s) => s.name)
-                          .join(", ");
-                        toast({
-                          title: `${cls.name} Students`,
-                          description: studentNames || "No students assigned",
-                        });
-                      }}
+                      className="flex-1 text-red-600 hover:text-red-700"
+                      onClick={() => handleDeleteClass(cls._id)}
                     >
-                      <Users className="h-4 w-4 mr-1" />
-                      View Students
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
                     </Button>
                   </div>
                 </div>
@@ -521,6 +617,252 @@ export default function AdminClasses() {
       </MobileLayout>
 
       <BottomNavigation />
+
+      {/* Create Class Dialog */}
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Create New Class</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="grade">Grade *</Label>
+              <Select
+                value={newClass.grade}
+                onValueChange={(value) =>
+                  setNewClass({ ...newClass, grade: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select grade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {levels.map((level) => (
+                    <SelectItem key={level} value={level}>
+                      Grade {level}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="section">Section *</Label>
+              <Select
+                value={newClass.section}
+                onValueChange={(value) =>
+                  setNewClass({ ...newClass, section: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select section" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sections.map((section) => (
+                    <SelectItem key={section} value={section}>
+                      Section {section}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="room">Room Number</Label>
+            <Input
+              id="room"
+              value={newClass.room}
+              onChange={(e) =>
+                setNewClass({ ...newClass, room: e.target.value })
+              }
+              placeholder="e.g., 101, Lab-A, Auditorium"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="capacity">Class Capacity</Label>
+            <Input
+              id="capacity"
+              type="number"
+              value={newClass.capacity}
+              onChange={(e) =>
+                setNewClass({ ...newClass, capacity: e.target.value })
+              }
+              placeholder="40"
+              min="1"
+              max="100"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="academicYear">Academic Year</Label>
+            <Input
+              id="academicYear"
+              value={newClass.academicYear}
+              onChange={(e) =>
+                setNewClass({ ...newClass, academicYear: e.target.value })
+              }
+              placeholder="2024-25"
+            />
+          </div>
+
+          <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
+            <p className="text-sm text-blue-700">
+              <strong>Note:</strong> After creating the class, you can assign
+              students to it from the User Management section and create
+              schedules from the Schedule Management section.
+            </p>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateDialogOpen(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateClass}
+              disabled={isLoading}
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+            >
+              {isLoading ? "Creating..." : "Create Class"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+
+      {/* Class Details Dialog */}
+      <Dialog open={isClassDetailsOpen} onOpenChange={setIsClassDetailsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              {selectedClass?.name} Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedClass && (
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+              {/* Class Info */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-900 mb-3">
+                  Class Information
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Grade:</span>
+                    <span className="font-medium">
+                      Grade {selectedClass.grade}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Section:</span>
+                    <span className="font-medium">{selectedClass.section}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Room:</span>
+                    <span className="font-medium">{selectedClass.room}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Capacity:</span>
+                    <span className="font-medium">
+                      {selectedClass.capacity} students
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Enrolled:</span>
+                    <span
+                      className={`font-medium ${getCapacityColor(selectedClass.students?.length || 0, selectedClass.capacity)}`}
+                    >
+                      {selectedClass.students?.length || 0} students
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Students List */}
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-blue-900 mb-3">
+                  Enrolled Students
+                </h3>
+                {selectedClass.students && selectedClass.students.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedClass.students.map((student) => (
+                      <div
+                        key={student._id}
+                        className="flex justify-between items-center text-sm"
+                      >
+                        <span className="text-blue-800">
+                          {student.profile.firstName} {student.profile.lastName}
+                        </span>
+                        <span className="text-blue-600 font-medium">
+                          {student.studentId}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-blue-700 text-sm">
+                    No students assigned yet. Add students from User Management.
+                  </p>
+                )}
+              </div>
+
+              {/* Schedule Info */}
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-green-900 mb-3">
+                  Class Schedule
+                </h3>
+                {selectedClass.schedule && selectedClass.schedule.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedClass.schedule
+                      .slice(0, 3)
+                      .map((schedule, index) => (
+                        <div key={index} className="text-sm text-green-800">
+                          <span className="font-medium">{schedule.day}</span> -
+                          <span className="ml-1">{schedule.subject}</span>
+                          <span className="text-green-600 ml-1">
+                            ({schedule.startTime}-{schedule.endTime})
+                          </span>
+                        </div>
+                      ))}
+                    {selectedClass.schedule.length > 3 && (
+                      <p className="text-green-600 text-sm">
+                        +{selectedClass.schedule.length - 3} more periods
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-green-700 text-sm">
+                    No schedule created yet. Add schedule from Schedule
+                    Management.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsClassDetailsOpen(false)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsClassDetailsOpen(false);
+                    window.location.href = "/admin/users";
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  Manage Students
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -239,7 +239,15 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
       localStorage.removeItem("currentUser");
       throw new Error("Session expired. Please login again.");
     }
-    const errorText = await response.text();
+
+    // Clone the response to avoid body stream already read error
+    const responseClone = response.clone();
+    let errorText;
+    try {
+      errorText = await response.text();
+    } catch (e) {
+      errorText = `API call failed: ${response.status}`;
+    }
     throw new Error(errorText || `API call failed: ${response.status}`);
   }
 
