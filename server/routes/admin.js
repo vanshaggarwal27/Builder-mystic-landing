@@ -218,6 +218,51 @@ router.get("/users", [auth, auth.requireRole(["admin"])], async (req, res) => {
   }
 });
 
+// Get individual user (admin only)
+router.get(
+  "/users/:id",
+  [auth, auth.requireRole(["admin"])],
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get role-specific data
+      let roleData = {};
+      switch (user.role) {
+        case "student":
+          roleData = await Student.findOne({ user: user._id }).lean();
+          break;
+        case "teacher":
+          roleData = await Teacher.findOne({ user: user._id }).lean();
+          break;
+        case "admin":
+          roleData = await Admin.findOne({ user: user._id }).lean();
+          break;
+      }
+
+      // Merge role data into the profile
+      const mergedProfile = {
+        ...user.profile,
+        ...(roleData || {}),
+      };
+
+      const userWithCompleteProfile = {
+        ...user.toObject(),
+        profile: mergedProfile,
+        roleData: roleData || {},
+      };
+
+      res.json({ user: userWithCompleteProfile });
+    } catch (error) {
+      console.error("Get user error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
 // Update user (admin only)
 router.put(
   "/users/:id",
