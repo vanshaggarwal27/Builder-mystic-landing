@@ -473,13 +473,15 @@ export default function AdminUsers() {
 
         // Student-specific fields
         ...(newUser.role === "student" && {
-          grade: `${newUser.grade}-${newUser.section}`, // Combine grade and section
-          section: newUser.section,
+          grade: newUser.grade, // Keep grade separate
+          section: newUser.section, // Keep section separate
           studentId: newUser.studentId || `STU${Date.now()}`,
           admissionDate: newUser.admissionDate,
           parentName: newUser.parentName,
           parentPhone: newUser.parentPhone,
           emergencyContact: newUser.emergencyContact,
+          academicYear: "2024-25", // Add academic year
+          rollNumber: `${newUser.grade}${newUser.section}${Date.now().toString().slice(-3)}`, // Generate roll number
         }),
 
         // Teacher-specific fields
