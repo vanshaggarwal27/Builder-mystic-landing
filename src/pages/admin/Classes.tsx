@@ -496,7 +496,10 @@ export default function AdminClasses() {
           {classesList.length > 0 && (
             <div className="space-y-3">
               {filteredClasses.map((cls) => (
-                <div key={cls.id} className="bg-white rounded-xl p-4 shadow-sm">
+                <div
+                  key={cls._id}
+                  className="bg-white rounded-xl p-4 shadow-sm"
+                >
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-semibold text-gray-900">
@@ -504,39 +507,68 @@ export default function AdminClasses() {
                       </h3>
                       <p className="text-sm text-gray-600">Room {cls.room}</p>
                     </div>
-                    <Badge className={getLevelColor(cls.level)}>
-                      Grade {cls.level}
+                    <Badge className={getLevelColor(cls.grade)}>
+                      Grade {cls.grade}
                     </Badge>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-3">
                     <div className="flex items-center text-sm text-gray-600">
                       <Users className="h-4 w-4 mr-2" />
-                      {cls.students} Students
+                      <span
+                        className={getCapacityColor(
+                          cls.students?.length || 0,
+                          cls.capacity,
+                        )}
+                      >
+                        {cls.students?.length || 0}/{cls.capacity}
+                      </span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <BookOpen className="h-4 w-4 mr-2" />
-                      {cls.teacher}
+                      {cls.classTeacher
+                        ? `${cls.classTeacher.profile.firstName} ${cls.classTeacher.profile.lastName}`
+                        : "No teacher assigned"}
                     </div>
                   </div>
 
                   {/* Student List Preview */}
-                  <div className="mb-3">
-                    <div className="text-xs text-gray-500 mb-2">Students:</div>
-                    <div className="flex flex-wrap gap-1">
-                      {cls.studentsList.slice(0, 3).map((student) => (
-                        <span
-                          key={student.id}
-                          className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
-                        >
-                          {student.name}
-                        </span>
-                      ))}
-                      {cls.studentsList.length > 3 && (
-                        <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                          +{cls.studentsList.length - 3} more
-                        </span>
-                      )}
+                  {cls.students && cls.students.length > 0 && (
+                    <div className="mb-3">
+                      <div className="text-xs text-gray-500 mb-2">
+                        Students:
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {cls.students.slice(0, 3).map((student) => (
+                          <span
+                            key={student._id}
+                            className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                          >
+                            {student.profile.firstName}{" "}
+                            {student.profile.lastName}
+                          </span>
+                        ))}
+                        {cls.students.length > 3 && (
+                          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                            +{cls.students.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Capacity and Schedule Info */}
+                  <div className="bg-gray-50 p-2 rounded-lg mb-3">
+                    <div className="flex justify-between text-xs text-gray-600">
+                      <span>
+                        Capacity:{" "}
+                        {(
+                          ((cls.students?.length || 0) / cls.capacity) *
+                          100
+                        ).toFixed(0)}
+                        % filled
+                      </span>
+                      <span>Schedule: {cls.schedule?.length || 0} periods</span>
                     </div>
                   </div>
 
@@ -545,32 +577,19 @@ export default function AdminClasses() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => {
-                        toast({
-                          title: "Class Details",
-                          description: `${cls.name} has ${cls.students} students. Class editing coming soon!`,
-                        });
-                      }}
+                      onClick={() => handleViewClassDetails(cls)}
                     >
                       <Edit className="h-4 w-4 mr-1" />
-                      View Details
+                      Manage
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1"
-                      onClick={() => {
-                        const studentNames = cls.studentsList
-                          .map((s) => s.name)
-                          .join(", ");
-                        toast({
-                          title: `${cls.name} Students`,
-                          description: studentNames || "No students assigned",
-                        });
-                      }}
+                      className="flex-1 text-red-600 hover:text-red-700"
+                      onClick={() => handleDeleteClass(cls._id)}
                     >
-                      <Users className="h-4 w-4 mr-1" />
-                      View Students
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
                     </Button>
                   </div>
                 </div>
