@@ -316,7 +316,9 @@ export default function AdminUsers() {
 
         // Student-specific fields
         ...(editUser.role === "student" && {
-          grade: `Grade ${editUser.grade}-${editUser.section}`,
+          grade: editUser.section
+            ? `${editUser.grade}-${editUser.section}`
+            : editUser.grade,
           section: editUser.section,
           studentId: editUser.studentId,
           admissionDate: editUser.admissionDate,
