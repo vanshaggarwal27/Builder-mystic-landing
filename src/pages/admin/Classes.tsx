@@ -344,6 +344,41 @@ export default function AdminClasses() {
             </div>
           </div>
 
+          {/* Quick Actions */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            <Dialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button className="bg-indigo-600 hover:bg-indigo-700 h-auto py-4">
+                  <div className="text-center">
+                    <Plus className="h-6 w-6 mx-auto mb-1" />
+                    <div className="text-sm">Create Class</div>
+                  </div>
+                </Button>
+              </DialogTrigger>
+            </Dialog>
+            <Button
+              onClick={() => (window.location.href = "/admin/users")}
+              className="bg-blue-600 hover:bg-blue-700 h-auto py-4"
+            >
+              <div className="text-center">
+                <UserPlus className="h-6 w-6 mx-auto mb-1" />
+                <div className="text-sm">Add Students</div>
+              </div>
+            </Button>
+            <Button
+              onClick={() => (window.location.href = "/admin/schedule")}
+              className="bg-green-600 hover:bg-green-700 h-auto py-4"
+            >
+              <div className="text-center">
+                <Calendar className="h-6 w-6 mx-auto mb-1" />
+                <div className="text-sm">Manage Schedule</div>
+              </div>
+            </Button>
+          </div>
+
           {/* Stats Overview */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -356,7 +391,7 @@ export default function AdminClasses() {
               <div className="text-2xl font-bold text-green-600">
                 {stats.totalStudents}
               </div>
-              <div className="text-sm text-gray-600">Total Students</div>
+              <div className="text-sm text-gray-600">Enrolled Students</div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="text-lg font-bold text-blue-600">
