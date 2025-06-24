@@ -81,10 +81,23 @@ router.post(
       let roleProfile;
       switch (role) {
         case "student":
+          // Parse grade and section if grade is in format "10-A"
+          let parsedGrade = grade || "";
+          let parsedSection = "";
+          if (grade && grade.includes("-")) {
+            const parts = grade.split("-");
+            parsedGrade = parts[0];
+            parsedSection = parts[1];
+          } else {
+            parsedGrade = grade || "";
+            parsedSection = section || "";
+          }
+
           roleProfile = new Student({
             user: user._id,
             studentId: studentId || `STU${Date.now()}`,
-            grade: grade || "",
+            grade: parsedGrade,
+            section: parsedSection,
             admissionDate: admissionDate ? new Date(admissionDate) : null,
             parentName: parentName || "",
             parentPhone: parentPhone || "",
