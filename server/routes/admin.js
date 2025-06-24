@@ -160,13 +160,19 @@ router.post(
         }
       }
 
+      // Merge role data into profile for frontend compatibility
+      const mergedProfile = {
+        ...user.profile,
+        ...(roleProfile ? roleProfile.toObject() : {}),
+      };
+
       res.status(201).json({
         message: "User created successfully",
         user: {
           id: user._id,
           email: user.email,
           role: user.role,
-          profile: user.profile,
+          profile: mergedProfile,
           roleData: roleProfile,
         },
       });
