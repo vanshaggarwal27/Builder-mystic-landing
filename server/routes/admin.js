@@ -433,10 +433,17 @@ router.put(
           break;
       }
 
+      // Merge role data into profile for frontend compatibility
+      const mergedProfile = {
+        ...updatedUser.profile,
+        ...(updatedRoleData || {}),
+      };
+
       res.json({
         message: "User updated successfully",
         user: {
           ...updatedUser.toObject(),
+          profile: mergedProfile,
           roleData: updatedRoleData || {},
         },
       });
