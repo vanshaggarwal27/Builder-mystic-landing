@@ -95,20 +95,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password, role }),
       });
 
-      // Check content type to determine how to parse
-      const contentType = response.headers.get("content-type");
+      // Parse response body only once
       let data;
-
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
+      try {
         const responseText = await response.text();
-        try {
-          data = responseText ? JSON.parse(responseText) : {};
-        } catch (parseError) {
-          console.error("❌ JSON parse error:", parseError);
-          throw new Error("Invalid response from server");
-        }
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch (parseError) {
+        console.error("❌ JSON parse error:", parseError);
+        throw new Error("Invalid response from server");
       }
 
       if (!response.ok) {
