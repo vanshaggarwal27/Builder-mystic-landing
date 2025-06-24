@@ -129,12 +129,10 @@ router.post(
       await roleProfile.save();
 
       // Auto-assign student to class if it exists
-      if (role === "student" && grade) {
+      if (role === "student" && roleProfile.grade && roleProfile.section) {
         try {
-          const className = grade; // grade already contains format like "10-A"
-          const existingClass = await Class.findOne({
-            name: `Grade ${className}`,
-          });
+          const className = `Grade ${roleProfile.grade}-${roleProfile.section}`;
+          const existingClass = await Class.findOne({ name: className });
 
           if (existingClass) {
             // Check if class has capacity
@@ -144,16 +142,16 @@ router.post(
               await existingClass.save();
 
               console.log(
-                `Student ${studentId} automatically assigned to class: Grade ${className}`,
+                `Student ${roleProfile.studentId} automatically assigned to class: ${className}`,
               );
             } else {
               console.log(
-                `Class Grade ${className} is at full capacity, student not auto-assigned`,
+                `Class ${className} is at full capacity, student not auto-assigned`,
               );
             }
           } else {
             console.log(
-              `Class Grade ${className} not found, student not auto-assigned`,
+              `Class ${className} not found, student not auto-assigned`,
             );
           }
         } catch (classError) {
