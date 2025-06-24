@@ -282,8 +282,12 @@ router.put(
   ],
   async (req, res) => {
     try {
+      console.log("UPDATE USER REQUEST - ID:", req.params.id);
+      console.log("UPDATE USER REQUEST - Body:", req.body);
+
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        console.log("Validation errors:", errors.array());
         return res.status(400).json({ errors: errors.array() });
       }
 
