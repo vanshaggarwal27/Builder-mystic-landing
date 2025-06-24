@@ -197,9 +197,16 @@ router.get("/users", [auth, auth.requireRole(["admin"])], async (req, res) => {
             break;
         }
 
+        // Merge role data into the profile
+        const mergedProfile = {
+          ...user.profile,
+          ...(roleData || {}),
+        };
+
         return {
           ...user.toObject(),
-          roleData: roleData || {},
+          profile: mergedProfile,
+          roleData: roleData || {}, // Keep for backward compatibility
         };
       }),
     );
