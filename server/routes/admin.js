@@ -2,6 +2,7 @@ const express = require("express");
 const { body, validationResult } = require("express-validator");
 const auth = require("../middleware/auth");
 const { User, Student, Teacher, Admin } = require("../models/User");
+const Class = require("../models/Class");
 
 const router = express.Router();
 
