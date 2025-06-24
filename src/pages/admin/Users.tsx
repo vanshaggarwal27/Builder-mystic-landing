@@ -128,7 +128,9 @@ export default function AdminUsers() {
         role: user.role,
         grade:
           user.role === "student"
-            ? user.profile.grade || "Not assigned"
+            ? user.profile.grade && user.profile.section
+              ? `Grade ${user.profile.grade}-${user.profile.section}`
+              : user.profile.grade || "Not assigned"
             : undefined,
         department:
           user.role === "teacher"
