@@ -182,7 +182,7 @@ router.get("/users", [auth, auth.requireRole(["admin"])], async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
 
-    // Get role-specific data for each user
+    // Get role-specific data for each user and merge into profile
     const usersWithRoleData = await Promise.all(
       users.map(async (user) => {
         let roleData = {};
@@ -198,8 +198,15 @@ router.get("/users", [auth, auth.requireRole(["admin"])], async (req, res) => {
             break;
         }
 
+        // Merge role data into profile for frontend compatibility
+        const mergedProfile = {
+          ...user.profile,
+          ...(roleData || {}),
+        };
+
         return {
           ...user.toObject(),
+          profile: mergedProfile,
           roleData: roleData || {},
         };
       }),
@@ -211,6 +218,51 @@ router.get("/users", [auth, auth.requireRole(["admin"])], async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+// Get single user details (admin only)
+router.get(
+  "/users/:id",
+  [auth, auth.requireRole(["admin"])],
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get role-specific data
+      let roleData = {};
+      switch (user.role) {
+        case "student":
+          roleData = await Student.findOne({ user: user._id }).lean();
+          break;
+        case "teacher":
+          roleData = await Teacher.findOne({ user: user._id }).lean();
+          break;
+        case "admin":
+          roleData = await Admin.findOne({ user: user._id }).lean();
+          break;
+      }
+
+      // Merge role data into profile for frontend compatibility
+      const mergedProfile = {
+        ...user.profile,
+        ...(roleData || {}),
+      };
+
+      res.json({
+        user: {
+          ...user.toObject(),
+          profile: mergedProfile,
+          roleData: roleData || {},
+        },
+      });
+    } catch (error) {
+      console.error("Get user details error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
 
 // Update user (admin only)
 router.put(
