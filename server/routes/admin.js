@@ -115,6 +115,40 @@ router.post(
 
       await roleProfile.save();
 
+      // Auto-assign student to class if it exists
+      if (role === "student" && grade) {
+        try {
+          const className = grade; // grade already contains format like "10-A"
+          const existingClass = await Class.findOne({
+            name: `Grade ${className}`,
+          });
+
+          if (existingClass) {
+            // Check if class has capacity
+            if (existingClass.students.length < existingClass.capacity) {
+              // Add student to class
+              existingClass.students.push(roleProfile._id);
+              await existingClass.save();
+
+              console.log(
+                `Student ${studentId} automatically assigned to class: Grade ${className}`,
+              );
+            } else {
+              console.log(
+                `Class Grade ${className} is at full capacity, student not auto-assigned`,
+              );
+            }
+          } else {
+            console.log(
+              `Class Grade ${className} not found, student not auto-assigned`,
+            );
+          }
+        } catch (classError) {
+          console.error("Error auto-assigning student to class:", classError);
+          // Don't fail user creation if class assignment fails
+        }
+      }
+
       res.status(201).json({
         message: "User created successfully",
         user: {
@@ -122,6 +156,7 @@ router.post(
           email: user.email,
           role: user.role,
           profile: user.profile,
+          roleData: roleProfile,
         },
       });
     } catch (error) {
