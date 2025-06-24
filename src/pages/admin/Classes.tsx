@@ -158,15 +158,86 @@ export default function AdminClasses() {
     "12",
   ];
 
+  const sections = ["A", "B", "C", "D"];
+
   const handleCreateClass = async () => {
-    // For real classes, we don't create classes directly
-    // Classes are created automatically when students are assigned
-    toast({
-      title: "Classes Auto-Created",
-      description:
-        "Classes are automatically created when you assign students to Grade-Section combinations. Create students instead.",
-    });
-    setIsCreateDialogOpen(false);
+    if (!newClass.grade || !newClass.section) {
+      toast({
+        title: "Error",
+        description: "Please select both grade and section",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const className = `Grade ${newClass.grade}-${newClass.section}`;
+      const classData = {
+        name: className,
+        grade: newClass.grade,
+        section: newClass.section,
+        room: newClass.room || "Not assigned",
+        capacity: parseInt(newClass.capacity) || 40,
+        academicYear: newClass.academicYear,
+      };
+
+      await apiCall("/classes", {
+        method: "POST",
+        body: JSON.stringify(classData),
+      });
+
+      toast({
+        title: "Class Created Successfully",
+        description: `${className} has been created with capacity of ${classData.capacity} students.`,
+      });
+
+      await loadClasses();
+      setIsCreateDialogOpen(false);
+      setNewClass({
+        name: "",
+        grade: "",
+        section: "",
+        room: "",
+        capacity: "40",
+        academicYear: "2024-25",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error Creating Class",
+        description:
+          error.message || "Failed to create class. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteClass = async (classId: string) => {
+    try {
+      await apiCall(`/classes/${classId}`, {
+        method: "DELETE",
+      });
+
+      toast({
+        title: "Class Deleted",
+        description: "Class has been deleted successfully.",
+      });
+
+      await loadClasses();
+    } catch (error: any) {
+      toast({
+        title: "Error Deleting Class",
+        description: error.message || "Failed to delete class.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewClassDetails = async (classData: ClassData) => {
+    setSelectedClass(classData);
+    setIsClassDetailsOpen(true);
   };
 
   const getLevelColor = (level: string) => {
