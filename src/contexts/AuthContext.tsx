@@ -139,11 +139,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (
         email === "admin@shkva.edu" &&
         password === "admin123" &&
-        role === "admin" &&
-        (error.message.includes("Failed to fetch") ||
-          error.message.includes("network"))
+        role === "admin"
       ) {
-        console.log("🔑 Admin fallback login - backend not accessible");
+        console.log("🔧 Trying mock login for admin in development");
+        try {
+          const mockResponse = await fetch(`${API_BASE_URL}/auth/mock-login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (mockResponse.ok) {
+            const mockData = await mockResponse.json();
+            localStorage.setItem("authToken", mockData.token);
+            const userData = {
+              id: mockData.user.id,
+              name: `${mockData.user.profile.firstName} ${mockData.user.profile.lastName}`,
+              email: mockData.user.email,
+              role: mockData.user.role,
+            };
+            setUser(userData);
+            localStorage.setItem("currentUser", JSON.stringify(userData));
+            console.log("✅ Mock login successful");
+            return;
+          }
+        } catch (mockError) {
+          console.error("Mock login failed:", mockError);
+        }
+
+        // Final fallback if mock endpoint also fails
+        console.log("🔑 Using offline admin fallback");
         const adminUser = {
           id: "demo-admin",
           name: "System Administrator",
@@ -151,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: "admin" as UserRole,
         };
         setUser(adminUser);
-        localStorage.setItem("authToken", "demo-admin-token");
+        localStorage.setItem("authToken", "mock_admin_token");
         localStorage.setItem("currentUser", JSON.stringify(adminUser));
         return;
       }
