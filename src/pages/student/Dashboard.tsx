@@ -160,40 +160,84 @@ export default function StudentDashboard() {
 
           {/* Today's Schedule */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Today's Schedule
-            </h3>
-            <div className="space-y-3">
-              {schedule.map((item, index) => (
-                <Card key={index} className="p-4 card-hover">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        item.status === "current"
-                          ? "bg-blue-500"
-                          : "bg-gray-300"
-                      }`}
-                    ></div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-gray-900">
-                          {item.subject}
-                        </h4>
-                        {item.status === "current" && (
-                          <Badge
-                            variant="secondary"
-                            className="bg-blue-100 text-blue-700"
-                          >
-                            Now
-                          </Badge>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Today's Schedule
+              </h3>
+              {isLoadingSchedule && (
+                <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+              )}
+            </div>
+
+            {isLoadingSchedule ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-gray-200 animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded animate-pulse w-24"></div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : todayScheduleWithStatus.length > 0 ? (
+              <div className="space-y-3">
+                {todayScheduleWithStatus.map((item, index) => (
+                  <Card key={item.id || index} className="p-4 card-hover">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          item.status === "current"
+                            ? "bg-blue-500"
+                            : "bg-gray-300"
+                        }`}
+                      ></div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-gray-900">
+                            {item.subject}
+                          </h4>
+                          {item.status === "current" && (
+                            <Badge
+                              variant="secondary"
+                              className="bg-blue-100 text-blue-700"
+                            >
+                              Now
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600">{item.time}</p>
+                        {item.teacher && (
+                          <p className="text-xs text-gray-500">
+                            Teacher: {item.teacher}
+                          </p>
+                        )}
+                        {item.room && (
+                          <p className="text-xs text-gray-500">
+                            Room: {item.room}
+                          </p>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600">{item.time}</p>
                     </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-6 text-center">
+                <Calendar className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600 mb-1">
+                  No classes scheduled for today
+                </p>
+                <p className="text-sm text-gray-500">
+                  {today === "Saturday" || today === "Sunday"
+                    ? "Enjoy your weekend!"
+                    : "Check back later for updates"}
+                </p>
+              </Card>
+            )}
           </div>
 
           {/* Upcoming Assignments */}
