@@ -341,39 +341,6 @@ export default function AdminClasses() {
                   />
                   Refresh
                 </Button>
-                <Button
-                  onClick={async () => {
-                    try {
-                      setIsLoading(true);
-                      const response = await apiCall(
-                        "/classes/reassign-students",
-                        {
-                          method: "POST",
-                        },
-                      );
-                      toast({
-                        title: "Student Assignments Fixed",
-                        description: `${response.assigned} students assigned, ${response.skipped} skipped`,
-                      });
-                      await loadClasses(); // Refresh the data
-                    } catch (error: any) {
-                      toast({
-                        title: "Error",
-                        description:
-                          error.message || "Failed to fix student assignments",
-                        variant: "destructive",
-                      });
-                    } finally {
-                      setIsLoading(false);
-                    }
-                  }}
-                  variant="outline"
-                  size="sm"
-                  disabled={isLoading}
-                  className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
-                >
-                  Fix Assignments
-                </Button>
               </div>
             </div>
           </div>
