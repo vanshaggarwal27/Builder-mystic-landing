@@ -209,33 +209,39 @@ app.use(morgan(config.server.env === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// MongoDB Connection with production configuration
+// MongoDB Connection
 const connectDB = async () => {
   try {
-    await mongoose.connect(
-      config.mongodb.uri || "mongodb://localhost:27017/shkva",
-      config.mongodb.options,
-    );
+    const mongoUri =
+      config.mongodb.uri ||
+      process.env.MONGODB_URI ||
+      "mongodb://localhost:27017/shkva";
+    await mongoose.connect(mongoUri, {
+      retryWrites: true,
+      w: "majority",
+    });
     console.log("✅ Connected to MongoDB");
 
     // Initialize sample data if database is empty
-    const { User, Student, Admin } = require("./models/User");
-    const Class = require("./models/Class");
-
+    const { User } = require("./models/User");
     const userCount = await User.countDocuments();
     if (userCount === 0) {
-      console.log("📊 Database is empty, creating sample data...");
+      console.log("📊 Database is empty, creating initial data...");
       await createInitialData();
     } else {
       console.log(`📊 Database has ${userCount} users`);
     }
   } catch (error) {
     console.error("❌ MongoDB connection error:", error.message);
-    console.log("⚠️  Continuing without database (some features may not work)");
+    throw error; // Don't continue without database
   }
 };
 
-connectDB();
+// Connect to database
+connectDB().catch((error) => {
+  console.error("Failed to connect to database:", error);
+  process.exit(1);
+});
 
 const db = mongoose.connection;
 db.on("error", (error) => {
