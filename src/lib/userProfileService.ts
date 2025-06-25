@@ -431,11 +431,51 @@ class UserProfileServiceClass {
         throw new Error("No authentication token found");
       }
 
-      // This would need a new backend endpoint to delete specific schedule entries
-      // For now, we'll throw an error to indicate this needs backend implementation
-      throw new Error(
-        "Delete schedule functionality needs backend implementation",
+      // First, find which class contains this schedule entry
+      const classesResponse = await fetch(`${this.API_BASE_URL}/classes`, {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!classesResponse.ok) {
+        throw new Error("Failed to fetch classes");
+      }
+
+      const classesData = await classesResponse.json();
+      let targetClassId = null;
+
+      // Find the class that contains this schedule entry
+      if (classesData.classes) {
+        for (const classData of classesData.classes) {
+          if (classData.schedule) {
+            const scheduleEntry = classData.schedule.find(
+              (s: any) => s._id === scheduleId,
+            );
+            if (scheduleEntry) {
+              targetClassId = classData._id;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!targetClassId) {
+        throw new Error("Schedule entry not found");
+      }
+
+      // Delete the schedule entry
+      const response = await fetch(
+        `${this.API_BASE_URL}/classes/${targetClassId}/schedule/${scheduleId}`,
+        {
+          method: "DELETE",
+          headers: this.getAuthHeaders(),
+        },
       );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete schedule");
+      }
     } catch (error) {
       console.error("Failed to delete class schedule:", error);
       throw error;
