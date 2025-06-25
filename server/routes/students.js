@@ -77,7 +77,11 @@ router.get(
         period: scheduleItem.period,
         subject: scheduleItem.subject,
         teacher: scheduleItem.teacher
-          ? `${scheduleItem.teacher.profile.firstName} ${scheduleItem.teacher.profile.lastName}`
+          ? typeof scheduleItem.teacher === "string"
+            ? scheduleItem.teacher
+            : scheduleItem.teacher.profile
+              ? `${scheduleItem.teacher.profile.firstName} ${scheduleItem.teacher.profile.lastName}`
+              : "TBA"
           : "TBA",
         time:
           scheduleItem.startTime && scheduleItem.endTime
