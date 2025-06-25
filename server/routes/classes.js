@@ -395,39 +395,10 @@ router.post(
       let skippedCount = 0;
 
       for (const student of students) {
-        if (student.grade && student.section) {
-          // Normalize grade format
-          let normalizedGrade = student.grade;
-          if (normalizedGrade.startsWith("Grade ")) {
-            normalizedGrade = normalizedGrade.replace("Grade ", "");
-          }
-
-          const className = `Grade ${normalizedGrade}-${student.section}`;
-          const targetClass = await Class.findOne({ name: className });
-
-          if (targetClass) {
-            // Check capacity
-            if (targetClass.students.length < targetClass.capacity) {
-              targetClass.students.push(student._id);
-              await targetClass.save();
-              assignedCount++;
-              console.log(`✅ Assigned ${student.studentId} to ${className}`);
-            } else {
-              console.log(
-                `⚠️  Class ${className} at capacity, skipped ${student.studentId}`,
-              );
-              skippedCount++;
-            }
-          } else {
-            console.log(
-              `❌ No class found for ${student.studentId}: ${className}`,
-            );
-            skippedCount++;
-          }
+        const success = await assignStudentToClass(student);
+        if (success) {
+          assignedCount++;
         } else {
-          console.log(
-            `⚠️  Student ${student.studentId} has no grade/section info`,
-          );
           skippedCount++;
         }
       }
