@@ -660,11 +660,17 @@ export default function AdminSchedule() {
                             <SelectValue placeholder="Select class" />
                           </SelectTrigger>
                           <SelectContent>
-                            {classes.map((cls) => (
-                              <SelectItem key={cls} value={cls}>
-                                {cls}
+                            {availableClasses.length > 0 ? (
+                              availableClasses.map((cls) => (
+                                <SelectItem key={cls} value={cls}>
+                                  {cls}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="no-classes" disabled>
+                                No classes available - Create classes first
                               </SelectItem>
-                            ))}
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
