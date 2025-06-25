@@ -329,18 +329,52 @@ export default function AdminClasses() {
                   </span>
                 </p>
               </div>
-              <Button
-                onClick={loadClasses}
-                variant="outline"
-                size="sm"
-                disabled={isLoadingClasses}
-                className="ml-3"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 mr-1 ${isLoadingClasses ? "animate-spin" : ""}`}
-                />
-                Refresh
-              </Button>
+              <div className="flex gap-2 ml-3">
+                <Button
+                  onClick={loadClasses}
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoadingClasses}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-1 ${isLoadingClasses ? "animate-spin" : ""}`}
+                  />
+                  Refresh
+                </Button>
+                <Button
+                  onClick={async () => {
+                    try {
+                      setIsLoading(true);
+                      const response = await apiCall(
+                        "/admin/fix-student-assignments",
+                        {
+                          method: "POST",
+                        },
+                      );
+                      toast({
+                        title: "Student Assignments Fixed",
+                        description: `${response.assigned} students assigned, ${response.skipped} skipped`,
+                      });
+                      await loadClasses(); // Refresh the data
+                    } catch (error: any) {
+                      toast({
+                        title: "Error",
+                        description:
+                          error.message || "Failed to fix student assignments",
+                        variant: "destructive",
+                      });
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoading}
+                  className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                >
+                  Fix Assignments
+                </Button>
+              </div>
             </div>
           </div>
 
