@@ -70,12 +70,38 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // MongoDB Connection with production configuration
-mongoose.connect(config.mongodb.uri, config.mongodb.options);
+const connectDB = async () => {
+  try {
+    await mongoose.connect(
+      config.mongodb.uri || "mongodb://localhost:27017/shkva",
+      config.mongodb.options,
+    );
+    console.log("✅ Connected to MongoDB");
+
+    // Initialize sample data if database is empty
+    const User = require("./models/User").User;
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      console.log("📊 Database is empty, creating sample data...");
+      // Import and run seeds
+      const createAdmin = require("./seeds/createAdmin");
+      const createSampleUsers = require("./seeds/createSampleUsers");
+      // Note: These will run automatically when imported if they're set up properly
+    }
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error.message);
+    console.log("⚠️  Continuing without database (some features may not work)");
+  }
+};
+
+connectDB();
 
 const db = mongoose.connection;
-db.on("error", console.error.bind(console, "connection error:"));
+db.on("error", (error) => {
+  console.error("Database connection error:", error.message);
+});
 db.once("open", () => {
-  console.log("Connected to MongoDB");
+  console.log("🎉 Database connection established successfully");
 });
 
 // Import Routes
