@@ -346,7 +346,7 @@ export default function AdminClasses() {
                     try {
                       setIsLoading(true);
                       const response = await apiCall(
-                        "/admin/fix-student-assignments",
+                        "/classes/reassign-students",
                         {
                           method: "POST",
                         },
