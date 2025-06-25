@@ -556,20 +556,50 @@ export default function AdminClasses() {
                 <div>Classes found: {classesList.length}</div>
                 <div>Total students: {stats.totalStudents}</div>
                 <div>Check browser console for detailed logs</div>
-                <Button
-                  onClick={() => {
-                    console.log("Current classes state:", classesList);
-                    toast({
-                      title: "Debug Info",
-                      description: `${classesList.length} classes, ${stats.totalStudents} students. Check console for details.`,
-                    });
-                  }}
-                  size="sm"
-                  variant="outline"
-                  className="mt-2"
-                >
-                  Log Debug Info
-                </Button>
+                <div className="flex gap-2 mt-2">
+                  <Button
+                    onClick={() => {
+                      console.log("Current classes state:", classesList);
+                      toast({
+                        title: "Debug Info",
+                        description: `${classesList.length} classes, ${stats.totalStudents} students. Check console for details.`,
+                      });
+                    }}
+                    size="sm"
+                    variant="outline"
+                  >
+                    Log Debug Info
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await apiCall(
+                          "/classes/reassign-students",
+                          {
+                            method: "POST",
+                          },
+                        );
+                        toast({
+                          title: "Students Reassigned",
+                          description: `${response.assigned} students assigned, ${response.skipped} skipped`,
+                        });
+                        await loadClasses(); // Refresh the data
+                      } catch (error: any) {
+                        toast({
+                          title: "Error",
+                          description:
+                            error.message || "Failed to reassign students",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    size="sm"
+                    variant="outline"
+                    className="bg-blue-50 hover:bg-blue-100"
+                  >
+                    Reassign Students
+                  </Button>
+                </div>
               </div>
             </div>
           )}
