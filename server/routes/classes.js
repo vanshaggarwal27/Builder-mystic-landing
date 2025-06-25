@@ -273,6 +273,37 @@ router.post(
   },
 );
 
+// Delete schedule entry from class (admin only)
+router.delete(
+  "/:classId/schedule/:scheduleId",
+  [auth, auth.requireRole(["admin"])],
+  async (req, res) => {
+    try {
+      const { classId, scheduleId } = req.params;
+
+      const classDoc = await Class.findById(classId);
+      if (!classDoc) {
+        return res.status(404).json({ error: "Class not found" });
+      }
+
+      // Remove schedule entry
+      classDoc.schedule = classDoc.schedule.filter(
+        (schedule) => schedule._id.toString() !== scheduleId,
+      );
+
+      await classDoc.save();
+
+      res.json({
+        message: "Schedule entry deleted successfully",
+        class: classDoc,
+      });
+    } catch (error) {
+      console.error("Delete schedule error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
 // Get class by ID with full details
 router.get("/:id", [auth], async (req, res) => {
   try {
