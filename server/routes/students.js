@@ -61,7 +61,7 @@ router.get(
       const Class = require("../models/Class");
       const studentClass = await Class.findOne({
         students: student._id,
-      }).populate("schedule.teacher", "profile teacherId");
+      });
 
       if (!studentClass) {
         return res.json({
@@ -76,9 +76,7 @@ router.get(
         day: scheduleItem.day,
         period: scheduleItem.period,
         subject: scheduleItem.subject,
-        teacher: scheduleItem.teacher
-          ? `${scheduleItem.teacher.profile.firstName} ${scheduleItem.teacher.profile.lastName}`
-          : "TBA",
+        teacher: scheduleItem.teacher || "TBA",
         time:
           scheduleItem.startTime && scheduleItem.endTime
             ? `${scheduleItem.startTime} - ${scheduleItem.endTime}`

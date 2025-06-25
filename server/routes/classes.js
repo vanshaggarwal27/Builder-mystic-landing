@@ -310,8 +310,7 @@ router.get("/:id", [auth], async (req, res) => {
     const classDoc = await Class.findById(req.params.id)
       .populate("classTeacher", "profile teacherId")
       .populate("students", "profile studentId")
-      .populate("subjects.teacher", "profile teacherId")
-      .populate("schedule.teacher", "profile teacherId");
+      .populate("subjects.teacher", "profile teacherId");
 
     if (!classDoc) {
       return res.status(404).json({ error: "Class not found" });
