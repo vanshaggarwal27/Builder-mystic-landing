@@ -12,6 +12,146 @@ const config = require("./config/production");
 
 const app = express();
 
+// Function to create initial data
+async function createInitialData() {
+  try {
+    const { User, Student, Admin } = require("./models/User");
+    const Class = require("./models/Class");
+
+    // Create admin user
+    const adminUser = new User({
+      email: "admin@shkva.edu",
+      password: "admin123",
+      role: "admin",
+      profile: {
+        firstName: "System",
+        lastName: "Administrator",
+        phone: "+1234567890",
+      },
+    });
+    await adminUser.save();
+
+    const adminProfile = new Admin({
+      user: adminUser._id,
+      adminId: "ADM001",
+    });
+    await adminProfile.save();
+    console.log("✅ Admin user created: admin@shkva.edu / admin123");
+
+    // Create sample classes
+    const sampleClasses = [
+      {
+        name: "Grade 10-A",
+        grade: "10",
+        section: "A",
+        room: "101",
+        capacity: 40,
+      },
+      {
+        name: "Grade 10-B",
+        grade: "10",
+        section: "B",
+        room: "102",
+        capacity: 40,
+      },
+      {
+        name: "Grade 11-A",
+        grade: "11",
+        section: "A",
+        room: "201",
+        capacity: 35,
+      },
+      {
+        name: "Grade 11-B",
+        grade: "11",
+        section: "B",
+        room: "202",
+        capacity: 35,
+      },
+    ];
+
+    for (const classData of sampleClasses) {
+      const newClass = new Class(classData);
+      await newClass.save();
+      console.log(`✅ Class created: ${classData.name}`);
+    }
+
+    // Create sample students
+    const sampleStudents = [
+      {
+        email: "student1@shkva.edu",
+        firstName: "John",
+        lastName: "Smith",
+        grade: "10",
+        section: "A",
+      },
+      {
+        email: "student2@shkva.edu",
+        firstName: "Alice",
+        lastName: "Johnson",
+        grade: "10",
+        section: "A",
+      },
+      {
+        email: "student3@shkva.edu",
+        firstName: "Bob",
+        lastName: "Wilson",
+        grade: "10",
+        section: "B",
+      },
+      {
+        email: "student4@shkva.edu",
+        firstName: "Carol",
+        lastName: "Davis",
+        grade: "11",
+        section: "A",
+      },
+    ];
+
+    for (const studentData of sampleStudents) {
+      const studentUser = new User({
+        email: studentData.email,
+        password: "student123",
+        role: "student",
+        profile: {
+          firstName: studentData.firstName,
+          lastName: studentData.lastName,
+          phone: "+1234567890",
+          dateOfBirth: new Date("2005-06-15"),
+          gender: "male",
+        },
+      });
+      await studentUser.save();
+
+      const studentProfile = new Student({
+        user: studentUser._id,
+        studentId: `STU${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 100)}`,
+        grade: studentData.grade,
+        section: studentData.section,
+        rollNumber: `${studentData.grade}${studentData.section}${String(sampleStudents.indexOf(studentData) + 1).padStart(2, "0")}`,
+        academicYear: "2024-25",
+        admissionDate: new Date("2024-01-01"),
+      });
+      await studentProfile.save();
+
+      // Auto-assign to class
+      const className = `Grade ${studentData.grade}-${studentData.section}`;
+      const targetClass = await Class.findOne({ name: className });
+      if (targetClass) {
+        targetClass.students.push(studentProfile._id);
+        await targetClass.save();
+        console.log(
+          `✅ Student assigned: ${studentData.firstName} ${studentData.lastName} -> ${className}`,
+        );
+      }
+    }
+
+    console.log("🎉 Sample data created successfully!");
+  } catch (error) {
+    console.error("❌ Error creating initial data:", error);
+  }
+}
+
 // Trust proxy for production deployments
 if (config.security.trustProxy) {
   app.set("trust proxy", 1);
@@ -69,13 +209,46 @@ app.use(morgan(config.server.env === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// MongoDB Connection with production configuration
-mongoose.connect(config.mongodb.uri, config.mongodb.options);
+// MongoDB Connection
+const connectDB = async () => {
+  try {
+    const mongoUri =
+      config.mongodb.uri ||
+      process.env.MONGODB_URI ||
+      "mongodb://localhost:27017/shkva";
+    await mongoose.connect(mongoUri, {
+      retryWrites: true,
+      w: "majority",
+    });
+    console.log("✅ Connected to MongoDB");
+
+    // Initialize sample data if database is empty
+    const { User } = require("./models/User");
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      console.log("📊 Database is empty, creating initial data...");
+      await createInitialData();
+    } else {
+      console.log(`📊 Database has ${userCount} users`);
+    }
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error.message);
+    throw error; // Don't continue without database
+  }
+};
+
+// Connect to database
+connectDB().catch((error) => {
+  console.error("Failed to connect to database:", error);
+  process.exit(1);
+});
 
 const db = mongoose.connection;
-db.on("error", console.error.bind(console, "connection error:"));
+db.on("error", (error) => {
+  console.error("Database connection error:", error.message);
+});
 db.once("open", () => {
-  console.log("Connected to MongoDB");
+  console.log("🎉 Database connection established successfully");
 });
 
 // Import Routes

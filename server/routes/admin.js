@@ -6,6 +6,63 @@ const Class = require("../models/Class");
 
 const router = express.Router();
 
+// Helper function to assign student to appropriate class
+async function assignStudentToClass(student) {
+  if (!student.grade || !student.section) {
+    console.log(`Student ${student.studentId} has no grade/section info`);
+    return false;
+  }
+
+  // Parse grade from various formats
+  let normalizedGrade = student.grade;
+
+  // Handle "Grade 12-A" format - extract just the grade number
+  if (normalizedGrade.includes("-")) {
+    const parts = normalizedGrade.split("-");
+    normalizedGrade = parts[0].replace("Grade ", "").trim();
+  }
+  // Handle "Grade 12" format
+  else if (normalizedGrade.startsWith("Grade ")) {
+    normalizedGrade = normalizedGrade.replace("Grade ", "").trim();
+  }
+
+  const className = `Grade ${normalizedGrade}-${student.section}`;
+  console.log(
+    `Looking for class: ${className} for student ${student.studentId}`,
+  );
+
+  const existingClass = await Class.findOne({ name: className });
+
+  if (existingClass) {
+    // Check if student is not already in the class
+    if (!existingClass.students.includes(student._id)) {
+      // Check if class has capacity
+      if (existingClass.students.length < existingClass.capacity) {
+        // Add student to class
+        existingClass.students.push(student._id);
+        await existingClass.save();
+        console.log(
+          `✅ Student ${student.studentId} assigned to class: ${className}`,
+        );
+        return true;
+      } else {
+        console.log(`⚠️ Class ${className} is at full capacity`);
+        return false;
+      }
+    } else {
+      console.log(
+        `ℹ️ Student ${student.studentId} already in class: ${className}`,
+      );
+      return true;
+    }
+  } else {
+    console.log(
+      `❌ Class ${className} not found for student ${student.studentId}`,
+    );
+    return false;
+  }
+}
+
 // Test route to verify admin routes are working
 router.get("/test", (req, res) => {
   res.json({ message: "Admin routes are working", timestamp: new Date() });
@@ -134,31 +191,9 @@ router.post(
       await roleProfile.save();
 
       // Auto-assign student to class if it exists
-      if (role === "student" && roleProfile.grade && roleProfile.section) {
+      if (role === "student") {
         try {
-          const className = `Grade ${roleProfile.grade}-${roleProfile.section}`;
-          const existingClass = await Class.findOne({ name: className });
-
-          if (existingClass) {
-            // Check if class has capacity
-            if (existingClass.students.length < existingClass.capacity) {
-              // Add student to class
-              existingClass.students.push(roleProfile._id);
-              await existingClass.save();
-
-              console.log(
-                `Student ${roleProfile.studentId} automatically assigned to class: ${className}`,
-              );
-            } else {
-              console.log(
-                `Class ${className} is at full capacity, student not auto-assigned`,
-              );
-            }
-          } else {
-            console.log(
-              `Class ${className} not found, student not auto-assigned`,
-            );
-          }
+          await assignStudentToClass(roleProfile);
         } catch (classError) {
           console.error("Error auto-assigning student to class:", classError);
           // Don't fail user creation if class assignment fails
@@ -490,6 +525,51 @@ router.delete(
       res.json({ message: "User deleted successfully" });
     } catch (error) {
       console.error("Delete user error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
+// Fix all existing student-class assignments (admin only)
+router.post(
+  "/fix-student-assignments",
+  [auth, auth.requireRole(["admin"])],
+  async (req, res) => {
+    try {
+      console.log("🔧 Starting to fix all student-class assignments...");
+
+      // Get all students
+      const students = await Student.find();
+      console.log(`Found ${students.length} students to process`);
+
+      // Clear all current class assignments
+      await Class.updateMany({}, { students: [] });
+      console.log("Cleared all current class assignments");
+
+      let assignedCount = 0;
+      let skippedCount = 0;
+
+      for (const student of students) {
+        const success = await assignStudentToClass(student);
+        if (success) {
+          assignedCount++;
+        } else {
+          skippedCount++;
+        }
+      }
+
+      console.log(
+        `✅ Assignment complete: ${assignedCount} assigned, ${skippedCount} skipped`,
+      );
+
+      res.json({
+        message: "Student assignments fixed successfully",
+        assigned: assignedCount,
+        skipped: skippedCount,
+        totalStudents: students.length,
+      });
+    } catch (error) {
+      console.error("Fix assignments error:", error);
       res.status(500).json({ error: "Server error" });
     }
   },

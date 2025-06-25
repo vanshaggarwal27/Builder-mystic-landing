@@ -314,4 +314,111 @@ router.delete("/:id", [auth, auth.requireRole(["admin"])], async (req, res) => {
   }
 });
 
+// Helper function to assign student to appropriate class
+async function assignStudentToClass(student) {
+  if (!student.grade || !student.section) {
+    console.log(`Student ${student.studentId} has no grade/section info`);
+    return false;
+  }
+
+  // Parse grade from various formats
+  let normalizedGrade = student.grade;
+
+  // Handle "Grade 12-A" format - extract just the grade number
+  if (normalizedGrade.includes("-")) {
+    const parts = normalizedGrade.split("-");
+    normalizedGrade = parts[0].replace("Grade ", "").trim();
+  }
+  // Handle "Grade 12" format
+  else if (normalizedGrade.startsWith("Grade ")) {
+    normalizedGrade = normalizedGrade.replace("Grade ", "").trim();
+  }
+
+  const className = `Grade ${normalizedGrade}-${student.section}`;
+  console.log(
+    `Looking for class: ${className} for student ${student.studentId}`,
+  );
+
+  const existingClass = await Class.findOne({ name: className });
+
+  if (existingClass) {
+    // Check if student is not already in the class
+    if (!existingClass.students.includes(student._id)) {
+      // Check if class has capacity
+      if (existingClass.students.length < existingClass.capacity) {
+        // Add student to class
+        existingClass.students.push(student._id);
+        await existingClass.save();
+        console.log(
+          `✅ Student ${student.studentId} assigned to class: ${className}`,
+        );
+        return true;
+      } else {
+        console.log(`⚠️ Class ${className} is at full capacity`);
+        return false;
+      }
+    } else {
+      console.log(
+        `ℹ️ Student ${student.studentId} already in class: ${className}`,
+      );
+      return true;
+    }
+  } else {
+    console.log(
+      `❌ Class ${className} not found for student ${student.studentId}`,
+    );
+    return false;
+  }
+}
+
+// Debug: Reassign all students to their appropriate classes (admin only)
+router.post(
+  "/reassign-students",
+  [auth, auth.requireRole(["admin"])],
+  async (req, res) => {
+    try {
+      console.log("Starting student reassignment process...");
+
+      // Get all students
+      const students = await Student.find();
+      console.log(`Found ${students.length} students to process`);
+
+      // Get all classes
+      const classes = await Class.find();
+      console.log(`Found ${classes.length} classes available`);
+
+      // Clear all current class assignments
+      await Class.updateMany({}, { students: [] });
+      console.log("Cleared all current class assignments");
+
+      let assignedCount = 0;
+      let skippedCount = 0;
+
+      for (const student of students) {
+        const success = await assignStudentToClass(student);
+        if (success) {
+          assignedCount++;
+        } else {
+          skippedCount++;
+        }
+      }
+
+      console.log(
+        `Reassignment complete: ${assignedCount} assigned, ${skippedCount} skipped`,
+      );
+
+      res.json({
+        message: "Student reassignment completed",
+        assigned: assignedCount,
+        skipped: skippedCount,
+        totalStudents: students.length,
+        totalClasses: classes.length,
+      });
+    } catch (error) {
+      console.error("Reassign students error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
 module.exports = router;

@@ -17,7 +17,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Always use production backend for real authentication
+// Use production backend for real data
 const API_BASE_URL = "https://shkva-backend-new.onrender.com/api";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -133,26 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error: any) {
       console.error("❌ Backend login failed:", error);
 
-      // Special fallback for admin only when backend is not accessible
-      if (
-        email === "admin@shkva.edu" &&
-        password === "admin123" &&
-        role === "admin" &&
-        (error.message.includes("Failed to fetch") ||
-          error.message.includes("network"))
-      ) {
-        console.log("🔑 Admin fallback login - backend not accessible");
-        const adminUser = {
-          id: "demo-admin",
-          name: "System Administrator",
-          email: "admin@shkva.edu",
-          role: "admin" as UserRole,
-        };
-        setUser(adminUser);
-        localStorage.setItem("authToken", "demo-admin-token");
-        localStorage.setItem("currentUser", JSON.stringify(adminUser));
-        return;
-      }
+      // No fallback - use real backend only
 
       throw new Error(
         error.message || "Login failed. Please contact your admin.",

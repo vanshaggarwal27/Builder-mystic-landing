@@ -329,18 +329,52 @@ export default function AdminClasses() {
                   </span>
                 </p>
               </div>
-              <Button
-                onClick={loadClasses}
-                variant="outline"
-                size="sm"
-                disabled={isLoadingClasses}
-                className="ml-3"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 mr-1 ${isLoadingClasses ? "animate-spin" : ""}`}
-                />
-                Refresh
-              </Button>
+              <div className="flex gap-2 ml-3">
+                <Button
+                  onClick={loadClasses}
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoadingClasses}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-1 ${isLoadingClasses ? "animate-spin" : ""}`}
+                  />
+                  Refresh
+                </Button>
+                <Button
+                  onClick={async () => {
+                    try {
+                      setIsLoading(true);
+                      const response = await apiCall(
+                        "/classes/reassign-students",
+                        {
+                          method: "POST",
+                        },
+                      );
+                      toast({
+                        title: "Student Assignments Fixed",
+                        description: `${response.assigned} students assigned, ${response.skipped} skipped`,
+                      });
+                      await loadClasses(); // Refresh the data
+                    } catch (error: any) {
+                      toast({
+                        title: "Error",
+                        description:
+                          error.message || "Failed to fix student assignments",
+                        variant: "destructive",
+                      });
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoading}
+                  className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                >
+                  Fix Assignments
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -545,34 +579,6 @@ export default function AdminClasses() {
               />
             </Button>
           </div>
-
-          {/* Debug Section - only show in development */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="bg-yellow-50 p-3 rounded-lg mb-4 border border-yellow-200">
-              <h4 className="text-sm font-medium text-yellow-800 mb-2">
-                Debug Info:
-              </h4>
-              <div className="text-xs text-yellow-700 space-y-1">
-                <div>Classes found: {classesList.length}</div>
-                <div>Total students: {stats.totalStudents}</div>
-                <div>Check browser console for detailed logs</div>
-                <Button
-                  onClick={() => {
-                    console.log("Current classes state:", classesList);
-                    toast({
-                      title: "Debug Info",
-                      description: `${classesList.length} classes, ${stats.totalStudents} students. Check console for details.`,
-                    });
-                  }}
-                  size="sm"
-                  variant="outline"
-                  className="mt-2"
-                >
-                  Log Debug Info
-                </Button>
-              </div>
-            </div>
-          )}
 
           {/* Empty State */}
           {classesList.length === 0 && (
