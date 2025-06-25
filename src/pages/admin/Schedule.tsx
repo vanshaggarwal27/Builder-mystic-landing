@@ -129,6 +129,7 @@ export default function AdminSchedule() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [availableClasses, setAvailableClasses] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Load schedules from backend on component mount
@@ -139,28 +140,46 @@ export default function AdminSchedule() {
   const loadSchedules = async () => {
     try {
       setIsLoadingData(true);
-      const schedules = await UserProfileService.getClassSchedules();
+
+      // Load both schedules and available classes
+      const [schedules, classesResponse] = await Promise.all([
+        UserProfileService.getClassSchedules(),
+        fetch("https://shkva-backend-new.onrender.com/api/classes", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json",
+          },
+        }),
+      ]);
+
+      // Update available classes for dropdown
+      if (classesResponse.ok) {
+        const classesData = await classesResponse.json();
+        const classNames =
+          classesData.classes?.map((cls: any) => cls.name) || [];
+        setAvailableClasses(classNames);
+      }
 
       if (schedules && schedules.length > 0) {
-        // Convert backend schedules to frontend format
-        const formattedSchedules = schedules.map((schedule: any) => ({
-          id: schedule._id || schedule.id,
-          class: schedule.class,
-          day: schedule.day,
-          period: schedule.period,
-          subject: schedule.subject,
-          teacher: schedule.teacher,
-          time: schedule.time,
-          room: schedule.room,
-        }));
-        setTimetableList(formattedSchedules);
+        setTimetableList(schedules);
+        toast({
+          title: "Schedules Loaded",
+          description: `Found ${schedules.length} schedule entries across all classes.`,
+        });
+      } else {
+        setTimetableList([]);
+        toast({
+          title: "No Schedules",
+          description: "No schedules found. Create schedules for your classes.",
+        });
       }
     } catch (error) {
       console.error("Failed to load schedules:", error);
-      // Keep using the demo data as fallback
+      setTimetableList(initialTimetable);
       toast({
-        title: "Info",
-        description: "Using demo schedule data. Backend integration pending.",
+        title: "Error Loading Schedules",
+        description: "Using demo data. Check your connection and try again.",
+        variant: "destructive",
       });
     } finally {
       setIsLoadingData(false);
@@ -204,20 +223,21 @@ export default function AdminSchedule() {
   const handleDeleteEntry = async (id: string, type: "timetable" | "event") => {
     if (type === "timetable") {
       try {
-        // Try to delete from backend
         await UserProfileService.deleteClassSchedule(id);
-        setTimetableList((prev) => prev.filter((t) => t.id !== id));
+        // Reload the schedule list to reflect changes
+        await loadSchedules();
         toast({
           title: "Success",
           description:
             "Class schedule deleted! Students will no longer see this schedule.",
         });
-      } catch (error) {
-        // Fallback to local deletion if backend is unavailable
-        setTimetableList((prev) => prev.filter((t) => t.id !== id));
+      } catch (error: any) {
+        console.error("Delete error:", error);
         toast({
-          title: "Schedule Removed",
-          description: "Schedule removed locally. Backend integration pending.",
+          title: "Error",
+          description:
+            error.message || "Failed to delete schedule. Please try again.",
+          variant: "destructive",
         });
       }
     } else {
@@ -317,30 +337,25 @@ export default function AdminSchedule() {
           room: newEntry.room || "TBA",
         };
 
-        // Try to save to backend
+        // Save to backend
         try {
           const createdSchedule =
             await UserProfileService.createClassSchedule(scheduleData);
-          const timetableEntry = {
-            id: createdSchedule._id || createdSchedule.id,
-            ...scheduleData,
-          };
-          setTimetableList((prev) => [...prev, timetableEntry]);
+          // Reload the full schedule list to get updated data
+          await loadSchedules();
           toast({
             title: "Success",
             description:
               "Class schedule created and will be visible to students!",
           });
-        } catch (backendError) {
-          // Fallback to local storage if backend is unavailable
-          const timetableEntry = {
-            id: `TT${Date.now()}`,
-            ...scheduleData,
-          };
-          setTimetableList((prev) => [...prev, timetableEntry]);
+        } catch (backendError: any) {
+          console.error("Backend error:", backendError);
           toast({
-            title: "Schedule Added",
-            description: "Schedule saved locally. Backend integration pending.",
+            title: "Error",
+            description:
+              backendError.message ||
+              "Failed to create schedule. Please try again.",
+            variant: "destructive",
           });
         }
       } catch (error) {
@@ -645,11 +660,17 @@ export default function AdminSchedule() {
                             <SelectValue placeholder="Select class" />
                           </SelectTrigger>
                           <SelectContent>
-                            {classes.map((cls) => (
-                              <SelectItem key={cls} value={cls}>
-                                {cls}
+                            {availableClasses.length > 0 ? (
+                              availableClasses.map((cls) => (
+                                <SelectItem key={cls} value={cls}>
+                                  {cls}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="no-classes" disabled>
+                                No classes available - Create classes first
                               </SelectItem>
-                            ))}
+                            )}
                           </SelectContent>
                         </Select>
                       </div>

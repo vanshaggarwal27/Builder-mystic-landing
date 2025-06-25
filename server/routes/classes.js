@@ -273,6 +273,37 @@ router.post(
   },
 );
 
+// Delete schedule entry from class (admin only)
+router.delete(
+  "/:classId/schedule/:scheduleId",
+  [auth, auth.requireRole(["admin"])],
+  async (req, res) => {
+    try {
+      const { classId, scheduleId } = req.params;
+
+      const classDoc = await Class.findById(classId);
+      if (!classDoc) {
+        return res.status(404).json({ error: "Class not found" });
+      }
+
+      // Remove schedule entry
+      classDoc.schedule = classDoc.schedule.filter(
+        (schedule) => schedule._id.toString() !== scheduleId,
+      );
+
+      await classDoc.save();
+
+      res.json({
+        message: "Schedule entry deleted successfully",
+        class: classDoc,
+      });
+    } catch (error) {
+      console.error("Delete schedule error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
 // Get class by ID with full details
 router.get("/:id", [auth], async (req, res) => {
   try {
@@ -370,55 +401,5 @@ async function assignStudentToClass(student) {
     return false;
   }
 }
-
-// Debug: Reassign all students to their appropriate classes (admin only)
-router.post(
-  "/reassign-students",
-  [auth, auth.requireRole(["admin"])],
-  async (req, res) => {
-    try {
-      console.log("Starting student reassignment process...");
-
-      // Get all students
-      const students = await Student.find();
-      console.log(`Found ${students.length} students to process`);
-
-      // Get all classes
-      const classes = await Class.find();
-      console.log(`Found ${classes.length} classes available`);
-
-      // Clear all current class assignments
-      await Class.updateMany({}, { students: [] });
-      console.log("Cleared all current class assignments");
-
-      let assignedCount = 0;
-      let skippedCount = 0;
-
-      for (const student of students) {
-        const success = await assignStudentToClass(student);
-        if (success) {
-          assignedCount++;
-        } else {
-          skippedCount++;
-        }
-      }
-
-      console.log(
-        `Reassignment complete: ${assignedCount} assigned, ${skippedCount} skipped`,
-      );
-
-      res.json({
-        message: "Student reassignment completed",
-        assigned: assignedCount,
-        skipped: skippedCount,
-        totalStudents: students.length,
-        totalClasses: classes.length,
-      });
-    } catch (error) {
-      console.error("Reassign students error:", error);
-      res.status(500).json({ error: "Server error" });
-    }
-  },
-);
 
 module.exports = router;

@@ -320,8 +320,9 @@ export default function AdminClasses() {
                   Class Management System
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Create and manage classes, then assign students to them. Each
-                  class can have its own schedule and capacity.
+                  Create and manage classes. Students are automatically assigned
+                  when created. Each class can have its own schedule and
+                  capacity.
                   <span className="block text-xs text-indigo-600 mt-1">
                     {classesList.length === 0
                       ? "No classes created yet. Create your first class!"
@@ -340,39 +341,6 @@ export default function AdminClasses() {
                     className={`h-4 w-4 mr-1 ${isLoadingClasses ? "animate-spin" : ""}`}
                   />
                   Refresh
-                </Button>
-                <Button
-                  onClick={async () => {
-                    try {
-                      setIsLoading(true);
-                      const response = await apiCall(
-                        "/classes/reassign-students",
-                        {
-                          method: "POST",
-                        },
-                      );
-                      toast({
-                        title: "Student Assignments Fixed",
-                        description: `${response.assigned} students assigned, ${response.skipped} skipped`,
-                      });
-                      await loadClasses(); // Refresh the data
-                    } catch (error: any) {
-                      toast({
-                        title: "Error",
-                        description:
-                          error.message || "Failed to fix student assignments",
-                        variant: "destructive",
-                      });
-                    } finally {
-                      setIsLoading(false);
-                    }
-                  }}
-                  variant="outline"
-                  size="sm"
-                  disabled={isLoading}
-                  className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
-                >
-                  Fix Assignments
                 </Button>
               </div>
             </div>

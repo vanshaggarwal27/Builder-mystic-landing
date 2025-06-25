@@ -40,27 +40,58 @@ export default function StudentSchedule() {
       const profile = await UserProfileService.getCurrentUserProfile();
       setUserProfile(profile);
 
-      // Load user's class-specific schedule (this will now fetch admin-created schedules)
-      const scheduleData = await UserProfileService.getUserSchedule();
-      if (scheduleData.length > 0) {
-        setSchedule(scheduleData);
-        // Check if this is real admin-created data or demo data
-        const isRealSchedule = scheduleData.some(
-          (item) => !item.id.startsWith("mon-") && !item.id.startsWith("tue-"),
+      // Load user's real class schedule from backend
+      try {
+        const response = await fetch(
+          "https://shkva-backend-new.onrender.com/api/students/schedule",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+              "Content-Type": "application/json",
+            },
+          },
         );
-        if (isRealSchedule) {
-          toast({
-            title: "Class Schedule Loaded",
-            description: `Showing your assigned schedule for ${profile?.grade || "your class"}`,
-          });
+
+        if (response.ok) {
+          const scheduleData = await response.json();
+          if (scheduleData.schedule && scheduleData.schedule.length > 0) {
+            // Convert backend schedule to frontend format
+            const formattedSchedule = scheduleData.schedule.map(
+              (item: any) => ({
+                id: item.id,
+                day: item.day,
+                time: item.time,
+                subject: item.subject,
+                teacher: item.teacher,
+                room: item.room,
+                type: "class",
+              }),
+            );
+            setSchedule(formattedSchedule);
+            toast({
+              title: "Class Schedule Loaded",
+              description: `Showing schedule for ${scheduleData.className}`,
+            });
+          } else {
+            // No schedule found, use demo data
+            const defaultSchedule = UserProfileService.generateDefaultSchedule(
+              user?.role || "student",
+              profile?.grade,
+              profile?.department,
+            );
+            setSchedule(defaultSchedule);
+            toast({
+              title: "Demo Schedule",
+              description: `No schedule found for your class. Showing demo data.`,
+            });
+          }
         } else {
-          toast({
-            title: "Demo Schedule",
-            description: `No schedule created yet for ${profile?.grade || "your class"}. Contact admin.`,
-          });
+          throw new Error("Failed to fetch schedule");
         }
-      } else {
-        // Generate default schedule if no admin-created schedule exists
+      } catch (scheduleError) {
+        console.error("Failed to fetch real schedule:", scheduleError);
+        // Fallback to demo schedule
         const defaultSchedule = UserProfileService.generateDefaultSchedule(
           user?.role || "student",
           profile?.grade,
@@ -69,7 +100,7 @@ export default function StudentSchedule() {
         setSchedule(defaultSchedule);
         toast({
           title: "Demo Schedule",
-          description: `No schedule found for ${profile?.grade || "your class"}. Showing demo data.`,
+          description: `Using demo schedule. Contact admin if you need your real timetable.`,
         });
       }
     } catch (error) {
@@ -254,7 +285,12 @@ export default function StudentSchedule() {
             ) : (
               <div className="text-center py-8 text-gray-500">
                 <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                <p>No classes scheduled for today</p>
+                <div className="space-y-2">
+                  <p>No classes scheduled for today</p>
+                  <p className="text-xs text-blue-600">
+                    Ask your admin to create a schedule for your class
+                  </p>
+                </div>
                 <Button
                   variant="outline"
                   onClick={loadScheduleData}
