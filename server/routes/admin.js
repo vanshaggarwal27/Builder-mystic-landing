@@ -6,6 +6,63 @@ const Class = require("../models/Class");
 
 const router = express.Router();
 
+// Helper function to assign student to appropriate class
+async function assignStudentToClass(student) {
+  if (!student.grade || !student.section) {
+    console.log(`Student ${student.studentId} has no grade/section info`);
+    return false;
+  }
+
+  // Parse grade from various formats
+  let normalizedGrade = student.grade;
+
+  // Handle "Grade 12-A" format - extract just the grade number
+  if (normalizedGrade.includes("-")) {
+    const parts = normalizedGrade.split("-");
+    normalizedGrade = parts[0].replace("Grade ", "").trim();
+  }
+  // Handle "Grade 12" format
+  else if (normalizedGrade.startsWith("Grade ")) {
+    normalizedGrade = normalizedGrade.replace("Grade ", "").trim();
+  }
+
+  const className = `Grade ${normalizedGrade}-${student.section}`;
+  console.log(
+    `Looking for class: ${className} for student ${student.studentId}`,
+  );
+
+  const existingClass = await Class.findOne({ name: className });
+
+  if (existingClass) {
+    // Check if student is not already in the class
+    if (!existingClass.students.includes(student._id)) {
+      // Check if class has capacity
+      if (existingClass.students.length < existingClass.capacity) {
+        // Add student to class
+        existingClass.students.push(student._id);
+        await existingClass.save();
+        console.log(
+          `✅ Student ${student.studentId} assigned to class: ${className}`,
+        );
+        return true;
+      } else {
+        console.log(`⚠️ Class ${className} is at full capacity`);
+        return false;
+      }
+    } else {
+      console.log(
+        `ℹ️ Student ${student.studentId} already in class: ${className}`,
+      );
+      return true;
+    }
+  } else {
+    console.log(
+      `❌ Class ${className} not found for student ${student.studentId}`,
+    );
+    return false;
+  }
+}
+
 // Test route to verify admin routes are working
 router.get("/test", (req, res) => {
   res.json({ message: "Admin routes are working", timestamp: new Date() });
