@@ -142,25 +142,25 @@ export default function AdminSchedule() {
       const schedules = await UserProfileService.getClassSchedules();
 
       if (schedules && schedules.length > 0) {
-        // Convert backend schedules to frontend format
-        const formattedSchedules = schedules.map((schedule: any) => ({
-          id: schedule._id || schedule.id,
-          class: schedule.class,
-          day: schedule.day,
-          period: schedule.period,
-          subject: schedule.subject,
-          teacher: schedule.teacher,
-          time: schedule.time,
-          room: schedule.room,
-        }));
-        setTimetableList(formattedSchedules);
+        setTimetableList(schedules);
+        toast({
+          title: "Schedules Loaded",
+          description: `Found ${schedules.length} schedule entries across all classes.`,
+        });
+      } else {
+        setTimetableList([]);
+        toast({
+          title: "No Schedules",
+          description: "No schedules found. Create schedules for your classes.",
+        });
       }
     } catch (error) {
       console.error("Failed to load schedules:", error);
-      // Keep using the demo data as fallback
+      setTimetableList(initialTimetable);
       toast({
-        title: "Info",
-        description: "Using demo schedule data. Backend integration pending.",
+        title: "Error Loading Schedules",
+        description: "Using demo data. Check your connection and try again.",
+        variant: "destructive",
       });
     } finally {
       setIsLoadingData(false);
