@@ -84,7 +84,9 @@ class UserProfileServiceClass {
       }
 
       const data = await response.json();
-      return this.normalizeProfileData(data);
+      // Extract profile data from the response
+      const profileData = data.profile || data;
+      return this.normalizeProfileData(profileData);
     } catch (error) {
       console.warn("Profile fetch failed, using fallback:", error);
       return this.createFallbackProfile();
@@ -236,6 +238,9 @@ class UserProfileServiceClass {
    * Normalize profile data from different API formats
    */
   private normalizeProfileData(data: any): UserProfile {
+    // Handle nested parent contact information
+    const parentContact = data.parentContact || {};
+
     return {
       id: data.id || data._id || "unknown",
       firstName: data.firstName || data.first_name || "",
@@ -253,11 +258,25 @@ class UserProfileServiceClass {
       position: data.position || data.designation || "",
       experience: data.experience || "",
       subjects: data.subjects || data.teachingSubjects || "",
+      // Handle parent information from multiple possible sources
       parentName:
-        data.parentName || data.parent_name || data.guardianName || "",
+        data.parentName ||
+        data.parent_name ||
+        data.guardianName ||
+        parentContact.fatherName ||
+        parentContact.motherName ||
+        "",
       parentPhone:
-        data.parentPhone || data.parent_phone || data.guardianPhone || "",
-      emergencyContact: data.emergencyContact || data.emergency_contact || "",
+        data.parentPhone ||
+        data.parent_phone ||
+        data.guardianPhone ||
+        parentContact.guardianPhone ||
+        "",
+      emergencyContact:
+        data.emergencyContact ||
+        data.emergency_contact ||
+        parentContact.emergencyContact ||
+        "",
       admissionDate: data.admissionDate || data.admission_date || "",
       joiningDate: data.joiningDate || data.joining_date || "",
       role: data.role || "student",
