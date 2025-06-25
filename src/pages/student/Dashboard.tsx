@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   CheckCircle,
   Calendar,
   AlertTriangle,
   MessageCircle,
+  RefreshCw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
@@ -13,6 +14,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageTransition } from "@/components/layout/PageTransition";
+import {
+  UserProfileService,
+  UserProfile,
+  ScheduleItem,
+} from "@/lib/userProfileService";
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -183,18 +189,14 @@ export default function StudentDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold text-gray-900">
-                      Vadika sonal
+                        Vadika sonal
                       </h4>
                       <Badge className="bg-yellow-100 text-yellow-800">
-                      Batch 23-24
+                        Batch 23-24
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-700 mb-2">
-                    Score: 91%
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      
-                    </p>
+                    <p className="text-sm text-gray-700 mb-2">Score: 91%</p>
+                    <p className="text-xs text-gray-600"></p>
                   </div>
                 </div>
               </Card>
@@ -207,15 +209,13 @@ export default function StudentDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold text-gray-900">
-                      Nandani raj
+                        Nandani raj
                       </h4>
                       <Badge className="bg-green-100 text-green-800">
-                      Batch 24-25
+                        Batch 24-25
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-700 mb-2">
-                    Score: 90%
-                    </p>
+                    <p className="text-sm text-gray-700 mb-2">Score: 90%</p>
                     <p className="text-xs text-gray-600"></p>
                   </div>
                 </div>
@@ -228,18 +228,13 @@ export default function StudentDashboard() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-gray-900">
-                      Anshika 
-                      </h4>
+                      <h4 className="font-semibold text-gray-900">Anshika</h4>
                       <Badge className="bg-purple-100 text-purple-800">
-                      Batch 22-23
+                        Batch 22-23
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-700 mb-2">
-                    Score: 90%
-                    </p>
-                    <p className="text-xs text-gray-600">
-                    </p>
+                    <p className="text-sm text-gray-700 mb-2">Score: 90%</p>
+                    <p className="text-xs text-gray-600"></p>
                   </div>
                 </div>
               </Card>
