@@ -24,23 +24,78 @@ export default function StudentDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const schedule = [
-    {
-      subject: "Mathematics",
-      time: "9:00 - 10:00 AM",
-      status: "current" as const,
-    },
-    {
-      subject: "English",
-      time: "10:15 - 11:15 AM",
-      status: "upcoming" as const,
-    },
-    {
-      subject: "Science",
-      time: "11:30 - 12:30 PM",
-      status: "upcoming" as const,
-    },
-  ];
+  // State for real data
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState(true);
+
+  // Load real data on component mount
+  useEffect(() => {
+    loadStudentData();
+  }, []);
+
+  const loadStudentData = async () => {
+    try {
+      // Load profile data
+      setIsLoadingProfile(true);
+      const profile = await UserProfileService.getCurrentUserProfile();
+      setUserProfile(profile);
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    } finally {
+      setIsLoadingProfile(false);
+    }
+
+    try {
+      // Load schedule data
+      setIsLoadingSchedule(true);
+      const scheduleData = await UserProfileService.getUserSchedule();
+      setSchedule(scheduleData);
+    } catch (error) {
+      console.error("Error loading schedule:", error);
+    } finally {
+      setIsLoadingSchedule(false);
+    }
+  };
+
+  // Get today's schedule
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+  const todaySchedule = schedule.filter((item) => item.day === today);
+
+  // Get current time to determine which class is "current"
+  const currentTime = new Date();
+  const currentHour = currentTime.getHours();
+  const currentMinute = currentTime.getMinutes();
+
+  const todayScheduleWithStatus = todaySchedule.map((item) => {
+    const timeRange = item.time;
+    const startTimeStr = timeRange.split(" - ")[0] || timeRange.split("-")[0];
+
+    // Parse time (assuming format like "9:00" or "9:00 AM")
+    let startHour = 9; // default
+    try {
+      const timeParts = startTimeStr
+        .trim()
+        .replace(/\s*(AM|PM)/i, "")
+        .split(":");
+      startHour = parseInt(timeParts[0]);
+      if (startTimeStr.toLowerCase().includes("pm") && startHour !== 12) {
+        startHour += 12;
+      }
+    } catch (e) {
+      // Keep default if parsing fails
+    }
+
+    const isCurrent =
+      currentHour === startHour ||
+      (currentHour === startHour - 1 && currentMinute >= 45);
+
+    return {
+      ...item,
+      status: isCurrent ? ("current" as const) : ("upcoming" as const),
+    };
+  });
 
   const assignments = [
     {
