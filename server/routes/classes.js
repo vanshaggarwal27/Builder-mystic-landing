@@ -9,12 +9,6 @@ const router = express.Router();
 // Get all classes (admin only)
 router.get("/", [auth, auth.requireRole(["admin"])], async (req, res) => {
   try {
-    // Use mock data if database is not connected
-    if (req.useMockData) {
-      console.log("📊 Returning mock classes data");
-      return res.json({ classes: req.mockData.classes });
-    }
-
     const classes = await Class.find()
       .populate("classTeacher", "profile teacherId")
       .populate("subjects.teacher", "profile teacherId")
