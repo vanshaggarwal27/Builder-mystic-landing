@@ -136,22 +136,35 @@ router.post(
       // Auto-assign student to class if it exists
       if (role === "student" && roleProfile.grade && roleProfile.section) {
         try {
-          const className = `Grade ${roleProfile.grade}-${roleProfile.section}`;
+          // Normalize grade format - remove "Grade " prefix if present
+          let normalizedGrade = roleProfile.grade;
+          if (normalizedGrade.startsWith("Grade ")) {
+            normalizedGrade = normalizedGrade.replace("Grade ", "");
+          }
+
+          const className = `Grade ${normalizedGrade}-${roleProfile.section}`;
           const existingClass = await Class.findOne({ name: className });
 
           if (existingClass) {
-            // Check if class has capacity
-            if (existingClass.students.length < existingClass.capacity) {
-              // Add student to class
-              existingClass.students.push(roleProfile._id);
-              await existingClass.save();
+            // Check if student is not already in the class
+            if (!existingClass.students.includes(roleProfile._id)) {
+              // Check if class has capacity
+              if (existingClass.students.length < existingClass.capacity) {
+                // Add student to class
+                existingClass.students.push(roleProfile._id);
+                await existingClass.save();
 
-              console.log(
-                `Student ${roleProfile.studentId} automatically assigned to class: ${className}`,
-              );
+                console.log(
+                  `Student ${roleProfile.studentId} automatically assigned to class: ${className}`,
+                );
+              } else {
+                console.log(
+                  `Class ${className} is at full capacity, student not auto-assigned`,
+                );
+              }
             } else {
               console.log(
-                `Class ${className} is at full capacity, student not auto-assigned`,
+                `Student ${roleProfile.studentId} already assigned to class: ${className}`,
               );
             }
           } else {
