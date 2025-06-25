@@ -317,30 +317,25 @@ export default function AdminSchedule() {
           room: newEntry.room || "TBA",
         };
 
-        // Try to save to backend
+        // Save to backend
         try {
           const createdSchedule =
             await UserProfileService.createClassSchedule(scheduleData);
-          const timetableEntry = {
-            id: createdSchedule._id || createdSchedule.id,
-            ...scheduleData,
-          };
-          setTimetableList((prev) => [...prev, timetableEntry]);
+          // Reload the full schedule list to get updated data
+          await loadSchedules();
           toast({
             title: "Success",
             description:
               "Class schedule created and will be visible to students!",
           });
-        } catch (backendError) {
-          // Fallback to local storage if backend is unavailable
-          const timetableEntry = {
-            id: `TT${Date.now()}`,
-            ...scheduleData,
-          };
-          setTimetableList((prev) => [...prev, timetableEntry]);
+        } catch (backendError: any) {
+          console.error("Backend error:", backendError);
           toast({
-            title: "Schedule Added",
-            description: "Schedule saved locally. Backend integration pending.",
+            title: "Error",
+            description:
+              backendError.message ||
+              "Failed to create schedule. Please try again.",
+            variant: "destructive",
           });
         }
       } catch (error) {
