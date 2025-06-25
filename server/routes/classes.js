@@ -314,4 +314,83 @@ router.delete("/:id", [auth, auth.requireRole(["admin"])], async (req, res) => {
   }
 });
 
+// Debug: Reassign all students to their appropriate classes (admin only)
+router.post(
+  "/reassign-students",
+  [auth, auth.requireRole(["admin"])],
+  async (req, res) => {
+    try {
+      console.log("Starting student reassignment process...");
+
+      // Get all students
+      const students = await Student.find();
+      console.log(`Found ${students.length} students to process`);
+
+      // Get all classes
+      const classes = await Class.find();
+      console.log(`Found ${classes.length} classes available`);
+
+      // Clear all current class assignments
+      await Class.updateMany({}, { students: [] });
+      console.log("Cleared all current class assignments");
+
+      let assignedCount = 0;
+      let skippedCount = 0;
+
+      for (const student of students) {
+        if (student.grade && student.section) {
+          // Normalize grade format
+          let normalizedGrade = student.grade;
+          if (normalizedGrade.startsWith("Grade ")) {
+            normalizedGrade = normalizedGrade.replace("Grade ", "");
+          }
+
+          const className = `Grade ${normalizedGrade}-${student.section}`;
+          const targetClass = await Class.findOne({ name: className });
+
+          if (targetClass) {
+            // Check capacity
+            if (targetClass.students.length < targetClass.capacity) {
+              targetClass.students.push(student._id);
+              await targetClass.save();
+              assignedCount++;
+              console.log(`✅ Assigned ${student.studentId} to ${className}`);
+            } else {
+              console.log(
+                `⚠️  Class ${className} at capacity, skipped ${student.studentId}`,
+              );
+              skippedCount++;
+            }
+          } else {
+            console.log(
+              `❌ No class found for ${student.studentId}: ${className}`,
+            );
+            skippedCount++;
+          }
+        } else {
+          console.log(
+            `⚠️  Student ${student.studentId} has no grade/section info`,
+          );
+          skippedCount++;
+        }
+      }
+
+      console.log(
+        `Reassignment complete: ${assignedCount} assigned, ${skippedCount} skipped`,
+      );
+
+      res.json({
+        message: "Student reassignment completed",
+        assigned: assignedCount,
+        skipped: skippedCount,
+        totalStudents: students.length,
+        totalClasses: classes.length,
+      });
+    } catch (error) {
+      console.error("Reassign students error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
 module.exports = router;
