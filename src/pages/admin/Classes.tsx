@@ -546,64 +546,6 @@ export default function AdminClasses() {
             </Button>
           </div>
 
-          {/* Debug Section - only show in development */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="bg-yellow-50 p-3 rounded-lg mb-4 border border-yellow-200">
-              <h4 className="text-sm font-medium text-yellow-800 mb-2">
-                Debug Info:
-              </h4>
-              <div className="text-xs text-yellow-700 space-y-1">
-                <div>Classes found: {classesList.length}</div>
-                <div>Total students: {stats.totalStudents}</div>
-                <div>Check browser console for detailed logs</div>
-                <div className="flex gap-2 mt-2">
-                  <Button
-                    onClick={() => {
-                      console.log("Current classes state:", classesList);
-                      toast({
-                        title: "Debug Info",
-                        description: `${classesList.length} classes, ${stats.totalStudents} students. Check console for details.`,
-                      });
-                    }}
-                    size="sm"
-                    variant="outline"
-                  >
-                    Log Debug Info
-                  </Button>
-                  <Button
-                    onClick={async () => {
-                      try {
-                        const response = await apiCall(
-                          "/classes/reassign-students",
-                          {
-                            method: "POST",
-                          },
-                        );
-                        toast({
-                          title: "Students Reassigned",
-                          description: `${response.assigned} students assigned, ${response.skipped} skipped`,
-                        });
-                        await loadClasses(); // Refresh the data
-                      } catch (error: any) {
-                        toast({
-                          title: "Error",
-                          description:
-                            error.message || "Failed to reassign students",
-                          variant: "destructive",
-                        });
-                      }
-                    }}
-                    size="sm"
-                    variant="outline"
-                    className="bg-blue-50 hover:bg-blue-100"
-                  >
-                    Reassign Students
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Empty State */}
           {classesList.length === 0 && (
             <div className="text-center py-12">
