@@ -3,42 +3,8 @@ const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 const { User, Student, Teacher, Admin } = require("../models/User");
 const auth = require("../middleware/auth");
-const { isDatabaseConnected } = require("../middleware/mockData");
 
 const router = express.Router();
-
-// Mock login for development when database is unavailable
-router.post("/mock-login", async (req, res) => {
-  try {
-    if (isDatabaseConnected()) {
-      return res
-        .status(400)
-        .json({ error: "Use regular login when database is available" });
-    }
-
-    console.log("🔧 Mock login request");
-
-    // Return mock admin token and user data
-    res.json({
-      token: "mock_admin_token",
-      user: {
-        id: "mock_admin_1",
-        email: "admin@shkva.edu",
-        role: "admin",
-        profile: {
-          firstName: "System",
-          lastName: "Administrator",
-        },
-        roleData: {
-          adminId: "ADM001",
-        },
-      },
-    });
-  } catch (error) {
-    console.error("Mock login error:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-});
 
 // Login endpoint
 router.post(
