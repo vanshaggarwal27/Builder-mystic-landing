@@ -285,7 +285,12 @@ export default function StudentSchedule() {
             ) : (
               <div className="text-center py-8 text-gray-500">
                 <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                <p>No classes scheduled for today</p>
+                <div className="space-y-2">
+                  <p>No classes scheduled for today</p>
+                  <p className="text-xs text-blue-600">
+                    Ask your admin to create a schedule for your class
+                  </p>
+                </div>
                 <Button
                   variant="outline"
                   onClick={loadScheduleData}
