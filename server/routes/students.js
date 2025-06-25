@@ -61,7 +61,7 @@ router.get(
       const Class = require("../models/Class");
       const studentClass = await Class.findOne({
         students: student._id,
-      }).populate("schedule.teacher", "profile teacherId");
+      });
 
       if (!studentClass) {
         return res.json({
