@@ -135,52 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error: any) {
       console.error("❌ Backend login failed:", error);
 
-      // Special fallback for admin only when backend is not accessible
-      if (
-        email === "admin@shkva.edu" &&
-        password === "admin123" &&
-        role === "admin"
-      ) {
-        console.log("🔧 Trying mock login for admin in development");
-        try {
-          const mockResponse = await fetch(`${API_BASE_URL}/auth/mock-login`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-
-          if (mockResponse.ok) {
-            const mockData = await mockResponse.json();
-            localStorage.setItem("authToken", mockData.token);
-            const userData = {
-              id: mockData.user.id,
-              name: `${mockData.user.profile.firstName} ${mockData.user.profile.lastName}`,
-              email: mockData.user.email,
-              role: mockData.user.role,
-            };
-            setUser(userData);
-            localStorage.setItem("currentUser", JSON.stringify(userData));
-            console.log("✅ Mock login successful");
-            return;
-          }
-        } catch (mockError) {
-          console.error("Mock login failed:", mockError);
-        }
-
-        // Final fallback if mock endpoint also fails
-        console.log("🔑 Using offline admin fallback");
-        const adminUser = {
-          id: "demo-admin",
-          name: "System Administrator",
-          email: "admin@shkva.edu",
-          role: "admin" as UserRole,
-        };
-        setUser(adminUser);
-        localStorage.setItem("authToken", "mock_admin_token");
-        localStorage.setItem("currentUser", JSON.stringify(adminUser));
-        return;
-      }
+      // No fallback - use real backend only
 
       throw new Error(
         error.message || "Login failed. Please contact your admin.",
