@@ -140,7 +140,25 @@ export default function AdminSchedule() {
   const loadSchedules = async () => {
     try {
       setIsLoadingData(true);
-      const schedules = await UserProfileService.getClassSchedules();
+
+      // Load both schedules and available classes
+      const [schedules, classesResponse] = await Promise.all([
+        UserProfileService.getClassSchedules(),
+        fetch("https://shkva-backend-new.onrender.com/api/classes", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json",
+          },
+        }),
+      ]);
+
+      // Update available classes for dropdown
+      if (classesResponse.ok) {
+        const classesData = await classesResponse.json();
+        const classNames =
+          classesData.classes?.map((cls: any) => cls.name) || [];
+        setAvailableClasses(classNames);
+      }
 
       if (schedules && schedules.length > 0) {
         setTimetableList(schedules);
