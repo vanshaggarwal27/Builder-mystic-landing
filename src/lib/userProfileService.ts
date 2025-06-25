@@ -84,7 +84,9 @@ class UserProfileServiceClass {
       }
 
       const data = await response.json();
-      return this.normalizeProfileData(data);
+      // Extract profile data from the response
+      const profileData = data.profile || data;
+      return this.normalizeProfileData(profileData);
     } catch (error) {
       console.warn("Profile fetch failed, using fallback:", error);
       return this.createFallbackProfile();
