@@ -103,14 +103,11 @@ class UserProfileServiceClass {
         throw new Error("No authentication token found");
       }
 
-      // Try to fetch real schedule data
-      const response = await fetch(
-        `${this.API_BASE_URL}/schedule/my-schedule`,
-        {
-          method: "GET",
-          headers: this.getAuthHeaders(),
-        },
-      );
+      // Try to fetch real schedule data from students endpoint
+      const response = await fetch(`${this.API_BASE_URL}/students/schedule`, {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      });
 
       if (!response.ok) {
         // If schedule endpoint doesn't exist, return demo schedule
