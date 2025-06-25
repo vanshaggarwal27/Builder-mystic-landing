@@ -530,49 +530,4 @@ router.delete(
   },
 );
 
-// Fix all existing student-class assignments (admin only)
-router.post(
-  "/fix-student-assignments",
-  [auth, auth.requireRole(["admin"])],
-  async (req, res) => {
-    try {
-      console.log("🔧 Starting to fix all student-class assignments...");
-
-      // Get all students
-      const students = await Student.find();
-      console.log(`Found ${students.length} students to process`);
-
-      // Clear all current class assignments
-      await Class.updateMany({}, { students: [] });
-      console.log("Cleared all current class assignments");
-
-      let assignedCount = 0;
-      let skippedCount = 0;
-
-      for (const student of students) {
-        const success = await assignStudentToClass(student);
-        if (success) {
-          assignedCount++;
-        } else {
-          skippedCount++;
-        }
-      }
-
-      console.log(
-        `✅ Assignment complete: ${assignedCount} assigned, ${skippedCount} skipped`,
-      );
-
-      res.json({
-        message: "Student assignments fixed successfully",
-        assigned: assignedCount,
-        skipped: skippedCount,
-        totalStudents: students.length,
-      });
-    } catch (error) {
-      console.error("Fix assignments error:", error);
-      res.status(500).json({ error: "Server error" });
-    }
-  },
-);
-
 module.exports = router;
