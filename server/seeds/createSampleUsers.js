@@ -32,7 +32,7 @@ const createSampleUsers = async () => {
       const studentProfile = new Student({
         user: studentUser._id,
         studentId: "STU2024001",
-        grade: "Grade 10",
+        grade: "10",
         section: "A",
         rollNumber: "10A01",
         academicYear: "2024-25",
