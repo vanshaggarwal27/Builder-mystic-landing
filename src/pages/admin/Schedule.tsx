@@ -129,6 +129,7 @@ export default function AdminSchedule() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [availableClasses, setAvailableClasses] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Load schedules from backend on component mount
