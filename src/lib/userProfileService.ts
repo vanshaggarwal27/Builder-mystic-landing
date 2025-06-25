@@ -118,7 +118,9 @@ class UserProfileServiceClass {
       }
 
       const data = await response.json();
-      return this.normalizeScheduleData(data);
+      // Extract schedule array from response
+      const scheduleArray = data.schedule || data;
+      return this.normalizeScheduleData(scheduleArray);
     } catch (error) {
       console.warn("Schedule fetch failed, using demo schedule:", error);
       return this.getDemoSchedule();
