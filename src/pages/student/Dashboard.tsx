@@ -119,34 +119,42 @@ export default function StudentDashboard() {
         <div className="px-6 py-6 pt-8">
           {/* Profile Header */}
           <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-6 rounded-2xl mb-6 mt-4">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-lg font-semibold">JS</span>
+                  <span className="text-lg font-semibold">
+                    {isLoadingProfile
+                      ? "..."
+                      : userProfile?.firstName && userProfile?.lastName
+                        ? `${userProfile.firstName[0]}${userProfile.lastName[0]}`
+                        : user?.name
+                            ?.split(" ")
+                            .map((n) => n[0])
+                            .join("") || "JS"}
+                  </span>
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold">John Smith</h2>
-                  <p className="text-white/80 text-sm">Grade 10-A</p>
+                  <h2 className="text-lg font-semibold">
+                    {isLoadingProfile
+                      ? "Loading..."
+                      : userProfile?.firstName && userProfile?.lastName
+                        ? `${userProfile.firstName} ${userProfile.lastName}`
+                        : user?.name || "Student Name"}
+                  </h2>
+                  <p className="text-white/80 text-sm">
+                    {isLoadingProfile
+                      ? "Loading grade..."
+                      : userProfile?.grade || "Not assigned"}
+                  </p>
+                  {isLoadingProfile && (
+                    <p className="text-white/60 text-xs flex items-center gap-1">
+                      <RefreshCw className="h-3 w-3 animate-spin" />
+                      Loading profile...
+                    </p>
+                  )}
                 </div>
               </div>
               <CheckCircle className="h-6 w-6 text-green-400" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-sm text-white/80">Attendance</span>
-                </div>
-                <span className="text-2xl font-bold">92%</span>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                  <span className="text-sm text-white/80">Assignments</span>
-                </div>
-                <span className="text-2xl font-bold">3</span>
-              </div>
             </div>
           </div>
 
