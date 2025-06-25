@@ -79,14 +79,15 @@ const connectDB = async () => {
     console.log("✅ Connected to MongoDB");
 
     // Initialize sample data if database is empty
-    const User = require("./models/User").User;
+    const { User, Student, Admin } = require("./models/User");
+    const Class = require("./models/Class");
+
     const userCount = await User.countDocuments();
     if (userCount === 0) {
       console.log("📊 Database is empty, creating sample data...");
-      // Import and run seeds
-      const createAdmin = require("./seeds/createAdmin");
-      const createSampleUsers = require("./seeds/createSampleUsers");
-      // Note: These will run automatically when imported if they're set up properly
+      await createInitialData();
+    } else {
+      console.log(`📊 Database has ${userCount} users`);
     }
   } catch (error) {
     console.error("❌ MongoDB connection error:", error.message);
