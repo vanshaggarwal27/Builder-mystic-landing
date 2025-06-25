@@ -3,8 +3,15 @@ const { body, validationResult } = require("express-validator");
 const auth = require("../middleware/auth");
 const Class = require("../models/Class");
 const { User, Student, Teacher } = require("../models/User");
+const {
+  useMockDataWhenNeeded,
+  isDatabaseConnected,
+} = require("../middleware/mockData");
 
 const router = express.Router();
+
+// Apply mock data middleware
+router.use(useMockDataWhenNeeded());
 
 // Get all classes (admin only)
 router.get("/", [auth, auth.requireRole(["admin"])], async (req, res) => {
