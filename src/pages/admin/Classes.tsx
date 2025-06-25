@@ -320,8 +320,9 @@ export default function AdminClasses() {
                   Class Management System
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Create and manage classes, then assign students to them. Each
-                  class can have its own schedule and capacity.
+                  Create and manage classes. Students are automatically assigned
+                  when created. Each class can have its own schedule and
+                  capacity.
                   <span className="block text-xs text-indigo-600 mt-1">
                     {classesList.length === 0
                       ? "No classes created yet. Create your first class!"
