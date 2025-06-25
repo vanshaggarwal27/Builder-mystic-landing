@@ -63,8 +63,7 @@ const classSchema = new mongoose.Schema({
       period: String,
       subject: String,
       teacher: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Teacher",
+        type: mongoose.Schema.Types.Mixed, // Allow both ObjectId and String
       },
       startTime: String,
       endTime: String,
