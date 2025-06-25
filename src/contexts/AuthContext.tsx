@@ -17,8 +17,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Always use production backend for real authentication
-const API_BASE_URL = "https://shkva-backend-new.onrender.com/api";
+// Use local backend for development, production backend for production
+const API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:5000/api"
+  : "https://shkva-backend-new.onrender.com/api";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
