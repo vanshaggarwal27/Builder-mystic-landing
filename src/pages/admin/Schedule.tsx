@@ -204,20 +204,21 @@ export default function AdminSchedule() {
   const handleDeleteEntry = async (id: string, type: "timetable" | "event") => {
     if (type === "timetable") {
       try {
-        // Try to delete from backend
         await UserProfileService.deleteClassSchedule(id);
-        setTimetableList((prev) => prev.filter((t) => t.id !== id));
+        // Reload the schedule list to reflect changes
+        await loadSchedules();
         toast({
           title: "Success",
           description:
             "Class schedule deleted! Students will no longer see this schedule.",
         });
-      } catch (error) {
-        // Fallback to local deletion if backend is unavailable
-        setTimetableList((prev) => prev.filter((t) => t.id !== id));
+      } catch (error: any) {
+        console.error("Delete error:", error);
         toast({
-          title: "Schedule Removed",
-          description: "Schedule removed locally. Backend integration pending.",
+          title: "Error",
+          description:
+            error.message || "Failed to delete schedule. Please try again.",
+          variant: "destructive",
         });
       }
     } else {
