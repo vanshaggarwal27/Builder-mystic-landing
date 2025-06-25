@@ -295,6 +295,192 @@ class UserProfileServiceClass {
       return {};
     }
   }
+
+  /**
+   * Admin: Get all class schedules
+   */
+  async getClassSchedules(): Promise<any[]> {
+    try {
+      const token = this.getAuthToken();
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await fetch(`${this.API_BASE_URL}/classes`, {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch classes: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const schedules: any[] = [];
+
+      // Extract schedules from all classes
+      if (data.classes) {
+        data.classes.forEach((classData: any) => {
+          if (classData.schedule) {
+            classData.schedule.forEach((scheduleItem: any) => {
+              schedules.push({
+                id: scheduleItem._id,
+                class: classData.name,
+                day: scheduleItem.day,
+                period: scheduleItem.period,
+                subject: scheduleItem.subject,
+                teacher: scheduleItem.teacher,
+                time:
+                  scheduleItem.startTime && scheduleItem.endTime
+                    ? `${scheduleItem.startTime}-${scheduleItem.endTime}`
+                    : "TBA",
+                room: scheduleItem.room || classData.room,
+              });
+            });
+          }
+        });
+      }
+
+      return schedules;
+    } catch (error) {
+      console.error("Failed to fetch class schedules:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Admin: Create schedule for a specific class
+   */
+  async createClassSchedule(scheduleData: {
+    class: string;
+    day: string;
+    period: string;
+    subject: string;
+    teacher: string;
+    time: string;
+    room: string;
+  }): Promise<any> {
+    try {
+      const token = this.getAuthToken();
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      // First, find the class by name
+      const classesResponse = await fetch(`${this.API_BASE_URL}/classes`, {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!classesResponse.ok) {
+        throw new Error("Failed to fetch classes");
+      }
+
+      const classesData = await classesResponse.json();
+      const targetClass = classesData.classes?.find(
+        (cls: any) => cls.name === scheduleData.class,
+      );
+
+      if (!targetClass) {
+        throw new Error(`Class "${scheduleData.class}" not found`);
+      }
+
+      // Parse time range
+      const [startTime, endTime] = scheduleData.time.includes("-")
+        ? scheduleData.time.split("-")
+        : [scheduleData.time, scheduleData.time];
+
+      // Add schedule to the class
+      const response = await fetch(
+        `${this.API_BASE_URL}/classes/${targetClass._id}/schedule`,
+        {
+          method: "POST",
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({
+            day: scheduleData.day,
+            period: scheduleData.period,
+            subject: scheduleData.subject,
+            teacher: scheduleData.teacher,
+            startTime: startTime.trim(),
+            endTime: endTime.trim(),
+            room: scheduleData.room,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create schedule");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Failed to create class schedule:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Admin: Delete a schedule entry
+   */
+  async deleteClassSchedule(scheduleId: string): Promise<void> {
+    try {
+      const token = this.getAuthToken();
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      // This would need a new backend endpoint to delete specific schedule entries
+      // For now, we'll throw an error to indicate this needs backend implementation
+      throw new Error(
+        "Delete schedule functionality needs backend implementation",
+      );
+    } catch (error) {
+      console.error("Failed to delete class schedule:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate default schedule for testing
+   */
+  generateDefaultSchedule(
+    role: string,
+    grade?: string,
+    department?: string,
+  ): ScheduleItem[] {
+    if (role === "student") {
+      const subjects = [
+        "Mathematics",
+        "English",
+        "Science",
+        "History",
+        "Geography",
+      ];
+      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+      const schedule: ScheduleItem[] = [];
+
+      days.forEach((day, dayIndex) => {
+        subjects.forEach((subject, subjectIndex) => {
+          const hour = 9 + subjectIndex;
+          schedule.push({
+            id: `${day.toLowerCase()}-${subject.toLowerCase()}`,
+            day,
+            time: `${hour}:00 AM - ${hour + 1}:00 AM`,
+            subject,
+            teacher: `Teacher ${subjectIndex + 1}`,
+            room: `Room ${(subjectIndex + 1) * 100 + dayIndex + 1}`,
+            type: "class",
+          });
+        });
+      });
+
+      return schedule;
+    }
+
+    return this.getDemoSchedule();
+  }
 }
 
 // Export singleton instance
