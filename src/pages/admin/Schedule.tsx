@@ -173,6 +173,7 @@ export default function AdminSchedule() {
           data.users?.filter((user: any) => user.role === "teacher") || [];
         setAvailableTeachers(teachers);
         console.log("Loaded teachers:", teachers);
+        console.log("First teacher structure:", teachers[0]);
       } else {
         console.error("Failed to load teachers:", response.statusText);
         setAvailableTeachers([]);
