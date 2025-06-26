@@ -94,6 +94,7 @@ const AppRoutes = () => {
 
         {/* Teacher Routes */}
         <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+        <Route path="/teacher/schedule" element={<TeacherSchedule />} />
         <Route path="/teacher/classes" element={<TeacherClasses />} />
         <Route path="/teacher/attendance" element={<TeacherAttendance />} />
         <Route path="/teacher/profile" element={<TeacherProfile />} />
