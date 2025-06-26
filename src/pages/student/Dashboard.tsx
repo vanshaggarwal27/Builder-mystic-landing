@@ -51,9 +51,12 @@ export default function StudentDashboard() {
       // Load schedule data
       setIsLoadingSchedule(true);
       const scheduleData = await UserProfileService.getUserSchedule();
+      console.log("Student schedule data loaded:", scheduleData);
       setSchedule(scheduleData);
     } catch (error) {
       console.error("Error loading schedule:", error);
+      // Set empty array as fallback
+      setSchedule([]);
     } finally {
       setIsLoadingSchedule(false);
     }
