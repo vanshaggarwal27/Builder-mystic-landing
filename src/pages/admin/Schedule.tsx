@@ -811,15 +811,27 @@ export default function AdminSchedule() {
                             availableTeachers.map((teacher) => {
                               // Handle different possible data structures
                               let teacherName = "Unknown Teacher";
-                              let teacherId = teacher._id || teacher.id || Math.random().toString();
+                              let teacherId =
+                                teacher._id ||
+                                teacher.id ||
+                                Math.random().toString();
 
-                              if (teacher.profile?.firstName && teacher.profile?.lastName) {
+                              if (
+                                teacher.profile?.firstName &&
+                                teacher.profile?.lastName
+                              ) {
                                 // Direct profile structure
                                 teacherName = `${teacher.profile.firstName} ${teacher.profile.lastName}`;
-                              } else if (teacher.user?.profile?.firstName && teacher.user?.profile?.lastName) {
+                              } else if (
+                                teacher.user?.profile?.firstName &&
+                                teacher.user?.profile?.lastName
+                              ) {
                                 // Nested user.profile structure
                                 teacherName = `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`;
-                              } else if (teacher.firstName && teacher.lastName) {
+                              } else if (
+                                teacher.firstName &&
+                                teacher.lastName
+                              ) {
                                 // Flat structure
                                 teacherName = `${teacher.firstName} ${teacher.lastName}`;
                               } else if (teacher.name) {
@@ -827,18 +839,30 @@ export default function AdminSchedule() {
                                 teacherName = teacher.name;
                               } else if (teacher.email) {
                                 // Fallback to email
-                                teacherName = teacher.email.split('@')[0];
+                                teacherName = teacher.email.split("@")[0];
                               }
 
                               const teacherValue = teacherName;
-                              const department = teacher.department || teacher.user?.department || "";
+                              const department =
+                                teacher.department ||
+                                teacher.user?.department ||
+                                "";
 
                               return (
-                                <SelectItem key={teacherId} value={teacherValue}>
-                                  {teacherName} {department && `(${department})`}
+                                <SelectItem
+                                  key={teacherId}
+                                  value={teacherValue}
+                                >
+                                  {teacherName}{" "}
+                                  {department && `(${department})`}
                                 </SelectItem>
                               );
                             })
+                          ) : (
+                            <SelectItem value="no-teachers" disabled>
+                              No teachers found - Add teachers first
+                            </SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
