@@ -33,6 +33,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { UserProfileService } from "@/lib/userProfileService";
 
+// Teacher interface for type safety
+interface Teacher {
+  _id: string;
+  user: {
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+  };
+  teacherId: string;
+  department?: string;
+}
+
 const initialTimetable = [
   {
     id: "TT001",
