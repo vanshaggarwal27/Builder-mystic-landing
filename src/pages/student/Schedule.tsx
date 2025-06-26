@@ -79,6 +79,24 @@ export default function StudentSchedule() {
     loadScheduleData();
   }, []);
 
+  // Week navigation functions
+  const goToPreviousWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() - 7);
+    setCurrentWeekStart(newWeekStart);
+  };
+
+  const goToNextWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() + 7);
+    setCurrentWeekStart(newWeekStart);
+  };
+
+  const goToCurrentWeek = () => {
+    setCurrentWeekStart(getCurrentWeek());
+    setSelectedDay(new Date().toLocaleDateString("en-US", { weekday: "long" }));
+  };
+
   const loadScheduleData = async () => {
     try {
       setIsLoading(true);
