@@ -21,12 +21,59 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 export default function StudentSchedule() {
-  const [selectedWeek, setSelectedWeek] = useState("March 18-22, 2024");
+  // Calculate current week dates
+  const getCurrentWeek = () => {
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (currentDay === 0 ? 6 : currentDay - 1)); // Get Monday
+
+    return monday;
+  };
+
+  const [currentWeekStart, setCurrentWeekStart] = useState(getCurrentWeek());
+  const [selectedDay, setSelectedDay] = useState(
+    new Date().toLocaleDateString("en-US", { weekday: "long" }),
+  );
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Generate week days array
+  const getWeekDays = (startDate: Date) => {
+    const days = [];
+    for (let i = 0; i < 5; i++) {
+      // Monday to Friday
+      const day = new Date(startDate);
+      day.setDate(startDate.getDate() + i);
+      days.push(day);
+    }
+    return days;
+  };
+
+  const weekDays = getWeekDays(currentWeekStart);
+
+  // Format week display
+  const formatWeekDisplay = (startDate: Date) => {
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 4); // Friday
+
+    const startMonth = startDate.toLocaleDateString("en-US", {
+      month: "short",
+    });
+    const endMonth = endDate.toLocaleDateString("en-US", { month: "short" });
+    const startDay = startDate.getDate();
+    const endDay = endDate.getDate();
+    const year = startDate.getFullYear();
+
+    if (startMonth === endMonth) {
+      return `${startMonth} ${startDay}-${endDay}, ${year}`;
+    } else {
+      return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
+    }
+  };
 
   useEffect(() => {
     loadScheduleData();
