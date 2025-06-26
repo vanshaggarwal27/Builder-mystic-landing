@@ -230,6 +230,34 @@ export default function AdminTeacherAttendance() {
         className="pb-20"
       >
         <div className="px-6 py-6">
+          {/* Header with Refresh */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Attendance for{" "}
+                {new Date(selectedDate).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </h2>
+              {isLoading && (
+                <p className="text-sm text-blue-600">Loading teachers...</p>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadTeachers}
+              disabled={isLoading}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-1 ${isLoading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+          </div>
           <div className="space-y-6">
             {/* Stats Overview */}
             <div className="grid grid-cols-4 gap-3">
