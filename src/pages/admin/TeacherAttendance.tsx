@@ -195,6 +195,14 @@ export default function AdminTeacherAttendance() {
     }
   };
 
+  // Calculate stats from real attendance data
+  const stats = {
+    total: attendance.length,
+    present: attendance.filter((r) => r.status === "present").length,
+    absent: attendance.filter((r) => r.status === "absent").length,
+    late: attendance.filter((r) => r.status === "late").length,
+  };
+
   const filteredAttendance = attendance.filter((record) => {
     const matchesSearch =
       record.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
