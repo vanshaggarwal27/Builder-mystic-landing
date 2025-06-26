@@ -98,11 +98,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Parse response body only once
       let data;
       try {
-        const responseText = await response.text();
-        data = responseText ? JSON.parse(responseText) : {};
+        // Use response.json() directly instead of text() then parse
+        data = await response.json();
       } catch (parseError) {
         console.error("❌ JSON parse error:", parseError);
-        throw new Error("Invalid response from server");
+        // If JSON parsing fails, it might be a network issue or invalid response
+        throw new Error(
+          "Server returned invalid response. Please check your connection and try again.",
+        );
       }
 
       if (!response.ok) {
@@ -111,10 +114,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           statusText: response.statusText,
           data: data,
         });
+
+        // Handle specific error cases
+        if (response.status === 401) {
+          throw new Error(
+            "Invalid email, password, or role. Please check your credentials.",
+          );
+        } else if (response.status >= 500) {
+          throw new Error("Server error. Please try again later.");
+        } else if (response.status === 404) {
+          throw new Error("Login service not found. Please contact support.");
+        }
+
         throw new Error(
-          data.error ||
-            data.message ||
-            `Server error: ${response.status} - ${response.statusText}`,
+          data?.error ||
+            data?.message ||
+            "Login failed. Please check your credentials and try again.",
         );
       }
 
