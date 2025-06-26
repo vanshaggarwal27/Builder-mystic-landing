@@ -87,7 +87,6 @@ const AppRoutes = () => {
         <Route path="/student/schedule" element={<StudentSchedule />} />
         <Route path="/student/attendance" element={<StudentAttendance />} />
         <Route path="/student/profile" element={<StudentProfile />} />
-        <Route path="/student/assignments" element={<StudentAssignments />} />
         <Route path="/student/notices" element={<StudentNotices />} />
         <Route path="/student/results" element={<StudentResults />} />
         <Route path="/student/chat" element={<StudentChat />} />
@@ -96,17 +95,8 @@ const AppRoutes = () => {
         <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
         <Route path="/teacher/classes" element={<TeacherClasses />} />
         <Route path="/teacher/attendance" element={<TeacherAttendance />} />
-        <Route path="/teacher/assignments" element={<TeacherAssignments />} />
         <Route path="/teacher/profile" element={<TeacherProfile />} />
         <Route path="/teacher/notices" element={<TeacherNotices />} />
-        <Route
-          path="/teacher/create-assignment"
-          element={<CreateAssignment />}
-        />
-        <Route
-          path="/teacher/upload-assignment"
-          element={<TeacherUploadAssignment />}
-        />
         <Route
           path="/teacher/upload-results"
           element={<TeacherUploadResults />}
