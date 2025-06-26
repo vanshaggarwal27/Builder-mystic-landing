@@ -809,26 +809,36 @@ export default function AdminSchedule() {
                             </SelectItem>
                           ) : availableTeachers.length > 0 ? (
                             availableTeachers.map((teacher) => {
-                              const teacherName = teacher.user?.profile
-                                ? `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`
-                                : `Teacher ${teacher.teacherId}`;
+                              // Handle different possible data structures
+                              let teacherName = "Unknown Teacher";
+                              let teacherId = teacher._id || teacher.id || Math.random().toString();
+
+                              if (teacher.profile?.firstName && teacher.profile?.lastName) {
+                                // Direct profile structure
+                                teacherName = `${teacher.profile.firstName} ${teacher.profile.lastName}`;
+                              } else if (teacher.user?.profile?.firstName && teacher.user?.profile?.lastName) {
+                                // Nested user.profile structure
+                                teacherName = `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`;
+                              } else if (teacher.firstName && teacher.lastName) {
+                                // Flat structure
+                                teacherName = `${teacher.firstName} ${teacher.lastName}`;
+                              } else if (teacher.name) {
+                                // Simple name field
+                                teacherName = teacher.name;
+                              } else if (teacher.email) {
+                                // Fallback to email
+                                teacherName = teacher.email.split('@')[0];
+                              }
+
                               const teacherValue = teacherName;
+                              const department = teacher.department || teacher.user?.department || "";
+
                               return (
-                                <SelectItem
-                                  key={teacher._id}
-                                  value={teacherValue}
-                                >
-                                  {teacherName}{" "}
-                                  {teacher.department &&
-                                    `(${teacher.department})`}
+                                <SelectItem key={teacherId} value={teacherValue}>
+                                  {teacherName} {department && `(${department})`}
                                 </SelectItem>
                               );
                             })
-                          ) : (
-                            <SelectItem value="no-teachers" disabled>
-                              No teachers found - Add teachers first
-                            </SelectItem>
-                          )}
                         </SelectContent>
                       </Select>
                     </div>
