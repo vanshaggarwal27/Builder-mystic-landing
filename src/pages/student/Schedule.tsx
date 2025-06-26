@@ -219,18 +219,20 @@ export default function StudentSchedule() {
     ];
   };
 
-  const weekDays = [
-    { short: "MON", number: "18" },
-    { short: "TUE", number: "19" },
-    { short: "WED", number: "20", selected: true },
-    { short: "THU", number: "21" },
-    { short: "FRI", number: "22" },
-  ];
+  // Get today's day name for comparison
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
-  // Filter schedule for today (Monday for demo)
-  const todaySchedule = schedule.filter(
-    (item) => item.day === "Monday" || !item.day,
-  );
+  // Filter schedule for selected day
+  const selectedDaySchedule = schedule
+    .filter((item) => item.day === selectedDay || !item.day)
+    .sort((a, b) => {
+      // Sort by time - extract hour from time string
+      const getHour = (timeStr: string) => {
+        const match = timeStr.match(/(\d+):/);
+        return match ? parseInt(match[1]) : 0;
+      };
+      return getHour(a.time) - getHour(b.time);
+    });
 
   return (
     <FadeTransition>
