@@ -215,13 +215,6 @@ export default function AdminTeacherAttendance() {
     return matchesSearch && matchesDepartment && matchesStatus;
   });
 
-  const stats = {
-    total: teacherAttendanceData.length,
-    present: teacherAttendanceData.filter((r) => r.status === "present").length,
-    absent: teacherAttendanceData.filter((r) => r.status === "absent").length,
-    late: teacherAttendanceData.filter((r) => r.status === "late").length,
-  };
-
   return (
     <>
       <MobileLayout
