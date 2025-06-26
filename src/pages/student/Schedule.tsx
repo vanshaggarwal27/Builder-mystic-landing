@@ -220,25 +220,25 @@ export default function StudentSchedule() {
   };
 
   // Get today's day name for comparison
-  const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
   // Filter schedule for selected day
-  const selectedDaySchedule = schedule
-    .filter((item) => item.day === selectedDay || !item.day)
-    .sort((a, b) => {
-      // Sort by time - extract hour from time string
-      const getHour = (timeStr: string) => {
-        const match = timeStr.match(/(\d+):/);
-        return match ? parseInt(match[1]) : 0;
-      };
-      return getHour(a.time) - getHour(b.time);
-    });
+  const selectedDaySchedule = schedule.filter(
+    (item) => item.day === selectedDay || !item.day,
+  ).sort((a, b) => {
+    // Sort by time - extract hour from time string
+    const getHour = (timeStr: string) => {
+      const match = timeStr.match(/(\d+):/);
+      return match ? parseInt(match[1]) : 0;
+    };
+    return getHour(a.time) - getHour(b.time);
+  });
 
   return (
     <FadeTransition>
       <MobileLayout
         title="Class Timetable"
-        subtitle={`${userProfile?.grade || "Your Class"} • ${selectedWeek}`}
+        subtitle={`${userProfile?.grade || "Your Class"} • ${formatWeekDisplay(currentWeekStart)}`}
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >
@@ -248,37 +248,59 @@ export default function StudentSchedule() {
             <div className="flex flex-col items-center space-y-4">
               {/* Navigation Controls */}
               <div className="flex items-center justify-center w-full">
-                <Button variant="ghost" size="sm" className="p-2">
+                <Button variant="ghost" size="sm" className="p-2" onClick={goToPreviousWeek}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="mx-4 text-center">
                   <h3 className="text-sm font-medium text-gray-900">
                     Week Navigation
                   </h3>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="text-xs text-blue-600 p-0 h-auto"
+                    onClick={goToCurrentWeek}
+                  >
+                    Go to Today
+                  </Button>
                   {isLoading && (
                     <p className="text-xs text-blue-600">Loading schedule...</p>
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-2"
-                  onClick={loadScheduleData}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
+                <Button variant="ghost" size="sm" className="p-2" onClick={goToNextWeek}>
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
 
               {/* Centered Calendar Days */}
               <div className="flex justify-center items-center space-x-2 w-full max-w-sm mx-auto">
-                {weekDays.map((day) => (
-                  <div
-                    key={day.short}
+                {weekDays.map((day, index) => {
+                  const dayName = day.toLocaleDateString('en-US', { weekday: 'long' });
+                  const isSelected = selectedDay === dayName;
+                  const isToday = today === dayName;
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedDay(dayName)}
+                      className={`flex flex-col items-center p-2 rounded-lg transition-all ${
+                        isSelected
+                          ? 'bg-blue-500 text-white shadow-md'
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span className="text-xs font-medium">
+                        {day.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
+                      </span>
+                      <span className={`text-lg font-bold ${isToday && !isSelected ? 'text-blue-600' : ''}`}>
+                        {day.getDate()}
+                      </span>
+                      {isToday && (
+                        <div className="w-1 h-1 bg-current rounded-full mt-1"></div>
+                      )}
+                    </button>
+                  );
+                })}
                     className={`text-center p-2 rounded-lg flex-1 min-w-0 ${
                       day.selected
                         ? "bg-blue-100 text-blue-700"
