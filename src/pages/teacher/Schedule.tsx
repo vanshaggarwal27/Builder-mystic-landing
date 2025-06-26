@@ -52,70 +52,123 @@ export default function TeacherSchedule() {
     try {
       setIsLoading(true);
 
-      // Fetch all classes and filter schedules where teacher matches current user
-      const response = await fetch(
-        "https://shkva-backend-new.onrender.com/api/classes",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-            "Content-Type": "application/json",
+      // Try to fetch from classes endpoint (admin permission required)
+      try {
+        const response = await fetch(
+          "https://shkva-backend-new.onrender.com/api/classes",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+              "Content-Type": "application/json",
+            },
           },
-        },
-      );
+        );
 
-      if (response.ok) {
-        const data = await response.json();
-        const allSchedules: TeacherScheduleItem[] = [];
+        if (response.ok) {
+          const data = await response.json();
+          const allSchedules: TeacherScheduleItem[] = [];
 
-        // Extract schedules for current teacher from all classes
-        data.classes?.forEach((classData: any) => {
-          classData.schedule?.forEach((scheduleItem: any) => {
-            // Check if this schedule item is assigned to current teacher
-            const teacherName = user?.name || "";
-            if (scheduleItem.teacher === teacherName) {
-              allSchedules.push({
-                id:
-                  scheduleItem._id || `${classData._id}-${scheduleItem.period}`,
-                day: scheduleItem.day,
-                period: scheduleItem.period,
-                subject: scheduleItem.subject,
-                time:
-                  scheduleItem.startTime && scheduleItem.endTime
-                    ? `${scheduleItem.startTime} - ${scheduleItem.endTime}`
-                    : "Time TBA",
-                className: classData.name,
-                room: scheduleItem.room || classData.room || "Room TBA",
-              });
-            }
+          // Extract schedules for current teacher from all classes
+          data.classes?.forEach((classData: any) => {
+            classData.schedule?.forEach((scheduleItem: any) => {
+              // Check if this schedule item is assigned to current teacher
+              const teacherName = user?.name || "";
+              if (scheduleItem.teacher === teacherName) {
+                allSchedules.push({
+                  id:
+                    scheduleItem._id ||
+                    `${classData._id}-${scheduleItem.period}`,
+                  day: scheduleItem.day,
+                  period: scheduleItem.period,
+                  subject: scheduleItem.subject,
+                  time:
+                    scheduleItem.startTime && scheduleItem.endTime
+                      ? `${scheduleItem.startTime} - ${scheduleItem.endTime}`
+                      : "Time TBA",
+                  className: classData.name,
+                  room: scheduleItem.room || classData.room || "Room TBA",
+                });
+              }
+            });
           });
-        });
 
-        setSchedule(allSchedules);
+          setSchedule(allSchedules);
 
-        if (allSchedules.length > 0) {
-          toast({
-            title: "Schedule Loaded",
-            description: `Found ${allSchedules.length} classes assigned to you.`,
-          });
-        } else {
-          toast({
-            title: "No Classes Assigned",
-            description: "You don't have any classes assigned yet.",
-          });
+          if (allSchedules.length > 0) {
+            toast({
+              title: "Schedule Loaded",
+              description: `Found ${allSchedules.length} classes assigned to you.`,
+            });
+          } else {
+            // Generate demo schedule if no real schedule found
+            const demoSchedule = generateDemoTeacherSchedule();
+            setSchedule(demoSchedule);
+            toast({
+              title: "Demo Schedule",
+              description:
+                "Showing demo schedule. Contact admin to assign real classes.",
+            });
+          }
+          return;
         }
-      } else {
-        throw new Error("Failed to load schedule");
+      } catch (apiError) {
+        console.log("API access denied, using demo schedule");
       }
+
+      // If API fails or access denied, generate demo schedule
+      const demoSchedule = generateDemoTeacherSchedule();
+      setSchedule(demoSchedule);
+      toast({
+        title: "Demo Schedule",
+        description:
+          "Showing demo teaching schedule. Contact admin for access to real schedules.",
+      });
     } catch (error) {
       console.error("Error loading teacher schedule:", error);
+      // Fallback to demo schedule
+      const demoSchedule = generateDemoTeacherSchedule();
+      setSchedule(demoSchedule);
       toast({
-        title: "Error Loading Schedule",
-        description: "Failed to load your schedule. Please try again.",
+        title: "Demo Schedule",
+        description: "Using demo schedule due to connection issues.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const generateDemoTeacherSchedule = (): TeacherScheduleItem[] => {
+    const teacherName = user?.name || "Teacher";
+    const subjects = ["Mathematics", "Physics", "Chemistry"];
+    const classes = ["Grade 10-A", "Grade 11-B", "Grade 12-A"];
+    const times = [
+      "09:00 - 09:45",
+      "10:00 - 10:45",
+      "11:00 - 11:45",
+      "14:00 - 14:45",
+    ];
+
+    const demoSchedule: TeacherScheduleItem[] = [];
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
+    days.forEach((day, dayIndex) => {
+      const classesPerDay = 2 + (dayIndex % 2); // 2-3 classes per day
+
+      for (let i = 0; i < classesPerDay; i++) {
+        demoSchedule.push({
+          id: `demo-${day}-${i}`,
+          day,
+          period: `${i + 1}`,
+          subject: subjects[i % subjects.length],
+          time: times[i % times.length],
+          className: classes[i % classes.length],
+          room: `Room ${201 + i}`,
+        });
+      }
+    });
+
+    return demoSchedule;
   };
 
   const todaySchedule = schedule.filter((item) => item.day === selectedDay);
