@@ -220,19 +220,19 @@ export default function StudentSchedule() {
   };
 
   // Get today's day name for comparison
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   // Filter schedule for selected day
-  const selectedDaySchedule = schedule.filter(
-    (item) => item.day === selectedDay || !item.day,
-  ).sort((a, b) => {
-    // Sort by time - extract hour from time string
-    const getHour = (timeStr: string) => {
-      const match = timeStr.match(/(\d+):/);
-      return match ? parseInt(match[1]) : 0;
-    };
-    return getHour(a.time) - getHour(b.time);
-  });
+  const selectedDaySchedule = schedule
+    .filter((item) => item.day === selectedDay || !item.day)
+    .sort((a, b) => {
+      // Sort by time - extract hour from time string
+      const getHour = (timeStr: string) => {
+        const match = timeStr.match(/(\d+):/);
+        return match ? parseInt(match[1]) : 0;
+      };
+      return getHour(a.time) - getHour(b.time);
+    });
 
   return (
     <FadeTransition>
@@ -248,7 +248,12 @@ export default function StudentSchedule() {
             <div className="flex flex-col items-center space-y-4">
               {/* Navigation Controls */}
               <div className="flex items-center justify-center w-full">
-                <Button variant="ghost" size="sm" className="p-2" onClick={goToPreviousWeek}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-2"
+                  onClick={goToPreviousWeek}
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="mx-4 text-center">
@@ -267,7 +272,12 @@ export default function StudentSchedule() {
                     <p className="text-xs text-blue-600">Loading schedule...</p>
                   )}
                 </div>
-                <Button variant="ghost" size="sm" className="p-2" onClick={goToNextWeek}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-2"
+                  onClick={goToNextWeek}
+                >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -275,7 +285,9 @@ export default function StudentSchedule() {
               {/* Centered Calendar Days */}
               <div className="flex justify-center items-center space-x-2 w-full max-w-sm mx-auto">
                 {weekDays.map((day, index) => {
-                  const dayName = day.toLocaleDateString('en-US', { weekday: 'long' });
+                  const dayName = day.toLocaleDateString("en-US", {
+                    weekday: "long",
+                  });
                   const isSelected = selectedDay === dayName;
                   const isToday = today === dayName;
 
@@ -285,14 +297,18 @@ export default function StudentSchedule() {
                       onClick={() => setSelectedDay(dayName)}
                       className={`flex flex-col items-center p-2 rounded-lg transition-all ${
                         isSelected
-                          ? 'bg-blue-500 text-white shadow-md'
-                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                          ? "bg-blue-500 text-white shadow-md"
+                          : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                       }`}
                     >
                       <span className="text-xs font-medium">
-                        {day.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
+                        {day
+                          .toLocaleDateString("en-US", { weekday: "short" })
+                          .toUpperCase()}
                       </span>
-                      <span className={`text-lg font-bold ${isToday && !isSelected ? 'text-blue-600' : ''}`}>
+                      <span
+                        className={`text-lg font-bold ${isToday && !isSelected ? "text-blue-600" : ""}`}
+                      >
                         {day.getDate()}
                       </span>
                       {isToday && (
@@ -301,16 +317,6 @@ export default function StudentSchedule() {
                     </button>
                   );
                 })}
-                    className={`text-center p-2 rounded-lg flex-1 min-w-0 ${
-                      day.selected
-                        ? "bg-blue-100 text-blue-700"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    <div className="text-xs font-medium">{day.short}</div>
-                    <div className="text-lg font-semibold">{day.number}</div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
