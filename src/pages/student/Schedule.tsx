@@ -323,8 +323,25 @@ export default function StudentSchedule() {
 
           {/* Schedule */}
           <div className="space-y-4">
-            {todaySchedule.length > 0 ? (
-              todaySchedule.map((item, index) => (
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {selectedDay}'s Schedule
+              </h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadScheduleData}
+                disabled={isLoading}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-1 ${isLoading ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
+            </div>
+
+            {selectedDaySchedule.length > 0 ? (
+              selectedDaySchedule.map((item, index) => (
                 <Card
                   key={index}
                   className={`p-4 card-hover ${
