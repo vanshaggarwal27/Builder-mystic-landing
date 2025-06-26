@@ -195,7 +195,7 @@ export default function AdminTeacherAttendance() {
     }
   };
 
-  const filteredAttendance = teacherAttendanceData.filter((record) => {
+  const filteredAttendance = attendance.filter((record) => {
     const matchesSearch =
       record.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       record.employeeId.toLowerCase().includes(searchQuery.toLowerCase());
