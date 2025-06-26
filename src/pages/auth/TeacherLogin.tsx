@@ -21,6 +21,12 @@ export default function TeacherLogin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent multiple concurrent login attempts
+    if (isLoading) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
