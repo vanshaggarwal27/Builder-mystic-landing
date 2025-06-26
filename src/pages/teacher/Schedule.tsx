@@ -241,6 +241,26 @@ export default function TeacherSchedule() {
             </Card>
           </div>
 
+          {/* Demo Schedule Notice */}
+          {schedule.length > 0 && schedule[0].id.startsWith("demo-") && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <div className="bg-blue-100 rounded-full p-1">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-blue-900 mb-1">
+                    Demo Schedule
+                  </h4>
+                  <p className="text-sm text-blue-700">
+                    This is a demo teaching schedule. Contact your admin to get
+                    access to your real class assignments and schedule.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Refresh Button */}
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-semibold text-gray-900">
