@@ -168,9 +168,18 @@ export default function AdminSchedule() {
 
       if (response.ok) {
         const data = await response.json();
-        // Filter only teachers from the users list
-        const teachers =
-          data.users?.filter((user: any) => user.role === "teacher") || [];
+        console.log("Full API response:", data);
+
+        // Handle different possible response structures
+        let teachers = [];
+        if (data.users) {
+          teachers = data.users.filter((user: any) => user.role === "teacher");
+        } else if (Array.isArray(data)) {
+          teachers = data.filter((user: any) => user.role === "teacher");
+        } else if (data.teachers) {
+          teachers = data.teachers;
+        }
+
         setAvailableTeachers(teachers);
         console.log("Loaded teachers:", teachers);
         console.log("First teacher structure:", teachers[0]);
