@@ -110,16 +110,22 @@ class UserProfileServiceClass {
       });
 
       if (!response.ok) {
+        console.warn(
+          `Schedule API response not ok: ${response.status} ${response.statusText}`,
+        );
         // If schedule endpoint doesn't exist, return demo schedule
         if (response.status === 404) {
+          console.log("Schedule endpoint not found, using demo schedule");
           return this.getDemoSchedule();
         }
         throw new Error(`Failed to fetch schedule: ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log("Raw schedule API response:", data);
       // Extract schedule array from response
       const scheduleArray = data.schedule || data;
+      console.log("Extracted schedule array:", scheduleArray);
       return this.normalizeScheduleData(scheduleArray);
     } catch (error) {
       console.warn("Schedule fetch failed, using demo schedule:", error);
