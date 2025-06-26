@@ -147,10 +147,43 @@ export default function AdminSchedule() {
   const [isLoadingTeachers, setIsLoadingTeachers] = useState(true);
   const { toast } = useToast();
 
-  // Load schedules from backend on component mount
+  // Load schedules and teachers from backend on component mount
   useEffect(() => {
     loadSchedules();
+    loadTeachers();
   }, []);
+
+  const loadTeachers = async () => {
+    try {
+      setIsLoadingTeachers(true);
+      const response = await fetch(
+        "https://shkva-backend-new.onrender.com/api/admin/users",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Filter only teachers from the users list
+        const teachers =
+          data.users?.filter((user: any) => user.role === "teacher") || [];
+        setAvailableTeachers(teachers);
+        console.log("Loaded teachers:", teachers);
+      } else {
+        console.error("Failed to load teachers:", response.statusText);
+        setAvailableTeachers([]);
+      }
+    } catch (error) {
+      console.error("Error loading teachers:", error);
+      setAvailableTeachers([]);
+    } finally {
+      setIsLoadingTeachers(false);
+    }
+  };
 
   const loadSchedules = async () => {
     try {
