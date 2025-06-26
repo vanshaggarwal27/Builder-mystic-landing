@@ -25,58 +25,151 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 
-const teacherAttendanceData = [
-  {
-    id: 1,
-    name: "Maria Johnson",
-    employeeId: "TCH001",
-    department: "Mathematics",
-    date: "2024-06-21",
-    checkIn: "08:30 AM",
-    checkOut: "04:30 PM",
-    status: "present",
-    hours: "8.0",
-  },
-  {
-    id: 2,
-    name: "John Smith",
-    employeeId: "TCH002",
-    department: "English",
-    date: "2024-06-21",
-    checkIn: "08:45 AM",
-    checkOut: "04:45 PM",
-    status: "late",
-    hours: "8.0",
-  },
-  {
-    id: 3,
-    name: "Sarah Davis",
-    employeeId: "TCH003",
-    department: "Science",
-    date: "2024-06-21",
-    checkIn: "-",
-    checkOut: "-",
-    status: "absent",
-    hours: "0.0",
-  },
-  {
-    id: 4,
-    name: "Robert Wilson",
-    employeeId: "TCH004",
-    department: "Social Studies",
-    date: "2024-06-21",
-    checkIn: "08:20 AM",
-    checkOut: "04:20 PM",
-    status: "present",
-    hours: "8.0",
-  },
-];
+interface Teacher {
+  _id: string;
+  user: {
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+    email: string;
+  };
+  teacherId: string;
+  department?: string;
+}
+
+interface TeacherAttendance {
+  id: string;
+  teacherId: string;
+  name: string;
+  employeeId: string;
+  department: string;
+  date: string;
+  checkIn: string;
+  checkOut: string;
+  status: "present" | "absent" | "late";
+  hours: string;
+}
 
 export default function AdminTeacherAttendance() {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [attendance, setAttendance] = useState<TeacherAttendance[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMarkingAttendance, setIsMarkingAttendance] = useState(false);
+
+  useEffect(() => {
+    loadTeachers();
+  }, []);
+
+  useEffect(() => {
+    if (teachers.length > 0) {
+      loadAttendance();
+    }
+  }, [selectedDate, teachers]);
+
+  const loadTeachers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        "https://shkva-backend-new.onrender.com/api/admin/users",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const teachersData =
+          data.users?.filter((user: any) => user.role === "teacher") || [];
+        setTeachers(teachersData);
+
+        // Generate attendance records for today if they don't exist
+        generateAttendanceForDate(teachersData, selectedDate);
+      } else {
+        throw new Error("Failed to load teachers");
+      }
+    } catch (error) {
+      console.error("Error loading teachers:", error);
+      toast({
+        title: "Error Loading Teachers",
+        description: "Failed to load teacher list. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateAttendanceForDate = (teachersData: Teacher[], date: string) => {
+    const attendanceRecords: TeacherAttendance[] = teachersData.map(
+      (teacher) => {
+        const teacherName = teacher.user?.profile
+          ? `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`
+          : teacher.user?.email?.split("@")[0] || "Unknown Teacher";
+
+        return {
+          id: `${teacher._id}-${date}`,
+          teacherId: teacher._id,
+          name: teacherName,
+          employeeId: teacher.teacherId || "N/A",
+          department: teacher.department || "General",
+          date: date,
+          checkIn: "-",
+          checkOut: "-",
+          status: "absent" as const,
+          hours: "0.0",
+        };
+      },
+    );
+
+    setAttendance(attendanceRecords);
+  };
+
+  const loadAttendance = () => {
+    // For now, we'll generate attendance records since there's no backend endpoint yet
+    // In a real app, this would fetch from an attendance API
+    generateAttendanceForDate(teachers, selectedDate);
+  };
+
+  const markAttendance = (
+    teacherId: string,
+    status: "present" | "absent" | "late",
+  ) => {
+    setAttendance((prev) =>
+      prev.map((record) => {
+        if (record.teacherId === teacherId) {
+          const now = new Date();
+          const timeString = now.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          });
+
+          return {
+            ...record,
+            status,
+            checkIn: status !== "absent" ? timeString : "-",
+            checkOut: status !== "absent" ? "-" : "-",
+            hours: status !== "absent" ? "8.0" : "0.0",
+          };
+        }
+        return record;
+      }),
+    );
+
+    toast({
+      title: "Attendance Marked",
+      description: `Marked ${status} for the selected teacher.`,
+    });
+  };
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
