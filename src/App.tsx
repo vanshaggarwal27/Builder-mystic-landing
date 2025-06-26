@@ -43,7 +43,6 @@ import AdminTestButtons from "./pages/admin/TestButtons";
 import AdminTeacherAttendance from "./pages/admin/TeacherAttendance";
 
 // Teacher Upload Components
-import TeacherUploadAssignment from "./pages/teacher/UploadAssignment";
 import TeacherUploadResults from "./pages/teacher/UploadResults";
 import TeacherMarkAttendance from "./pages/teacher/MarkAttendance";
 
