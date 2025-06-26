@@ -227,13 +227,13 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
     statusText: response.statusText,
   });
 
-  // Parse response text once
-  const responseText = await response.text();
+  // Parse response JSON once
   let data;
   try {
-    data = responseText ? JSON.parse(responseText) : {};
+    data = await response.json();
   } catch (parseError) {
-    data = { error: responseText || "Invalid response" };
+    // If JSON parsing fails, the response might be empty or not JSON
+    data = { error: "Invalid response format" };
   }
 
   if (!response.ok) {
