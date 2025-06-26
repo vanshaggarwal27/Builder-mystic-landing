@@ -16,7 +16,6 @@ import StudentDashboard from "./pages/student/Dashboard";
 import StudentSchedule from "./pages/student/Schedule";
 import StudentAttendance from "./pages/student/Attendance";
 import StudentProfile from "./pages/student/Profile";
-import StudentAssignments from "./pages/student/Assignments";
 import StudentNotices from "./pages/student/Notices";
 import StudentResults from "./pages/student/Results";
 import StudentChat from "./pages/student/Chat";
@@ -25,10 +24,8 @@ import StudentChat from "./pages/student/Chat";
 import TeacherDashboard from "./pages/teacher/Dashboard";
 import TeacherClasses from "./pages/teacher/Classes";
 import TeacherAttendance from "./pages/teacher/Attendance";
-import TeacherAssignments from "./pages/teacher/Assignments";
 import TeacherProfile from "./pages/teacher/Profile";
 import TeacherNotices from "./pages/teacher/Notices";
-import CreateAssignment from "./pages/teacher/CreateAssignment";
 import TeacherResultsManagement from "./pages/teacher/ResultsManagement";
 import TeacherChat from "./pages/teacher/Chat";
 
