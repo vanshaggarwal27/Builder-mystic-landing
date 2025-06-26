@@ -97,19 +97,6 @@ export default function StudentDashboard() {
     };
   });
 
-  const assignments = [
-    {
-      title: "Math Homework",
-      dueDate: "Tomorrow",
-      priority: "urgent" as const,
-    },
-    {
-      title: "Science Project",
-      dueDate: "March 25, 2024",
-      priority: "normal" as const,
-    },
-  ];
-
   return (
     <PageTransition>
       <MobileLayout
