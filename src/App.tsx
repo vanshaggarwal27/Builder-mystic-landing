@@ -22,6 +22,7 @@ import StudentChat from "./pages/student/Chat";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/Dashboard";
+import TeacherSchedule from "./pages/teacher/Schedule";
 import TeacherClasses from "./pages/teacher/Classes";
 import TeacherAttendance from "./pages/teacher/Attendance";
 import TeacherProfile from "./pages/teacher/Profile";
