@@ -383,6 +383,46 @@ export default function AdminTeacherAttendance() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Attendance Marking Buttons */}
+                  <div className="flex gap-2 mt-3 pt-3 border-t">
+                    <Button
+                      size="sm"
+                      variant={
+                        record.status === "present" ? "default" : "outline"
+                      }
+                      className={`flex-1 ${record.status === "present" ? "bg-green-600 hover:bg-green-700" : ""}`}
+                      onClick={() =>
+                        markAttendance(record.teacherId, "present")
+                      }
+                      disabled={isMarkingAttendance}
+                    >
+                      <UserCheck className="h-4 w-4 mr-1" />
+                      Present
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={record.status === "late" ? "default" : "outline"}
+                      className={`flex-1 ${record.status === "late" ? "bg-yellow-600 hover:bg-yellow-700" : ""}`}
+                      onClick={() => markAttendance(record.teacherId, "late")}
+                      disabled={isMarkingAttendance}
+                    >
+                      <Clock className="h-4 w-4 mr-1" />
+                      Late
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={
+                        record.status === "absent" ? "default" : "outline"
+                      }
+                      className={`flex-1 ${record.status === "absent" ? "bg-red-600 hover:bg-red-700" : ""}`}
+                      onClick={() => markAttendance(record.teacherId, "absent")}
+                      disabled={isMarkingAttendance}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Absent
+                    </Button>
+                  </div>
                 </div>
               ))}
 
