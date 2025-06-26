@@ -240,46 +240,6 @@ export default function StudentDashboard() {
             )}
           </div>
 
-          {/* Upcoming Assignments */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Upcoming Assignments
-              </h3>
-              <Button
-                variant="link"
-                className="text-blue-600 p-0 btn-animate"
-                onClick={() => navigate("/student/assignments")}
-              >
-                View All
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {assignments.map((assignment, index) => (
-                <Card key={index} className="p-4 card-hover">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">
-                        {assignment.title}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Due: {assignment.dueDate}
-                      </p>
-                    </div>
-                    {assignment.priority === "urgent" && (
-                      <Badge
-                        variant="destructive"
-                        className="bg-red-100 text-red-700"
-                      >
-                        Urgent
-                      </Badge>
-                    )}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-
           {/* Testimonials Section */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
