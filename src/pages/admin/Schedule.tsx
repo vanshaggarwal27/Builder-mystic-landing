@@ -787,13 +787,50 @@ export default function AdminSchedule() {
                     </div>
                     <div>
                       <Label>Teacher *</Label>
-                      <Input
+                      <Select
                         value={newEntry.teacher}
-                        onChange={(e) =>
-                          setNewEntry({ ...newEntry, teacher: e.target.value })
+                        onValueChange={(value) =>
+                          setNewEntry({ ...newEntry, teacher: value })
                         }
-                        placeholder="Teacher name"
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={
+                              isLoadingTeachers
+                                ? "Loading teachers..."
+                                : "Select teacher"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {isLoadingTeachers ? (
+                            <SelectItem value="loading" disabled>
+                              Loading teachers...
+                            </SelectItem>
+                          ) : availableTeachers.length > 0 ? (
+                            availableTeachers.map((teacher) => {
+                              const teacherName = teacher.user?.profile
+                                ? `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`
+                                : `Teacher ${teacher.teacherId}`;
+                              const teacherValue = teacherName;
+                              return (
+                                <SelectItem
+                                  key={teacher._id}
+                                  value={teacherValue}
+                                >
+                                  {teacherName}{" "}
+                                  {teacher.department &&
+                                    `(${teacher.department})`}
+                                </SelectItem>
+                              );
+                            })
+                          ) : (
+                            <SelectItem value="no-teachers" disabled>
+                              No teachers found - Add teachers first
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
