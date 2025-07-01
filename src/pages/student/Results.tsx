@@ -1,5 +1,12 @@
-import React, { useState } from "react";
-import { Trophy, TrendingUp, Calendar, Download, Eye } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Trophy,
+  TrendingUp,
+  Calendar,
+  Download,
+  Eye,
+  RefreshCw,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
@@ -8,9 +15,108 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { FadeTransition } from "@/components/layout/PageTransition";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+
+interface SubjectResult {
+  subject: string;
+  marks: number;
+  totalMarks: number;
+  grade: string;
+  teacher: string;
+  examDate: string;
+}
+
+interface ExamResult {
+  _id: string;
+  examName: string;
+  examDate: string;
+  subject: string;
+  marks: number;
+  totalMarks: number;
+  grade: string;
+  teacher: string;
+  class: string;
+}
 
 export default function StudentResults() {
   const [selectedTerm, setSelectedTerm] = useState("current");
+  const [results, setResults] = useState<ExamResult[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadResults();
+  }, []);
+
+  const loadResults = async () => {
+    try {
+      setIsLoading(true);
+      // Try to fetch real results from backend
+      const response = await fetch(
+        "https://shkva-backend-new.onrender.com/api/students/results",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setResults(data.results || []);
+
+        if (data.results?.length > 0) {
+          toast({
+            title: "Results Loaded",
+            description: `Found ${data.results.length} exam results.`,
+          });
+        }
+      } else {
+        // If API fails, show message about no results
+        setResults([]);
+        toast({
+          title: "No Results Available",
+          description: "No exam results have been uploaded by teachers yet.",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading results:", error);
+      setResults([]);
+      toast({
+        title: "Unable to Load Results",
+        description: "Contact your teacher or admin for exam results.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Group results by exam/subject
+  const groupedResults = results.reduce((acc: any, result) => {
+    const key = `${result.examName}-${result.examDate}`;
+    if (!acc[key]) {
+      acc[key] = {
+        examName: result.examName,
+        examDate: result.examDate,
+        subjects: [],
+      };
+    }
+    acc[key].subjects.push(result);
+    return acc;
+  }, {});
+
+  const calculateOverallPercentage = () => {
+    if (results.length === 0) return 0;
+    const totalMarks = results.reduce((sum, r) => sum + r.marks, 0);
+    const totalPossible = results.reduce((sum, r) => sum + r.totalMarks, 0);
+    return totalPossible > 0
+      ? Math.round((totalMarks / totalPossible) * 100)
+      : 0;
+  };
 
   const examResults = {
     currentProgress: {
