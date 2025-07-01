@@ -210,9 +210,13 @@ export default function StudentResults() {
                 <Card key={result._id} className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h4 className="font-semibold text-gray-900">{result.subject}</h4>
+                      <h4 className="font-semibold text-gray-900">
+                        {result.subject}
+                      </h4>
                       <p className="text-sm text-gray-600">{result.examName}</p>
-                      <p className="text-xs text-gray-500">Teacher: {result.teacher}</p>
+                      <p className="text-xs text-gray-500">
+                        Teacher: {result.teacher}
+                      </p>
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-bold text-gray-900">
@@ -227,7 +231,9 @@ export default function StudentResults() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span>Performance</span>
-                      <span>{Math.round((result.marks / result.totalMarks) * 100)}%</span>
+                      <span>
+                        {Math.round((result.marks / result.totalMarks) * 100)}%
+                      </span>
                     </div>
                     <Progress
                       value={(result.marks / result.totalMarks) * 100}
@@ -236,7 +242,10 @@ export default function StudentResults() {
                   </div>
 
                   <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-                    <span>Exam Date: {new Date(result.examDate).toLocaleDateString()}</span>
+                    <span>
+                      Exam Date:{" "}
+                      {new Date(result.examDate).toLocaleDateString()}
+                    </span>
                     <span>Class: {result.class}</span>
                   </div>
                 </Card>
@@ -247,9 +256,11 @@ export default function StudentResults() {
               <Trophy className="h-8 w-8 text-gray-400 mx-auto mb-2" />
               <p className="text-gray-600 mb-1">No Results Available</p>
               <p className="text-sm text-gray-500">
-                Your teachers haven't uploaded any exam results yet. Check back later or contact your teachers.
+                Your teachers haven't uploaded any exam results yet. Check back
+                later or contact your teachers.
               </p>
             </Card>
+          )}
         </div>
       </MobileLayout>
       <BottomNavigation />
