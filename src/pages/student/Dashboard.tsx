@@ -21,6 +21,21 @@ import {
 } from "@/lib/userProfileService";
 import { apiCall } from "@/contexts/AuthContext";
 
+interface Notice {
+  _id: string;
+  title: string;
+  message: string;
+  priority: "low" | "normal" | "high" | "urgent";
+  createdAt: string;
+  target: "all" | "students" | "teachers" | "admin";
+  targetGrade?: string;
+  readBy: string[];
+  createdBy: {
+    name: string;
+    role: string;
+  };
+}
+
 export default function StudentDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -28,8 +43,10 @@ export default function StudentDashboard() {
   // State for real data
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState(true);
+  const [isLoadingNotices, setIsLoadingNotices] = useState(true);
 
   // Load real data on component mount
   useEffect(() => {
