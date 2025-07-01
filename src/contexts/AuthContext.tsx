@@ -206,6 +206,12 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
         "Please use real admin login to create users. Backend connection required.",
       );
     }
+    // Handle notice endpoints for real-time testing
+    if (endpoint.includes("/notices")) {
+      const savedNotices = localStorage.getItem("demo_notices");
+      const notices = savedNotices ? JSON.parse(savedNotices) : [];
+      return { notices };
+    }
     throw new Error(
       "Backend connection required for this operation. Please ensure you're connected to the internet and try logging in again.",
     );
