@@ -295,6 +295,108 @@ export default function StudentDashboard() {
                   </div>
                 </div>
               </Card>
+
+              <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-lg">🌟</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-gray-900">
+                        Vivek suman
+                      </h4>
+                      <Badge className="bg-blue-100 text-blue-800">
+                        Batch 21-22
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-2">Score: 95%</p>
+                    <p className="text-xs text-gray-600"></p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                    <span className="text-lg">💎</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-gray-900">
+                        Vishal gaurav
+                      </h4>
+                      <Badge className="bg-emerald-100 text-emerald-800">
+                        Batch 19-20
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-2">Score: 93%</p>
+                    <p className="text-xs text-gray-600"></p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          {/* Notices Section */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Recent Notices
+              </h3>
+              <Button
+                variant="link"
+                className="text-blue-600 p-0 btn-animate"
+                onClick={() => navigate("/student/notices")}
+              >
+                View All
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              <Card className="p-4 bg-gradient-to-r from-red-50 to-orange-50 border-red-200">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm">🚨</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900 mb-1">
+                      School Closure Notice
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-2">
+                      School will remain closed tomorrow due to weather
+                      conditions. Online classes will continue as scheduled.
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <Badge className="bg-red-100 text-red-800">Urgent</Badge>
+                      <span className="text-xs text-gray-500">2 hours ago</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm">📚</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900 mb-1">
+                      Exam Schedule Released
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-2">
+                      Final examination schedule for all grades has been
+                      published. Check your grade section for details.
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <Badge className="bg-blue-100 text-blue-800">
+                        Important
+                      </Badge>
+                      <span className="text-xs text-gray-500">1 day ago</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
             </div>
           </div>
         </div>
