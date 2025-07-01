@@ -112,34 +112,41 @@ router.get(
         ],
       }).populate("students", "user profile");
 
-      const teacherClasses = classes.map((cls) => ({
-        _id: cls._id,
-        name: cls.name,
-        grade: cls.grade,
-        section: cls.section,
-        room: cls.room,
-        studentCount: cls.students.length,
-        subjects: [
-          ...new Set(
-            cls.schedule
-              .filter(
-                (s) =>
-                  s.teacher === teacher._id ||
-                  s.teacher ===
-                    `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`,
-              )
-              .map((s) => s.subject),
-          ),
-        ],
-        students: cls.students.map((student) => ({
-          _id: student._id,
-          name: student.user?.profile
-            ? `${student.user.profile.firstName} ${student.user.profile.lastName}`
-            : "Unknown Student",
-          rollNumber: student.rollNumber,
-          studentId: student.studentId,
-        })),
-      }));
+      const teacherClasses = classes.map((cls) => {
+        // Get subjects this teacher teaches in this class
+        const teacherSubjects = cls.schedule
+          .filter(
+            (s) =>
+              s.teacher === teacher._id ||
+              s.teacher ===
+                `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`,
+          )
+          .map((s) => s.subject);
+
+        // Also include subjects from teacher's profile if no schedule subjects found
+        let subjects = [...new Set(teacherSubjects)];
+        if (subjects.length === 0 && teacher.subjects) {
+          subjects = teacher.subjects.split(",").map((s) => s.trim());
+        }
+
+        return {
+          _id: cls._id,
+          name: cls.name,
+          grade: cls.grade,
+          section: cls.section,
+          room: cls.room,
+          studentCount: cls.students.length,
+          subjects: subjects,
+          students: cls.students.map((student) => ({
+            _id: student._id,
+            name: student.user?.profile
+              ? `${student.user.profile.firstName} ${student.user.profile.lastName}`
+              : "Unknown Student",
+            rollNumber: student.rollNumber,
+            studentId: student.studentId,
+          })),
+        };
+      });
 
       res.json({ classes: teacherClasses });
     } catch (error) {
