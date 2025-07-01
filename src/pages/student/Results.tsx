@@ -145,39 +145,53 @@ export default function StudentResults() {
         className="pb-20"
       >
         <div className="px-6 py-6 pt-8">
-          {/* Current Performance Overview */}
-          <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-6 rounded-2xl mb-6 mt-4">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                <Trophy className="h-8 w-8 text-yellow-300" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold">Current Progress</h2>
-                <p className="text-white/80">Monthly Assessment Report</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-3xl font-bold text-yellow-300">
-                  {examResults.currentProgress.overall}%
-                </div>
-                <div className="text-white/80 text-sm">Overall</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-green-300">
-                  #{examResults.currentProgress.rank}
-                </div>
-                <div className="text-white/80 text-sm">Class Rank</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-blue-300">
-                  {examResults.currentProgress.totalStudents}
-                </div>
-                <div className="text-white/80 text-sm">Total Students</div>
-              </div>
-            </div>
+          {/* Header with refresh */}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Exam Results ({results.length})
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadResults}
+              disabled={isLoading}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-1 ${isLoading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
           </div>
+
+          {/* Current Performance Overview */}
+          {results.length > 0 && (
+            <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-6 rounded-2xl mb-6 mt-4">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                  <Trophy className="h-8 w-8 text-yellow-300" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold">Current Progress</h2>
+                  <p className="text-white/80">Teacher Uploaded Results</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-yellow-300">
+                    {overallPercentage}%
+                  </div>
+                  <div className="text-white/80 text-sm">Overall Average</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-green-300">
+                    {results.length}
+                  </div>
+                  <div className="text-white/80 text-sm">Subjects Graded</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Subject-wise Current Progress */}
           <Card className="p-6 mb-6">
