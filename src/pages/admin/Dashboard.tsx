@@ -8,6 +8,7 @@ import {
   FileText,
   UserCheck,
   Bell,
+  MessageCircle,
 } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
