@@ -158,18 +158,33 @@ export default function TeacherUploadResults() {
   };
 
   const downloadTemplate = () => {
+    if (students.length === 0) {
+      toast({
+        title: "No students",
+        description: "Please select a class first to download template",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Create CSV template
-    const headers = ["Roll Number", "Student Name", "Marks", "Remarks"];
+    const headers = [
+      "Student ID",
+      "Roll Number",
+      "Student Name",
+      "Marks",
+      "Remarks",
+    ];
     const csvContent = [
       headers.join(","),
-      ...students.map((s) => `${s.rollNumber},${s.name},,`),
+      ...students.map((s) => `${s._id},${s.rollNumber},${s.name},,`),
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "results_template.csv";
+    a.download = `results_template_${selectedClass?.name || "class"}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
 
