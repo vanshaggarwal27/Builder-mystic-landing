@@ -153,21 +153,21 @@ async function createInitialData() {
         firstName: "Ms. Sarah",
         lastName: "Johnson",
         teacherId: "TCH001",
-        subjects: ["Mathematics", "Physics"],
+        subjects: "Mathematics, Physics",
       },
       {
         email: "teacher2@shkva.edu",
         firstName: "Mr. David",
         lastName: "Wilson",
         teacherId: "TCH002",
-        subjects: ["English", "Literature"],
+        subjects: "English, Literature",
       },
       {
         email: "teacher3@shkva.edu",
         firstName: "Dr. Emma",
         lastName: "Brown",
         teacherId: "TCH003",
-        subjects: ["Chemistry", "Biology"],
+        subjects: "Chemistry, Biology",
       },
     ];
 
@@ -192,7 +192,7 @@ async function createInitialData() {
         teacherId: teacherData.teacherId,
         subjects: teacherData.subjects,
         qualification: "M.Ed",
-        experience: 5,
+        experience: "5 Years",
         joiningDate: new Date("2020-01-01"),
       });
       await teacherProfile.save();
