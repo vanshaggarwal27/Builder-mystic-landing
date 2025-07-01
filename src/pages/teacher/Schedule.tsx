@@ -100,28 +100,26 @@ export default function TeacherSchedule() {
               description: `Found ${allSchedules.length} classes assigned to you.`,
             });
           } else {
-            // Generate demo schedule if no real schedule found
-            const demoSchedule = generateDemoTeacherSchedule();
-            setSchedule(demoSchedule);
+            setSchedule([]);
             toast({
-              title: "Demo Schedule",
+              title: "No Classes Assigned",
               description:
-                "Showing demo schedule. Contact admin to assign real classes.",
+                "You don't have any classes assigned yet. Contact admin to get schedule assignments.",
             });
           }
           return;
         }
       } catch (apiError) {
-        console.log("API access denied, using demo schedule");
+        console.log("API access denied, no schedule available");
       }
 
-      // If API fails or access denied, generate demo schedule
-      const demoSchedule = generateDemoTeacherSchedule();
-      setSchedule(demoSchedule);
+      // If API fails or access denied, show empty schedule
+      setSchedule([]);
       toast({
-        title: "Demo Schedule",
+        title: "No Schedule Access",
         description:
-          "Showing demo teaching schedule. Contact admin for access to real schedules.",
+          "Unable to load your teaching schedule. Contact admin for access.",
+        variant: "destructive",
       });
     } catch (error) {
       console.error("Error loading teacher schedule:", error);
