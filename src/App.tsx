@@ -42,6 +42,7 @@ import AdminSuccessStories from "./pages/admin/SuccessStories";
 import AdminSendNotice from "./pages/admin/SendNotice";
 import AdminTestButtons from "./pages/admin/TestButtons";
 import AdminTeacherAttendance from "./pages/admin/TeacherAttendance";
+import AdminChat from "./pages/admin/Chat";
 
 // Teacher Upload Components
 import TeacherUploadResults from "./pages/teacher/UploadResults";
