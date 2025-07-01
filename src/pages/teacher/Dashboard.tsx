@@ -136,45 +136,6 @@ export default function TeacherDashboard() {
     },
   ];
 
-  const recentActivity = [
-    {
-      title: "Admin Notice",
-      description:
-        "School will remain closed tomorrow due to weather conditions",
-      time: "2 hours ago",
-      status: "important",
-      type: "admin",
-    },
-    {
-      title: "Admin Notice",
-      description:
-        "Faculty meeting scheduled for Friday at 3:00 PM in main hall",
-      time: "1 day ago",
-      status: "info",
-      type: "admin",
-    },
-    {
-      title: "Admin Notice",
-      description: "New grading system guidelines have been updated",
-      time: "3 days ago",
-      status: "info",
-      type: "admin",
-    },
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "important":
-        return "bg-red-100 text-red-700";
-      case "info":
-        return "bg-blue-100 text-blue-700";
-      case "completed":
-        return "bg-green-100 text-green-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
-
   return (
     <>
       <MobileLayout
