@@ -22,12 +22,17 @@ export default function TeacherDashboard() {
     { label: "My Classes", value: "5", icon: BookOpen, color: "text-blue-600" },
     { label: "Students", value: "147", icon: Users, color: "text-green-600" },
     {
-      label: "Assignments",
-      value: "12",
-      icon: FileText,
+      label: "Schedule",
+      value: "25",
+      icon: Calendar,
       color: "text-purple-600",
     },
-    { label: "Pending", value: "3", icon: Clock, color: "text-orange-600" },
+    {
+      label: "Attendance",
+      value: "95%",
+      icon: UserCheck,
+      color: "text-orange-600",
+    },
   ];
 
   const quickActions = [
