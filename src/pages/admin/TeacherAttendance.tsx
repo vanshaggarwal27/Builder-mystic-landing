@@ -27,15 +27,21 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Teacher {
   _id: string;
-  user: {
-    profile: {
-      firstName: string;
-      lastName: string;
+  user?: {
+    profile?: {
+      firstName?: string;
+      lastName?: string;
     };
-    email: string;
+    email?: string;
   };
-  teacherId: string;
+  profile?: {
+    firstName?: string;
+    lastName?: string;
+  };
+  teacherId?: string;
   department?: string;
+  name?: string;
+  email?: string;
 }
 
 interface TeacherAttendance {
