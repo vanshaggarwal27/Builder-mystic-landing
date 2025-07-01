@@ -118,35 +118,8 @@ export default function StudentResults() {
       : 0;
   };
 
-  const examResults = {
-    currentProgress: {
-      overall: 87.5,
-      rank: 5,
-      totalStudents: 150,
-      subjects: [
-        { name: "Mathematics", marks: 92, total: 100, grade: "A+" },
-        { name: "Physics", marks: 85, total: 100, grade: "A" },
-        { name: "Chemistry", marks: 88, total: 100, grade: "A" },
-        { name: "English", marks: 90, total: 100, grade: "A+" },
-        { name: "Biology", marks: 82, total: 100, grade: "A" },
-      ],
-    },
-    examHistory: [
-      {
-        id: "final-2023",
-        name: "Final Examination 2023",
-        type: "Final",
-        date: "March 2024",
-        percentage: 89.2,
-        rank: 3,
-        grade: "A+",
-        subjects: [
-          { name: "Mathematics", marks: 95, total: 100 },
-          { name: "Physics", marks: 87, total: 100 },
-          { name: "Chemistry", marks: 92, total: 100 },
-          { name: "English", marks: 88, total: 100 },
-          { name: "Biology", marks: 84, total: 100 },
-        ],
+  const overallPercentage = calculateOverallPercentage();
+  const examHistoryArray = Object.values(groupedResults);
       },
       {
         id: "third-2023",
