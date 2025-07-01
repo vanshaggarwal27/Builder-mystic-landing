@@ -10,6 +10,7 @@ import {
   Clock,
   Award,
   RefreshCw,
+  MessageCircle,
 } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
