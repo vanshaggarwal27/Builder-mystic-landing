@@ -231,7 +231,7 @@ export default function TeacherChat() {
 
             {/* Chat Messages */}
             <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-              {chatHistory.map((chat) => (
+              {messages.map((chat) => (
                 <div
                   key={chat.id}
                   className={`flex ${chat.isMe ? "justify-end" : "justify-start"}`}
