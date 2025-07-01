@@ -274,34 +274,97 @@ export default function TeacherDashboard() {
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Recent Notices */}
             <div className="bg-white rounded-lg shadow-sm">
               <div className="p-4 border-b">
-                <h3 className="font-semibold text-gray-900">Recent Activity</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900">
+                    Recent Notices
+                  </h3>
+                  <Button
+                    variant="link"
+                    className="text-blue-600 p-0 text-sm"
+                    onClick={() => navigate("/teacher/notices")}
+                  >
+                    View All
+                  </Button>
+                </div>
               </div>
               <div className="space-y-1">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="p-4 border-b last:border-b-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium text-gray-900">
-                            {activity.title}
-                          </h4>
-                          <Badge className={getStatusColor(activity.status)}>
-                            {activity.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          {activity.description}
-                        </p>
-                      </div>
-                      <span className="text-xs text-gray-500 ml-2">
-                        {activity.time}
+                {isLoadingNotices ? (
+                  <div className="p-4">
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+                      <span className="text-sm text-gray-600">
+                        Loading notices...
                       </span>
                     </div>
                   </div>
-                ))}
+                ) : notices.length > 0 ? (
+                  notices.map((notice) => {
+                    const getPriorityColor = (priority: string) => {
+                      switch (priority) {
+                        case "urgent":
+                          return "bg-red-100 text-red-700";
+                        case "high":
+                          return "bg-orange-100 text-orange-700";
+                        case "normal":
+                          return "bg-blue-100 text-blue-700";
+                        default:
+                          return "bg-gray-100 text-gray-700";
+                      }
+                    };
+
+                    const formatDate = (dateString: string) => {
+                      const date = new Date(dateString);
+                      const now = new Date();
+                      const diffTime = Math.abs(now.getTime() - date.getTime());
+                      const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+                      const diffDays = Math.floor(diffHours / 24);
+
+                      if (diffHours < 1) return "Just now";
+                      if (diffHours < 24) return `${diffHours} hours ago`;
+                      if (diffDays === 1) return "1 day ago";
+                      return `${diffDays} days ago`;
+                    };
+
+                    return (
+                      <div
+                        key={notice._id}
+                        className="p-4 border-b last:border-b-0"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-gray-900">
+                                {notice.title}
+                              </h4>
+                              <Badge
+                                className={getPriorityColor(notice.priority)}
+                              >
+                                {notice.priority}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 line-clamp-2">
+                              {notice.message}
+                            </p>
+                            <div className="text-xs text-gray-500 mt-1">
+                              From: {notice.createdBy.name} (
+                              {notice.createdBy.role})
+                            </div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-2">
+                            {formatDate(notice.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    <p className="text-sm">No recent notices</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
