@@ -42,7 +42,7 @@ export function MobileLayout({
   };
 
   return (
-    <div className={cn("min-h-screen bg-gray-50", className)}>
+    <div className={cn("min-h-screen bg-gray-50 flex flex-col", className)}>
       {/* Header */}
       {(title || showBack || showMenu || showStar || showBell) && (
         <div
@@ -109,7 +109,7 @@ export function MobileLayout({
       )}
 
       {/* Content */}
-      <div className="flex-1 relative">{children}</div>
+      <div className="flex-1 relative pb-20">{children}</div>
     </div>
   );
 }
