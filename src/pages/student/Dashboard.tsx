@@ -88,6 +88,23 @@ export default function StudentDashboard() {
     }
   };
 
+  const loadNotices = async () => {
+    try {
+      setIsLoadingNotices(true);
+      const data = await apiCall("/students/notices");
+      const latestNotices = data.notices || [];
+
+      // Only show the 2 most recent notices on dashboard
+      setNotices(latestNotices.slice(0, 2));
+    } catch (error: any) {
+      console.error("Error loading notices:", error);
+      // Don't show error for notices - just use empty array
+      setNotices([]);
+    } finally {
+      setIsLoadingNotices(false);
+    }
+  };
+
   // Get today's schedule
   const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
   const todaySchedule = schedule.filter((item) => item.day === today);
