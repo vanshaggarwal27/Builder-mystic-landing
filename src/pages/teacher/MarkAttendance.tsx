@@ -52,6 +52,40 @@ export default function TeacherMarkAttendance() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Load saved attendance when details change
+  useEffect(() => {
+    if (
+      attendanceDetails.class &&
+      attendanceDetails.date &&
+      attendanceDetails.period
+    ) {
+      const attendanceKey = `student_attendance_${attendanceDetails.class}_${attendanceDetails.date}_${attendanceDetails.period}`;
+      const savedAttendance = localStorage.getItem(attendanceKey);
+
+      if (savedAttendance) {
+        try {
+          const parsedAttendance = JSON.parse(savedAttendance);
+          if (parsedAttendance.students) {
+            setStudents(parsedAttendance.students);
+            toast({
+              title: "Attendance Loaded",
+              description: "Previously saved attendance data has been loaded.",
+            });
+          }
+        } catch (error) {
+          console.error("Error loading saved attendance:", error);
+        }
+      } else {
+        // Reset to initial students if no saved data
+        setStudents(initialStudents);
+      }
+    }
+  }, [
+    attendanceDetails.class,
+    attendanceDetails.date,
+    attendanceDetails.period,
+  ]);
+
   const classes = [
     "Class 1-A",
     "Class 2-A",
