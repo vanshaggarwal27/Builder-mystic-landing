@@ -255,28 +255,6 @@ export default function TeacherDashboard() {
                 ))}
               </div>
             </div>
-
-            {/* Additional Features */}
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                onClick={() => navigate("/teacher/assignments")}
-                className="bg-purple-600 hover:bg-purple-700 h-auto py-4"
-              >
-                <div className="text-center">
-                  <FileText className="h-6 w-6 mx-auto mb-1" />
-                  <div className="text-sm">Assignments</div>
-                </div>
-              </Button>
-              <Button
-                onClick={() => navigate("/teacher/classes")}
-                className="bg-indigo-600 hover:bg-indigo-700 h-auto py-4"
-              >
-                <div className="text-center">
-                  <Users className="h-6 w-6 mx-auto mb-1" />
-                  <div className="text-sm">My Classes</div>
-                </div>
-              </Button>
-            </div>
           </div>
         </div>
       </MobileLayout>
