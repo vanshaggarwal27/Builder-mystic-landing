@@ -128,7 +128,29 @@ export default function StudentChat() {
   ];
 
   const sendMessage = () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !selectedTeacher) return;
+
+    const newMessage = {
+      id: Date.now(),
+      sender: "student",
+      message: message.trim(),
+      time: new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      isMe: true,
+      timestamp: Date.now(),
+    };
+
+    // Add to current messages
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
+
+    // Save to localStorage for persistence
+    localStorage.setItem(
+      `chat_${selectedTeacher}`,
+      JSON.stringify(updatedMessages),
+    );
 
     toast({
       title: "Message Sent",
@@ -136,6 +158,43 @@ export default function StudentChat() {
     });
 
     setMessage("");
+
+    // Simulate teacher response after 2-5 seconds
+    setTimeout(
+      () => {
+        const teacherResponse = {
+          id: Date.now() + 1,
+          sender: "teacher",
+          message: getAutoResponse(message.trim()),
+          time: new Date().toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          isMe: false,
+          timestamp: Date.now() + 1000,
+        };
+
+        const finalMessages = [...updatedMessages, teacherResponse];
+        setMessages(finalMessages);
+        localStorage.setItem(
+          `chat_${selectedTeacher}`,
+          JSON.stringify(finalMessages),
+        );
+      },
+      Math.random() * 3000 + 2000,
+    );
+  };
+
+  const getAutoResponse = (studentMessage: string) => {
+    const responses = [
+      "Thank you for your question! Let me help you with that.",
+      "Great question! I'll explain this step by step.",
+      "I understand your concern. Here's how to approach this problem.",
+      "That's a very good observation! Let me clarify this for you.",
+      "I'm here to help! Can you be more specific about what you need?",
+      "Excellent question! This is important to understand.",
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
   };
 
   const getAvatarColor = (initials: string) => {
