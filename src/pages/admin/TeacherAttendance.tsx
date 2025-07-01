@@ -130,6 +130,21 @@ export default function AdminTeacherAttendance() {
   };
 
   const generateAttendanceForDate = (teachersData: Teacher[], date: string) => {
+    // First, try to load from localStorage
+    const attendanceKey = `teacher_attendance_${date}`;
+    const savedAttendance = localStorage.getItem(attendanceKey);
+
+    if (savedAttendance) {
+      try {
+        const parsedAttendance = JSON.parse(savedAttendance);
+        setAttendance(parsedAttendance);
+        return;
+      } catch (error) {
+        console.error("Error parsing saved attendance:", error);
+      }
+    }
+
+    // If no saved data, generate fresh attendance records
     const attendanceRecords: TeacherAttendance[] = teachersData.map(
       (teacher) => {
         // Handle different possible data structures
