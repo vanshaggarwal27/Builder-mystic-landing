@@ -22,6 +22,36 @@ export default function TeacherChat() {
   const { toast } = useToast();
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Real-time message polling
+  useEffect(() => {
+    if (selectedStudent) {
+      loadMessages();
+      // Poll for new messages every 3 seconds
+      const messageInterval = setInterval(loadMessages, 3000);
+      return () => clearInterval(messageInterval);
+    }
+  }, [selectedStudent]);
+
+  const loadMessages = async () => {
+    if (!selectedStudent) return;
+
+    try {
+      // Load messages for this student
+      const savedMessages = localStorage.getItem(
+        `chat_teacher_${selectedStudent}`,
+      );
+      if (savedMessages) {
+        setMessages(JSON.parse(savedMessages));
+      } else {
+        setMessages(chatHistory); // fallback to demo data
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
+  };
 
   const students = [
     {
