@@ -123,50 +123,15 @@ export default function TeacherSchedule() {
       });
     } catch (error) {
       console.error("Error loading teacher schedule:", error);
-      // Fallback to demo schedule
-      const demoSchedule = generateDemoTeacherSchedule();
-      setSchedule(demoSchedule);
+      setSchedule([]);
       toast({
-        title: "Demo Schedule",
-        description: "Using demo schedule due to connection issues.",
+        title: "Schedule Unavailable",
+        description: "Failed to load teaching schedule. Please contact admin.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const generateDemoTeacherSchedule = (): TeacherScheduleItem[] => {
-    const teacherName = user?.name || "Teacher";
-    const subjects = ["Mathematics", "Physics", "Chemistry"];
-    const classes = ["Grade 10-A", "Grade 11-B", "Grade 12-A"];
-    const times = [
-      "09:00 - 09:45",
-      "10:00 - 10:45",
-      "11:00 - 11:45",
-      "14:00 - 14:45",
-    ];
-
-    const demoSchedule: TeacherScheduleItem[] = [];
-    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-
-    days.forEach((day, dayIndex) => {
-      const classesPerDay = 2 + (dayIndex % 2); // 2-3 classes per day
-
-      for (let i = 0; i < classesPerDay; i++) {
-        demoSchedule.push({
-          id: `demo-${day}-${i}`,
-          day,
-          period: `${i + 1}`,
-          subject: subjects[i % subjects.length],
-          time: times[i % times.length],
-          className: classes[i % classes.length],
-          room: `Room ${201 + i}`,
-        });
-      }
-    });
-
-    return demoSchedule;
   };
 
   const todaySchedule = schedule.filter((item) => item.day === selectedDay);
