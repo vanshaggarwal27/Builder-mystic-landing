@@ -168,7 +168,39 @@ export default function TeacherClasses() {
             </TabsList>
 
             <TabsContent value="all" className="space-y-4">
-              {classes.map((classItem) => (
+              {/* Header with refresh */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Today's Classes ({classes.length})
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadTeacherData}
+                  disabled={isLoading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
+
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-3 h-3 rounded-full bg-gray-200 animate-pulse mt-2"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                          <div className="h-6 bg-gray-200 rounded animate-pulse mb-1"></div>
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4 mb-2"></div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : classes.length > 0 ? (
+                classes.map((classItem) => (
                 <Card
                   key={classItem.id}
                   className={`p-4 ${
