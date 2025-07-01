@@ -251,32 +251,6 @@ export default function StudentResults() {
               </p>
             </Card>
           )}
-                            {exam.name}
-                          </h4>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Calendar className="h-3 w-3" />
-                            <span>{exam.date}</span>
-                          </div>
-                        </div>
-                        <Badge
-                          variant="secondary"
-                          className={getGradeColor(exam.grade)}
-                        >
-                          {exam.grade}
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-4 text-center bg-gray-50 p-3 rounded-lg">
-                        <div>
-                          <div className="text-lg font-bold text-blue-600">
-                            {exam.percentage}%
-                          </div>
-                          <div className="text-xs text-gray-600">
-                            Percentage
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-lg font-bold text-green-600">
                             #{exam.rank}
                           </div>
                           <div className="text-xs text-gray-600">Rank</div>
