@@ -146,6 +146,103 @@ async function createInitialData() {
       }
     }
 
+    // Create sample teachers
+    const sampleTeachers = [
+      {
+        email: "teacher1@shkva.edu",
+        firstName: "Ms. Sarah",
+        lastName: "Johnson",
+        teacherId: "TCH001",
+        subjects: ["Mathematics", "Physics"],
+      },
+      {
+        email: "teacher2@shkva.edu",
+        firstName: "Mr. David",
+        lastName: "Wilson",
+        teacherId: "TCH002",
+        subjects: ["English", "Literature"],
+      },
+      {
+        email: "teacher3@shkva.edu",
+        firstName: "Dr. Emma",
+        lastName: "Brown",
+        teacherId: "TCH003",
+        subjects: ["Chemistry", "Biology"],
+      },
+    ];
+
+    for (const teacherData of sampleTeachers) {
+      const teacherUser = new User({
+        email: teacherData.email,
+        password: "teacher123",
+        role: "teacher",
+        profile: {
+          firstName: teacherData.firstName,
+          lastName: teacherData.lastName,
+          phone: "+1234567890",
+          dateOfBirth: new Date("1985-06-15"),
+          gender: "female",
+        },
+      });
+      await teacherUser.save();
+
+      const { Teacher } = require("./models/User");
+      const teacherProfile = new Teacher({
+        user: teacherUser._id,
+        teacherId: teacherData.teacherId,
+        subjects: teacherData.subjects,
+        qualification: "M.Ed",
+        experience: 5,
+        joiningDate: new Date("2020-01-01"),
+      });
+      await teacherProfile.save();
+
+      console.log(
+        `✅ Teacher created: ${teacherData.firstName} ${teacherData.lastName} (${teacherData.email})`,
+      );
+    }
+
+    // Assign teachers to classes and subjects
+    const classes = await Class.find();
+    const teachers = await Teacher.find().populate("user");
+
+    for (const cls of classes) {
+      // Add some schedule entries for teachers
+      const scheduleEntries = [
+        {
+          day: "Monday",
+          period: "1",
+          subject: "Mathematics",
+          teacher: `${teachers[0].user.profile.firstName} ${teachers[0].user.profile.lastName}`,
+          startTime: "09:00",
+          endTime: "09:45",
+          room: cls.room,
+        },
+        {
+          day: "Monday",
+          period: "2",
+          subject: "English",
+          teacher: `${teachers[1].user.profile.firstName} ${teachers[1].user.profile.lastName}`,
+          startTime: "09:45",
+          endTime: "10:30",
+          room: cls.room,
+        },
+        {
+          day: "Tuesday",
+          period: "1",
+          subject: "Chemistry",
+          teacher: `${teachers[2].user.profile.firstName} ${teachers[2].user.profile.lastName}`,
+          startTime: "09:00",
+          endTime: "09:45",
+          room: cls.room,
+        },
+      ];
+
+      cls.schedule = scheduleEntries;
+      await cls.save();
+      console.log(`✅ Schedule assigned to ${cls.name}`);
+    }
+
     console.log("🎉 Sample data created successfully!");
   } catch (error) {
     console.error("❌ Error creating initial data:", error);
