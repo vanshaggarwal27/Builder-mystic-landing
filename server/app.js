@@ -212,10 +212,31 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // MongoDB Connection
 const connectDB = async () => {
   try {
-    const mongoUri =
-      config.mongodb.uri ||
-      process.env.MONGODB_URI ||
-      "mongodb://localhost:27017/shkva";
+    let mongoUri;
+
+    // Use in-memory database for development if MongoDB is not available
+    if (config.server.env === "development") {
+      try {
+        const { MongoMemoryServer } = require("mongodb-memory-server");
+        const mongod = await MongoMemoryServer.create();
+        mongoUri = mongod.getUri();
+        console.log("🧠 Using in-memory MongoDB for development");
+      } catch (memError) {
+        console.log(
+          "⚠️ In-memory MongoDB not available, trying regular connection...",
+        );
+        mongoUri =
+          config.mongodb.uri ||
+          process.env.MONGODB_URI ||
+          "mongodb://localhost:27017/shkva";
+      }
+    } else {
+      mongoUri =
+        config.mongodb.uri ||
+        process.env.MONGODB_URI ||
+        "mongodb://localhost:27017/shkva";
+    }
+
     await mongoose.connect(mongoUri, {
       retryWrites: true,
       w: "majority",
@@ -231,19 +252,17 @@ const connectDB = async () => {
     } else {
       console.log(`📊 Database has ${userCount} users`);
     }
+
+    return true;
   } catch (error) {
     console.error("❌ MongoDB connection error:", error.message);
-    console.log("⚠️ Running without database - using mock data");
-    // Don't exit, continue with mock data
+    console.log("⚠️ Continuing without database connection");
     return false;
   }
 };
 
 // Connect to database
-connectDB().catch((error) => {
-  console.error("Failed to connect to database:", error);
-  console.log("⚠️ Continuing without database connection");
-});
+connectDB();
 
 const db = mongoose.connection;
 db.on("error", (error) => {
