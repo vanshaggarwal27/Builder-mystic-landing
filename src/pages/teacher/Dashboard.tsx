@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users,
@@ -9,11 +9,14 @@ import {
   UserCheck,
   Clock,
   Award,
+  RefreshCw,
 } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { apiCall } from "@/contexts/AuthContext";
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
