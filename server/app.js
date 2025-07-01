@@ -146,6 +146,104 @@ async function createInitialData() {
       }
     }
 
+    // Create sample teachers
+    const sampleTeachers = [
+      {
+        email: "teacher1@shkva.edu",
+        firstName: "Ms. Sarah",
+        lastName: "Johnson",
+        teacherId: "TCH001",
+        subjects: "Mathematics, Physics",
+      },
+      {
+        email: "teacher2@shkva.edu",
+        firstName: "Mr. David",
+        lastName: "Wilson",
+        teacherId: "TCH002",
+        subjects: "English, Literature",
+      },
+      {
+        email: "teacher3@shkva.edu",
+        firstName: "Dr. Emma",
+        lastName: "Brown",
+        teacherId: "TCH003",
+        subjects: "Chemistry, Biology",
+      },
+    ];
+
+    for (const teacherData of sampleTeachers) {
+      const teacherUser = new User({
+        email: teacherData.email,
+        password: "teacher123",
+        role: "teacher",
+        profile: {
+          firstName: teacherData.firstName,
+          lastName: teacherData.lastName,
+          phone: "+1234567890",
+          dateOfBirth: new Date("1985-06-15"),
+          gender: "female",
+        },
+      });
+      await teacherUser.save();
+
+      const { Teacher } = require("./models/User");
+      const teacherProfile = new Teacher({
+        user: teacherUser._id,
+        teacherId: teacherData.teacherId,
+        subjects: teacherData.subjects,
+        qualification: "M.Ed",
+        experience: "5 Years",
+        joiningDate: new Date("2020-01-01"),
+      });
+      await teacherProfile.save();
+
+      console.log(
+        `✅ Teacher created: ${teacherData.firstName} ${teacherData.lastName} (${teacherData.email})`,
+      );
+    }
+
+    // Assign teachers to classes and subjects
+    const { Teacher } = require("./models/User");
+    const classes = await Class.find();
+    const teachers = await Teacher.find().populate("user");
+
+    for (const cls of classes) {
+      // Add some schedule entries for teachers
+      const scheduleEntries = [
+        {
+          day: "Monday",
+          period: "1",
+          subject: "Mathematics",
+          teacher: `${teachers[0].user.profile.firstName} ${teachers[0].user.profile.lastName}`,
+          startTime: "09:00",
+          endTime: "09:45",
+          room: cls.room,
+        },
+        {
+          day: "Monday",
+          period: "2",
+          subject: "English",
+          teacher: `${teachers[1].user.profile.firstName} ${teachers[1].user.profile.lastName}`,
+          startTime: "09:45",
+          endTime: "10:30",
+          room: cls.room,
+        },
+        {
+          day: "Tuesday",
+          period: "1",
+          subject: "Chemistry",
+          teacher: `${teachers[2].user.profile.firstName} ${teachers[2].user.profile.lastName}`,
+          startTime: "09:00",
+          endTime: "09:45",
+          room: cls.room,
+        },
+      ];
+
+      cls.schedule = scheduleEntries;
+      await cls.save();
+      console.log(`✅ Schedule assigned to ${cls.name}`);
+    }
+
     console.log("🎉 Sample data created successfully!");
   } catch (error) {
     console.error("❌ Error creating initial data:", error);
@@ -212,10 +310,31 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // MongoDB Connection
 const connectDB = async () => {
   try {
-    const mongoUri =
-      config.mongodb.uri ||
-      process.env.MONGODB_URI ||
-      "mongodb://localhost:27017/shkva";
+    let mongoUri;
+
+    // Use in-memory database for development if MongoDB is not available
+    if (config.server.env === "development") {
+      try {
+        const { MongoMemoryServer } = require("mongodb-memory-server");
+        const mongod = await MongoMemoryServer.create();
+        mongoUri = mongod.getUri();
+        console.log("🧠 Using in-memory MongoDB for development");
+      } catch (memError) {
+        console.log(
+          "⚠️ In-memory MongoDB not available, trying regular connection...",
+        );
+        mongoUri =
+          config.mongodb.uri ||
+          process.env.MONGODB_URI ||
+          "mongodb://localhost:27017/shkva";
+      }
+    } else {
+      mongoUri =
+        config.mongodb.uri ||
+        process.env.MONGODB_URI ||
+        "mongodb://localhost:27017/shkva";
+    }
+
     await mongoose.connect(mongoUri, {
       retryWrites: true,
       w: "majority",
@@ -231,17 +350,17 @@ const connectDB = async () => {
     } else {
       console.log(`📊 Database has ${userCount} users`);
     }
+
+    return true;
   } catch (error) {
     console.error("❌ MongoDB connection error:", error.message);
-    throw error; // Don't continue without database
+    console.log("⚠️ Continuing without database connection");
+    return false;
   }
 };
 
 // Connect to database
-connectDB().catch((error) => {
-  console.error("Failed to connect to database:", error);
-  process.exit(1);
-});
+connectDB();
 
 const db = mongoose.connection;
 db.on("error", (error) => {

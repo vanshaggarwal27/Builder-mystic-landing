@@ -9,9 +9,9 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       "/api": {
-        target: "https://shkva-backend-new.onrender.com",
+        target: "http://localhost:5000",
         changeOrigin: true,
-        secure: true,
+        secure: false,
         configure: (proxy, options) => {
           proxy.on("error", (err, req, res) => {
             console.log("proxy error", err);

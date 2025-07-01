@@ -97,4 +97,99 @@ router.get(
   },
 );
 
+// Get notices for students
+router.get(
+  "/notices",
+  [auth, auth.requireRole(["student"])],
+  async (req, res) => {
+    try {
+      const student = await Student.findOne({ user: req.userId });
+
+      if (!student) {
+        return res.status(404).json({ error: "Student profile not found" });
+      }
+
+      const Notice = require("../models/Notice");
+
+      const query = {
+        status: "published",
+        $or: [
+          { target: "all" },
+          { target: "students" },
+          {
+            target: "specific_grade",
+            "targetDetails.grades": student.grade,
+          },
+          {
+            target: "specific_class",
+            "targetDetails.grades": student.grade,
+            "targetDetails.sections": student.section,
+          },
+        ],
+      };
+
+      const notices = await Notice.find(query)
+        .populate("author", "profile.firstName profile.lastName")
+        .sort({ createdAt: -1 })
+        .limit(50);
+
+      // Transform notices to match frontend expectations
+      const transformedNotices = notices.map((notice) => ({
+        _id: notice._id,
+        title: notice.title,
+        message: notice.content,
+        priority: notice.priority,
+        createdAt: notice.createdAt,
+        target: notice.target,
+        targetGrade: notice.targetDetails?.grades?.[0],
+        readBy: notice.readBy.map((r) => r.user.toString()),
+        createdBy: {
+          name: notice.author?.profile
+            ? `${notice.author.profile.firstName} ${notice.author.profile.lastName}`
+            : "System Admin",
+          role: "admin",
+        },
+      }));
+
+      res.json({ notices: transformedNotices });
+    } catch (error) {
+      console.error("Get student notices error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
+// Mark notice as read for student
+router.post(
+  "/notices/:id/read",
+  [auth, auth.requireRole(["student"])],
+  async (req, res) => {
+    try {
+      const Notice = require("../models/Notice");
+      const notice = await Notice.findById(req.params.id);
+
+      if (!notice) {
+        return res.status(404).json({ error: "Notice not found" });
+      }
+
+      // Check if already read
+      const alreadyRead = notice.readBy.find(
+        (read) => read.user.toString() === req.userId,
+      );
+
+      if (!alreadyRead) {
+        notice.readBy.push({ user: req.userId });
+        notice.analytics.readCount += 1;
+        notice.updateReadPercentage();
+        await notice.save();
+      }
+
+      res.json({ message: "Notice marked as read" });
+    } catch (error) {
+      console.error("Mark notice read error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
 module.exports = router;
