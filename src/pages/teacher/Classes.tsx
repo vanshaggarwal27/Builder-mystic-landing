@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Star } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Star, RefreshCw, Calendar, Users, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
@@ -7,9 +7,141 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { UserProfileService } from "@/lib/userProfileService";
+
+interface ClassItem {
+  id: string;
+  name: string;
+  time: string;
+  room: string;
+  students: number;
+  subject: string;
+  status: "current" | "next" | "upcoming";
+}
 
 export default function TeacherClasses() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [teacherProfile, setTeacherProfile] = useState<any>(null);
+
+  useEffect(() => {
+    loadTeacherData();
+  }, []);
+
+  const loadTeacherData = async () => {
+    try {
+      setIsLoading(true);
+
+      // Load teacher profile
+      const profile = await UserProfileService.getCurrentUserProfile();
+      setTeacherProfile(profile);
+
+      // Load today's classes for this teacher
+      await loadTodaysClasses();
+    } catch (error) {
+      console.error("Error loading teacher data:", error);
+      toast({
+        title: "Error Loading Data",
+        description: "Failed to load teacher information.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadTodaysClasses = async () => {
+    try {
+      // Try to get classes from API
+      const response = await fetch(
+        "https://shkva-backend-new.onrender.com/api/classes",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const todaySchedules: ClassItem[] = [];
+        const today = new Date().toLocaleDateString("en-US", {
+          weekday: "long",
+        });
+        const teacherName = user?.name || "";
+
+        // Extract today's schedules for current teacher
+        data.classes?.forEach((classData: any) => {
+          classData.schedule?.forEach((scheduleItem: any) => {
+            if (
+              scheduleItem.teacher === teacherName &&
+              scheduleItem.day === today
+            ) {
+              todaySchedules.push({
+                id:
+                  scheduleItem._id || `${classData._id}-${scheduleItem.period}`,
+                name: `${classData.name} ${scheduleItem.subject}`,
+                time:
+                  scheduleItem.startTime && scheduleItem.endTime
+                    ? `${scheduleItem.startTime} - ${scheduleItem.endTime}`
+                    : "Time TBA",
+                room: scheduleItem.room || classData.room || "Room TBA",
+                students: classData.students?.length || 0,
+                subject: scheduleItem.subject,
+                status: getCurrentStatus(scheduleItem.startTime),
+              });
+            }
+          });
+        });
+
+        setClasses(todaySchedules);
+      } else {
+        // If can't access classes, show empty state
+        setClasses([]);
+      }
+    } catch (error) {
+      console.error("Error loading classes:", error);
+      setClasses([]);
+    }
+  };
+
+  const getCurrentStatus = (
+    startTime: string,
+  ): "current" | "next" | "upcoming" => {
+    if (!startTime) return "upcoming";
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    // Parse start time (assuming format like "09:00")
+    const [hourStr, minuteStr] = startTime.split(":");
+    const startHour = parseInt(hourStr);
+    const startMinute = parseInt(minuteStr);
+
+    const currentTimeMinutes = currentHour * 60 + currentMinute;
+    const startTimeMinutes = startHour * 60 + startMinute;
+    const endTimeMinutes = startTimeMinutes + 45; // Assuming 45-minute classes
+
+    if (
+      currentTimeMinutes >= startTimeMinutes &&
+      currentTimeMinutes <= endTimeMinutes
+    ) {
+      return "current";
+    } else if (
+      currentTimeMinutes < startTimeMinutes &&
+      currentTimeMinutes >= startTimeMinutes - 45
+    ) {
+      return "next";
+    }
+    return "upcoming";
+  };
 
   const classes = [
     {
