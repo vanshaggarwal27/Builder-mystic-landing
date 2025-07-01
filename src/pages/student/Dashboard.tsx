@@ -19,6 +19,7 @@ import {
   UserProfile,
   ScheduleItem,
 } from "@/lib/userProfileService";
+import { apiCall } from "@/contexts/AuthContext";
 
 export default function StudentDashboard() {
   const { user } = useAuth();
