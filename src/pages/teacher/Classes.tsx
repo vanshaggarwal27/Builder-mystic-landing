@@ -143,41 +143,18 @@ export default function TeacherClasses() {
     return "upcoming";
   };
 
-  const classes = [
-    {
-      id: "1",
-      name: "Grade 10-A Mathematics",
-      time: "9:00 - 10:00 AM",
-      room: "Room 201",
-      students: 30,
-      topic: "Algebra - Chapter 5",
-      status: "current" as const,
-    },
-    {
-      id: "2",
-      name: "Grade 9-B Mathematics",
-      time: "10:15 - 11:15 AM",
-      room: "Room 201",
-      students: 28,
-      topic: "Geometry - Triangles",
-      status: "next" as const,
-    },
-    {
-      id: "3",
-      name: "Grade 11-A Mathematics",
-      time: "2:00 - 3:00 PM",
-      room: "Room 201",
-      students: 25,
-      topic: "Calculus - Derivatives",
-      status: "upcoming" as const,
-    },
-  ];
+  const teacherName =
+    teacherProfile?.firstName && teacherProfile?.lastName
+      ? `${teacherProfile.firstName} ${teacherProfile.lastName}`
+      : user?.name || "Teacher";
+
+  const department = teacherProfile?.department || "General Department";
 
   return (
     <>
       <MobileLayout
         title="My Classes"
-        subtitle="Ms. Johnson • Mathematics Department"
+        subtitle={`${teacherName} • ${department}`}
         headerGradient="from-green-500 to-blue-600"
         className="pb-20"
       >
