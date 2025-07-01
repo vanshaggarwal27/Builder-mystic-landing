@@ -51,6 +51,14 @@ export default function StudentDashboard() {
   // Load real data on component mount
   useEffect(() => {
     loadStudentData();
+    loadNotices();
+
+    // Set up real-time polling for notices every 30 seconds
+    const noticesInterval = setInterval(() => {
+      loadNotices();
+    }, 30000);
+
+    return () => clearInterval(noticesInterval);
   }, []);
 
   const loadStudentData = async () => {
