@@ -183,31 +183,35 @@ export default function AdminTeacherAttendance() {
     teacherId: string,
     status: "present" | "absent" | "late",
   ) => {
-    setAttendance((prev) =>
-      prev.map((record) => {
-        if (record.teacherId === teacherId) {
-          const now = new Date();
-          const timeString = now.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          });
+    const updatedAttendance = attendance.map((record) => {
+      if (record.teacherId === teacherId) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
 
-          return {
-            ...record,
-            status,
-            checkIn: status !== "absent" ? timeString : "-",
-            checkOut: status !== "absent" ? "-" : "-",
-            hours: status !== "absent" ? "8.0" : "0.0",
-          };
-        }
-        return record;
-      }),
-    );
+        return {
+          ...record,
+          status,
+          checkIn: status !== "absent" ? timeString : "-",
+          checkOut: status !== "absent" ? "-" : "-",
+          hours: status !== "absent" ? "8.0" : "0.0",
+        };
+      }
+      return record;
+    });
+
+    setAttendance(updatedAttendance);
+
+    // Save to localStorage for persistence
+    const attendanceKey = `teacher_attendance_${selectedDate}`;
+    localStorage.setItem(attendanceKey, JSON.stringify(updatedAttendance));
 
     toast({
-      title: "Attendance Marked",
-      description: `Marked ${status} for the selected teacher.`,
+      title: "Attendance Saved",
+      description: `Marked ${status} for the selected teacher. Data saved locally.`,
     });
   };
   const [departmentFilter, setDepartmentFilter] = useState("all");
