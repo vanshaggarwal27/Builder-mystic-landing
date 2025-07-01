@@ -89,28 +89,27 @@ export default function TeacherDashboard() {
 
   const recentActivity = [
     {
-      title: "Assignment submitted",
-      description: "Math Chapter 5 - 25/32 students",
-      time: "1 hour ago",
-      status: "pending",
-    },
-    {
-      title: "Attendance marked",
-      description: "Class 5-A - Present: 30/32",
+      title: "Admin Notice",
+      description:
+        "School will remain closed tomorrow due to weather conditions",
       time: "2 hours ago",
-      status: "completed",
+      status: "important",
+      type: "admin",
     },
     {
-      title: "Results uploaded",
-      description: "Mid-term Math - Class 5-B",
+      title: "Admin Notice",
+      description:
+        "Faculty meeting scheduled for Friday at 3:00 PM in main hall",
       time: "1 day ago",
-      status: "completed",
+      status: "info",
+      type: "admin",
     },
     {
-      title: "Assignment created",
-      description: "Science Lab Report - Class 6-A",
-      time: "2 days ago",
-      status: "completed",
+      title: "Admin Notice",
+      description: "New grading system guidelines have been updated",
+      time: "3 days ago",
+      status: "info",
+      type: "admin",
     },
   ];
 
