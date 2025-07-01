@@ -85,29 +85,6 @@ export default function AdminDashboard() {
     },
   ];
 
-  const recentActivity = [
-    {
-      title: "New student registered",
-      description: "John Smith - Class 5-A",
-      time: "2 hours ago",
-    },
-    {
-      title: "Assignment uploaded",
-      description: "Mathematics - Ms. Johnson",
-      time: "4 hours ago",
-    },
-    {
-      title: "Attendance marked",
-      description: "Class 3-B - Present: 28/30",
-      time: "6 hours ago",
-    },
-    {
-      title: "Notice published",
-      description: "Parent-Teacher Meeting",
-      time: "1 day ago",
-    },
-  ];
-
   return (
     <>
       <MobileLayout
