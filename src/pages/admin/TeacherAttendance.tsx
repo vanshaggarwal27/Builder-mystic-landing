@@ -99,8 +99,23 @@ export default function AdminTeacherAttendance() {
 
         // Generate attendance records for today if they don't exist
         generateAttendanceForDate(teachersData, selectedDate);
+      } else if (response.status === 403 || response.status === 401) {
+        console.error("Access denied to admin users endpoint");
+        setTeachers([]);
+        toast({
+          title: "Access Denied",
+          description:
+            "You don't have permission to view teacher data. Please contact system administrator.",
+          variant: "destructive",
+        });
       } else {
-        throw new Error("Failed to load teachers");
+        console.error("Failed to load teachers:", response.statusText);
+        setTeachers([]);
+        toast({
+          title: "Failed to Load Teachers",
+          description: "Unable to load teacher list. Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error loading teachers:", error);
