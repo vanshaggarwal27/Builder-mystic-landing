@@ -177,32 +177,6 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white rounded-lg shadow-sm">
-              <div className="p-4 border-b">
-                <h3 className="font-semibold text-gray-900">Recent Activity</h3>
-              </div>
-              <div className="space-y-1">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="p-4 border-b last:border-b-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">
-                          {activity.title}
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {activity.description}
-                        </p>
-                      </div>
-                      <span className="text-xs text-gray-500 ml-2">
-                        {activity.time}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </MobileLayout>
