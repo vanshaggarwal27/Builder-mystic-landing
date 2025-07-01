@@ -111,9 +111,28 @@ export default function AdminTeacherAttendance() {
   const generateAttendanceForDate = (teachersData: Teacher[], date: string) => {
     const attendanceRecords: TeacherAttendance[] = teachersData.map(
       (teacher) => {
-        const teacherName = teacher.user?.profile
-          ? `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`
-          : teacher.user?.email?.split("@")[0] || "Unknown Teacher";
+        // Handle different possible data structures
+        let teacherName = "Unknown Teacher";
+
+        if (
+          teacher.user?.profile?.firstName &&
+          teacher.user?.profile?.lastName
+        ) {
+          teacherName = `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`;
+        } else if (teacher.profile?.firstName && teacher.profile?.lastName) {
+          // Direct profile structure
+          teacherName = `${teacher.profile.firstName} ${teacher.profile.lastName}`;
+        } else if (teacher.user?.email) {
+          teacherName = teacher.user.email.split("@")[0];
+        } else if (teacher.email) {
+          teacherName = teacher.email.split("@")[0];
+        } else if (teacher.name) {
+          teacherName = teacher.name;
+        } else if (teacher.teacherId) {
+          teacherName = `Teacher ${teacher.teacherId}`;
+        }
+
+        console.log("Teacher data:", teacher, "Generated name:", teacherName);
 
         return {
           id: `${teacher._id}-${date}`,
