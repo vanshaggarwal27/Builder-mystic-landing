@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users,
@@ -9,35 +9,83 @@ import {
   UserCheck,
   Clock,
   Award,
+  RefreshCw,
+  MessageCircle,
 } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { apiCall } from "@/contexts/AuthContext";
+
+interface Notice {
+  _id: string;
+  title: string;
+  message: string;
+  priority: "low" | "normal" | "high" | "urgent";
+  createdAt: string;
+  target: "all" | "students" | "teachers" | "admin";
+  targetGrade?: string;
+  readBy: string[];
+  createdBy: {
+    name: string;
+    role: string;
+  };
+}
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [isLoadingNotices, setIsLoadingNotices] = useState(true);
+
+  // Load notices on component mount and set up real-time updates
+  useEffect(() => {
+    loadNotices();
+
+    // Set up polling for real-time updates every 30 seconds
+    const noticesInterval = setInterval(() => {
+      loadNotices();
+    }, 30000);
+
+    return () => clearInterval(noticesInterval);
+  }, []);
+
+  const loadNotices = async () => {
+    try {
+      setIsLoadingNotices(true);
+      const data = await apiCall("/teachers/notices");
+      const latestNotices = data.notices || [];
+
+      // Only show the 3 most recent notices on dashboard
+      setNotices(latestNotices.slice(0, 3));
+    } catch (error: any) {
+      console.error("Error loading notices:", error);
+      // Don't show error for notices - just use empty array
+      setNotices([]);
+    } finally {
+      setIsLoadingNotices(false);
+    }
+  };
 
   const quickStats = [
     { label: "My Classes", value: "5", icon: BookOpen, color: "text-blue-600" },
     { label: "Students", value: "147", icon: Users, color: "text-green-600" },
     {
-      label: "Assignments",
-      value: "12",
-      icon: FileText,
+      label: "Schedule",
+      value: "25",
+      icon: Calendar,
       color: "text-purple-600",
     },
-    { label: "Pending", value: "3", icon: Clock, color: "text-orange-600" },
+    {
+      label: "Attendance",
+      value: "95%",
+      icon: UserCheck,
+      color: "text-orange-600",
+    },
   ];
 
   const quickActions = [
-    {
-      title: "Upload Assignment",
-      description: "Create & assign homework",
-      icon: Upload,
-      color: "from-green-500 to-emerald-500",
-      route: "/teacher/upload-assignment",
-    },
     {
       title: "Upload Results",
       description: "Enter exam marks & grades",
@@ -58,6 +106,13 @@ export default function TeacherDashboard() {
       icon: Calendar,
       color: "from-orange-500 to-red-500",
       route: "/teacher/schedule",
+    },
+    {
+      title: "My Classes",
+      description: "Manage class information",
+      icon: BookOpen,
+      color: "from-green-500 to-emerald-500",
+      route: "/teacher/classes",
     },
   ];
 
@@ -81,46 +136,6 @@ export default function TeacherDashboard() {
       nextPeriod: "Period 6 (2:15 PM)",
     },
   ];
-
-  const recentActivity = [
-    {
-      title: "Assignment submitted",
-      description: "Math Chapter 5 - 25/32 students",
-      time: "1 hour ago",
-      status: "pending",
-    },
-    {
-      title: "Attendance marked",
-      description: "Class 5-A - Present: 30/32",
-      time: "2 hours ago",
-      status: "completed",
-    },
-    {
-      title: "Results uploaded",
-      description: "Mid-term Math - Class 5-B",
-      time: "1 day ago",
-      status: "completed",
-    },
-    {
-      title: "Assignment created",
-      description: "Science Lab Report - Class 6-A",
-      time: "2 days ago",
-      status: "completed",
-    },
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-700";
-      case "pending":
-        return "bg-orange-100 text-orange-700";
-      case "overdue":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
 
   return (
     <>
@@ -221,61 +236,111 @@ export default function TeacherDashboard() {
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Recent Notices */}
             <div className="bg-white rounded-lg shadow-sm">
               <div className="p-4 border-b">
-                <h3 className="font-semibold text-gray-900">Recent Activity</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900">
+                    Recent Notices
+                  </h3>
+                  <Button
+                    variant="link"
+                    className="text-blue-600 p-0 text-sm"
+                    onClick={() => navigate("/teacher/notices")}
+                  >
+                    View All
+                  </Button>
+                </div>
               </div>
               <div className="space-y-1">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="p-4 border-b last:border-b-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium text-gray-900">
-                            {activity.title}
-                          </h4>
-                          <Badge className={getStatusColor(activity.status)}>
-                            {activity.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          {activity.description}
-                        </p>
-                      </div>
-                      <span className="text-xs text-gray-500 ml-2">
-                        {activity.time}
+                {isLoadingNotices ? (
+                  <div className="p-4">
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+                      <span className="text-sm text-gray-600">
+                        Loading notices...
                       </span>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                ) : notices.length > 0 ? (
+                  notices.map((notice) => {
+                    const getPriorityColor = (priority: string) => {
+                      switch (priority) {
+                        case "urgent":
+                          return "bg-red-100 text-red-700";
+                        case "high":
+                          return "bg-orange-100 text-orange-700";
+                        case "normal":
+                          return "bg-blue-100 text-blue-700";
+                        default:
+                          return "bg-gray-100 text-gray-700";
+                      }
+                    };
 
-            {/* Additional Features */}
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                onClick={() => navigate("/teacher/assignments")}
-                className="bg-purple-600 hover:bg-purple-700 h-auto py-4"
-              >
-                <div className="text-center">
-                  <FileText className="h-6 w-6 mx-auto mb-1" />
-                  <div className="text-sm">Assignments</div>
-                </div>
-              </Button>
-              <Button
-                onClick={() => navigate("/teacher/classes")}
-                className="bg-indigo-600 hover:bg-indigo-700 h-auto py-4"
-              >
-                <div className="text-center">
-                  <Users className="h-6 w-6 mx-auto mb-1" />
-                  <div className="text-sm">My Classes</div>
-                </div>
-              </Button>
+                    const formatDate = (dateString: string) => {
+                      const date = new Date(dateString);
+                      const now = new Date();
+                      const diffTime = Math.abs(now.getTime() - date.getTime());
+                      const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+                      const diffDays = Math.floor(diffHours / 24);
+
+                      if (diffHours < 1) return "Just now";
+                      if (diffHours < 24) return `${diffHours} hours ago`;
+                      if (diffDays === 1) return "1 day ago";
+                      return `${diffDays} days ago`;
+                    };
+
+                    return (
+                      <div
+                        key={notice._id}
+                        className="p-4 border-b last:border-b-0"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-gray-900">
+                                {notice.title}
+                              </h4>
+                              <Badge
+                                className={getPriorityColor(notice.priority)}
+                              >
+                                {notice.priority}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 line-clamp-2">
+                              {notice.message}
+                            </p>
+                            <div className="text-xs text-gray-500 mt-1">
+                              From: {notice.createdBy.name} (
+                              {notice.createdBy.role})
+                            </div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-2">
+                            {formatDate(notice.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    <p className="text-sm">No recent notices</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </MobileLayout>
+
+      {/* Floating Chat Button */}
+      <Button
+        onClick={() => navigate("/teacher/chat")}
+        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 shadow-lg btn-animate z-10"
+      >
+        <MessageCircle className="h-6 w-6 text-white" />
+      </Button>
+
       <BottomNavigation />
     </>
   );

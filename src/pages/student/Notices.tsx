@@ -32,6 +32,13 @@ export default function StudentNotices() {
 
   useEffect(() => {
     loadNotices();
+
+    // Set up polling for real-time updates every 30 seconds
+    const pollInterval = setInterval(() => {
+      loadNotices();
+    }, 30000);
+
+    return () => clearInterval(pollInterval);
   }, []);
 
   const loadNotices = async () => {

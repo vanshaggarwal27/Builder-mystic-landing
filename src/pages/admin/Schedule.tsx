@@ -33,6 +33,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { UserProfileService } from "@/lib/userProfileService";
 
+// Teacher interface for type safety
+interface Teacher {
+  _id: string;
+  user: {
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+  };
+  teacherId: string;
+  department?: string;
+}
+
 const initialTimetable = [
   {
     id: "TT001",
@@ -130,12 +143,57 @@ export default function AdminSchedule() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [availableClasses, setAvailableClasses] = useState<string[]>([]);
+  const [availableTeachers, setAvailableTeachers] = useState<Teacher[]>([]);
+  const [isLoadingTeachers, setIsLoadingTeachers] = useState(true);
   const { toast } = useToast();
 
-  // Load schedules from backend on component mount
+  // Load schedules and teachers from backend on component mount
   useEffect(() => {
     loadSchedules();
+    loadTeachers();
   }, []);
+
+  const loadTeachers = async () => {
+    try {
+      setIsLoadingTeachers(true);
+      const response = await fetch(
+        "https://shkva-backend-new.onrender.com/api/admin/users",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Full API response:", data);
+
+        // Handle different possible response structures
+        let teachers = [];
+        if (data.users) {
+          teachers = data.users.filter((user: any) => user.role === "teacher");
+        } else if (Array.isArray(data)) {
+          teachers = data.filter((user: any) => user.role === "teacher");
+        } else if (data.teachers) {
+          teachers = data.teachers;
+        }
+
+        setAvailableTeachers(teachers);
+        console.log("Loaded teachers:", teachers);
+        console.log("First teacher structure:", teachers[0]);
+      } else {
+        console.error("Failed to load teachers:", response.statusText);
+        setAvailableTeachers([]);
+      }
+    } catch (error) {
+      console.error("Error loading teachers:", error);
+      setAvailableTeachers([]);
+    } finally {
+      setIsLoadingTeachers(false);
+    }
+  };
 
   const loadSchedules = async () => {
     try {
@@ -739,13 +797,84 @@ export default function AdminSchedule() {
                     </div>
                     <div>
                       <Label>Teacher *</Label>
-                      <Input
+                      <Select
                         value={newEntry.teacher}
-                        onChange={(e) =>
-                          setNewEntry({ ...newEntry, teacher: e.target.value })
+                        onValueChange={(value) =>
+                          setNewEntry({ ...newEntry, teacher: value })
                         }
-                        placeholder="Teacher name"
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={
+                              isLoadingTeachers
+                                ? "Loading teachers..."
+                                : "Select teacher"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {isLoadingTeachers ? (
+                            <SelectItem value="loading" disabled>
+                              Loading teachers...
+                            </SelectItem>
+                          ) : availableTeachers.length > 0 ? (
+                            availableTeachers.map((teacher) => {
+                              // Handle different possible data structures
+                              let teacherName = "Unknown Teacher";
+                              let teacherId =
+                                teacher._id ||
+                                teacher.id ||
+                                Math.random().toString();
+
+                              if (
+                                teacher.profile?.firstName &&
+                                teacher.profile?.lastName
+                              ) {
+                                // Direct profile structure
+                                teacherName = `${teacher.profile.firstName} ${teacher.profile.lastName}`;
+                              } else if (
+                                teacher.user?.profile?.firstName &&
+                                teacher.user?.profile?.lastName
+                              ) {
+                                // Nested user.profile structure
+                                teacherName = `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`;
+                              } else if (
+                                teacher.firstName &&
+                                teacher.lastName
+                              ) {
+                                // Flat structure
+                                teacherName = `${teacher.firstName} ${teacher.lastName}`;
+                              } else if (teacher.name) {
+                                // Simple name field
+                                teacherName = teacher.name;
+                              } else if (teacher.email) {
+                                // Fallback to email
+                                teacherName = teacher.email.split("@")[0];
+                              }
+
+                              const teacherValue = teacherName;
+                              const department =
+                                teacher.department ||
+                                teacher.user?.department ||
+                                "";
+
+                              return (
+                                <SelectItem
+                                  key={teacherId}
+                                  value={teacherValue}
+                                >
+                                  {teacherName}{" "}
+                                  {department && `(${department})`}
+                                </SelectItem>
+                              );
+                            })
+                          ) : (
+                            <SelectItem value="no-teachers" disabled>
+                              No teachers found - Add teachers first
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>

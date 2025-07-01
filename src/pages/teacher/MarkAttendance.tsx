@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Save,
   Users,
@@ -51,6 +51,40 @@ export default function TeacherMarkAttendance() {
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Load saved attendance when details change
+  useEffect(() => {
+    if (
+      attendanceDetails.class &&
+      attendanceDetails.date &&
+      attendanceDetails.period
+    ) {
+      const attendanceKey = `student_attendance_${attendanceDetails.class}_${attendanceDetails.date}_${attendanceDetails.period}`;
+      const savedAttendance = localStorage.getItem(attendanceKey);
+
+      if (savedAttendance) {
+        try {
+          const parsedAttendance = JSON.parse(savedAttendance);
+          if (parsedAttendance.students) {
+            setStudents(parsedAttendance.students);
+            toast({
+              title: "Attendance Loaded",
+              description: "Previously saved attendance data has been loaded.",
+            });
+          }
+        } catch (error) {
+          console.error("Error loading saved attendance:", error);
+        }
+      } else {
+        // Reset to initial students if no saved data
+        setStudents(initialStudents);
+      }
+    }
+  }, [
+    attendanceDetails.class,
+    attendanceDetails.date,
+    attendanceDetails.period,
+  ]);
 
   const classes = [
     "Class 1-A",
@@ -126,6 +160,16 @@ export default function TeacherMarkAttendance() {
 
     setIsLoading(true);
     try {
+      // Save to localStorage for persistence
+      const attendanceRecord = {
+        ...attendanceDetails,
+        students: students,
+        timestamp: new Date().toISOString(),
+      };
+
+      const attendanceKey = `student_attendance_${attendanceDetails.class}_${attendanceDetails.date}_${attendanceDetails.period}`;
+      localStorage.setItem(attendanceKey, JSON.stringify(attendanceRecord));
+
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const stats = {
@@ -136,7 +180,7 @@ export default function TeacherMarkAttendance() {
 
       toast({
         title: "Attendance saved!",
-        description: `${stats.present} present, ${stats.absent} absent, ${stats.late} late`,
+        description: `${stats.present} present, ${stats.absent} absent, ${stats.late} late. Data saved locally.`,
       });
 
       // Reset form

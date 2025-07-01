@@ -1,5 +1,13 @@
-import React, { useState } from "react";
-import { Send, Search, Users, MessageCircle, Phone, Video } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Send,
+  Search,
+  Users,
+  MessageCircle,
+  Phone,
+  Video,
+  RefreshCw,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
@@ -14,6 +22,36 @@ export default function TeacherChat() {
   const { toast } = useToast();
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Real-time message polling
+  useEffect(() => {
+    if (selectedStudent) {
+      loadMessages();
+      // Poll for new messages every 3 seconds
+      const messageInterval = setInterval(loadMessages, 3000);
+      return () => clearInterval(messageInterval);
+    }
+  }, [selectedStudent]);
+
+  const loadMessages = async () => {
+    if (!selectedStudent) return;
+
+    try {
+      // Load messages for this student
+      const savedMessages = localStorage.getItem(
+        `chat_teacher_${selectedStudent}`,
+      );
+      if (savedMessages) {
+        setMessages(JSON.parse(savedMessages));
+      } else {
+        setMessages(chatHistory); // fallback to demo data
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
+  };
 
   const students = [
     {
@@ -92,7 +130,29 @@ export default function TeacherChat() {
   ];
 
   const sendMessage = () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !selectedStudent) return;
+
+    const newMessage = {
+      id: Date.now(),
+      sender: "teacher",
+      message: message.trim(),
+      time: new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      isMe: true,
+      timestamp: Date.now(),
+    };
+
+    // Add to current messages
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
+
+    // Save to localStorage for persistence
+    localStorage.setItem(
+      `chat_teacher_${selectedStudent}`,
+      JSON.stringify(updatedMessages),
+    );
 
     toast({
       title: "Message Sent",
@@ -171,7 +231,7 @@ export default function TeacherChat() {
 
             {/* Chat Messages */}
             <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-              {chatHistory.map((chat) => (
+              {messages.map((chat) => (
                 <div
                   key={chat.id}
                   className={`flex ${chat.isMe ? "justify-end" : "justify-start"}`}

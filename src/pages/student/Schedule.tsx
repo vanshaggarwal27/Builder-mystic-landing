@@ -21,16 +21,81 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 export default function StudentSchedule() {
-  const [selectedWeek, setSelectedWeek] = useState("March 18-22, 2024");
+  // Calculate current week dates
+  const getCurrentWeek = () => {
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (currentDay === 0 ? 6 : currentDay - 1)); // Get Monday
+
+    return monday;
+  };
+
+  const [currentWeekStart, setCurrentWeekStart] = useState(getCurrentWeek());
+  const [selectedDay, setSelectedDay] = useState(
+    new Date().toLocaleDateString("en-US", { weekday: "long" }),
+  );
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
 
+  // Generate week days array
+  const getWeekDays = (startDate: Date) => {
+    const days = [];
+    for (let i = 0; i < 5; i++) {
+      // Monday to Friday
+      const day = new Date(startDate);
+      day.setDate(startDate.getDate() + i);
+      days.push(day);
+    }
+    return days;
+  };
+
+  const weekDays = getWeekDays(currentWeekStart);
+
+  // Format week display
+  const formatWeekDisplay = (startDate: Date) => {
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 4); // Friday
+
+    const startMonth = startDate.toLocaleDateString("en-US", {
+      month: "short",
+    });
+    const endMonth = endDate.toLocaleDateString("en-US", { month: "short" });
+    const startDay = startDate.getDate();
+    const endDay = endDate.getDate();
+    const year = startDate.getFullYear();
+
+    if (startMonth === endMonth) {
+      return `${startMonth} ${startDay}-${endDay}, ${year}`;
+    } else {
+      return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
+    }
+  };
+
   useEffect(() => {
     loadScheduleData();
   }, []);
+
+  // Week navigation functions
+  const goToPreviousWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() - 7);
+    setCurrentWeekStart(newWeekStart);
+  };
+
+  const goToNextWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() + 7);
+    setCurrentWeekStart(newWeekStart);
+  };
+
+  const goToCurrentWeek = () => {
+    setCurrentWeekStart(getCurrentWeek());
+    setSelectedDay(new Date().toLocaleDateString("en-US", { weekday: "long" }));
+  };
 
   const loadScheduleData = async () => {
     try {
@@ -154,24 +219,26 @@ export default function StudentSchedule() {
     ];
   };
 
-  const weekDays = [
-    { short: "MON", number: "18" },
-    { short: "TUE", number: "19" },
-    { short: "WED", number: "20", selected: true },
-    { short: "THU", number: "21" },
-    { short: "FRI", number: "22" },
-  ];
+  // Get today's day name for comparison
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
-  // Filter schedule for today (Monday for demo)
-  const todaySchedule = schedule.filter(
-    (item) => item.day === "Monday" || !item.day,
-  );
+  // Filter schedule for selected day
+  const selectedDaySchedule = schedule
+    .filter((item) => item.day === selectedDay || !item.day)
+    .sort((a, b) => {
+      // Sort by time - extract hour from time string
+      const getHour = (timeStr: string) => {
+        const match = timeStr.match(/(\d+):/);
+        return match ? parseInt(match[1]) : 0;
+      };
+      return getHour(a.time) - getHour(b.time);
+    });
 
   return (
     <FadeTransition>
       <MobileLayout
         title="Class Timetable"
-        subtitle={`${userProfile?.grade || "Your Class"} • ${selectedWeek}`}
+        subtitle={`${userProfile?.grade || "Your Class"} • ${formatWeekDisplay(currentWeekStart)}`}
         headerGradient="from-purple-600 to-blue-600"
         className="pb-20"
       >
@@ -181,13 +248,26 @@ export default function StudentSchedule() {
             <div className="flex flex-col items-center space-y-4">
               {/* Navigation Controls */}
               <div className="flex items-center justify-center w-full">
-                <Button variant="ghost" size="sm" className="p-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-2"
+                  onClick={goToPreviousWeek}
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="mx-4 text-center">
                   <h3 className="text-sm font-medium text-gray-900">
                     Week Navigation
                   </h3>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="text-xs text-blue-600 p-0 h-auto"
+                    onClick={goToCurrentWeek}
+                  >
+                    Go to Today
+                  </Button>
                   {isLoading && (
                     <p className="text-xs text-blue-600">Loading schedule...</p>
                   )}
@@ -196,40 +276,72 @@ export default function StudentSchedule() {
                   variant="ghost"
                   size="sm"
                   className="p-2"
-                  onClick={loadScheduleData}
-                  disabled={isLoading}
+                  onClick={goToNextWeek}
                 >
-                  {isLoading ? (
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
 
               {/* Centered Calendar Days */}
               <div className="flex justify-center items-center space-x-2 w-full max-w-sm mx-auto">
-                {weekDays.map((day) => (
-                  <div
-                    key={day.short}
-                    className={`text-center p-2 rounded-lg flex-1 min-w-0 ${
-                      day.selected
-                        ? "bg-blue-100 text-blue-700"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    <div className="text-xs font-medium">{day.short}</div>
-                    <div className="text-lg font-semibold">{day.number}</div>
-                  </div>
-                ))}
+                {weekDays.map((day, index) => {
+                  const dayName = day.toLocaleDateString("en-US", {
+                    weekday: "long",
+                  });
+                  const isSelected = selectedDay === dayName;
+                  const isToday = today === dayName;
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedDay(dayName)}
+                      className={`flex flex-col items-center p-2 rounded-lg transition-all ${
+                        isSelected
+                          ? "bg-blue-500 text-white shadow-md"
+                          : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <span className="text-xs font-medium">
+                        {day
+                          .toLocaleDateString("en-US", { weekday: "short" })
+                          .toUpperCase()}
+                      </span>
+                      <span
+                        className={`text-lg font-bold ${isToday && !isSelected ? "text-blue-600" : ""}`}
+                      >
+                        {day.getDate()}
+                      </span>
+                      {isToday && (
+                        <div className="w-1 h-1 bg-current rounded-full mt-1"></div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* Schedule */}
           <div className="space-y-4">
-            {todaySchedule.length > 0 ? (
-              todaySchedule.map((item, index) => (
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {selectedDay}'s Schedule
+              </h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadScheduleData}
+                disabled={isLoading}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-1 ${isLoading ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
+            </div>
+
+            {selectedDaySchedule.length > 0 ? (
+              selectedDaySchedule.map((item, index) => (
                 <Card
                   key={index}
                   className={`p-4 card-hover ${

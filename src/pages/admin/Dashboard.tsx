@@ -8,6 +8,7 @@ import {
   FileText,
   UserCheck,
   Bell,
+  MessageCircle,
 } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
@@ -85,29 +86,6 @@ export default function AdminDashboard() {
     },
   ];
 
-  const recentActivity = [
-    {
-      title: "New student registered",
-      description: "John Smith - Class 5-A",
-      time: "2 hours ago",
-    },
-    {
-      title: "Assignment uploaded",
-      description: "Mathematics - Ms. Johnson",
-      time: "4 hours ago",
-    },
-    {
-      title: "Attendance marked",
-      description: "Class 3-B - Present: 28/30",
-      time: "6 hours ago",
-    },
-    {
-      title: "Notice published",
-      description: "Parent-Teacher Meeting",
-      time: "1 day ago",
-    },
-  ];
-
   return (
     <>
       <MobileLayout
@@ -177,35 +155,18 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white rounded-lg shadow-sm">
-              <div className="p-4 border-b">
-                <h3 className="font-semibold text-gray-900">Recent Activity</h3>
-              </div>
-              <div className="space-y-1">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="p-4 border-b last:border-b-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">
-                          {activity.title}
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {activity.description}
-                        </p>
-                      </div>
-                      <span className="text-xs text-gray-500 ml-2">
-                        {activity.time}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </MobileLayout>
+
+      {/* Floating Chat Button */}
+      <Button
+        onClick={() => navigate("/admin/chat")}
+        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg btn-animate z-10"
+      >
+        <MessageCircle className="h-6 w-6 text-white" />
+      </Button>
+
       <BottomNavigation />
     </>
   );

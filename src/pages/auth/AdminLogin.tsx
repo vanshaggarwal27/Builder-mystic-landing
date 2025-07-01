@@ -23,6 +23,11 @@ export default function AdminLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prevent multiple concurrent login attempts
+    if (isLoading) {
+      return;
+    }
+
     // For admin login, we expect a security code (demo: any 6 digits)
     if (!securityCode || securityCode.length !== 6) {
       toast({

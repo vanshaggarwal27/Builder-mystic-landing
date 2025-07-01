@@ -107,6 +107,28 @@ export default function AdminAnnouncements() {
 
       setAnnouncementsList((prev) => [announcement, ...prev]);
 
+      // Also save to notice format for real-time testing
+      const notice = {
+        _id: `notice_${Date.now()}`,
+        title: newAnnouncement.title,
+        message: newAnnouncement.content,
+        priority: newAnnouncement.priority,
+        createdAt: new Date().toISOString(),
+        target: newAnnouncement.target,
+        targetGrade: newAnnouncement.target === "specific" ? "10" : undefined,
+        readBy: [],
+        createdBy: {
+          name: "Admin",
+          role: "admin",
+        },
+      };
+
+      // Save notice for real-time updates
+      const savedNotices = localStorage.getItem("demo_notices");
+      const notices = savedNotices ? JSON.parse(savedNotices) : [];
+      notices.unshift(notice);
+      localStorage.setItem("demo_notices", JSON.stringify(notices));
+
       toast({
         title: "Success",
         description: `Announcement published${newAnnouncement.sendNotification ? " and notifications sent" : ""}!`,

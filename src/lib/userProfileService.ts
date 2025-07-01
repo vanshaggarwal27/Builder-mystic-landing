@@ -84,7 +84,9 @@ class UserProfileServiceClass {
       }
 
       const data = await response.json();
-      return this.normalizeProfileData(data);
+      // Extract profile data from the response
+      const profileData = data.profile || data;
+      return this.normalizeProfileData(profileData);
     } catch (error) {
       console.warn("Profile fetch failed, using fallback:", error);
       return this.createFallbackProfile();
@@ -101,25 +103,30 @@ class UserProfileServiceClass {
         throw new Error("No authentication token found");
       }
 
-      // Try to fetch real schedule data
-      const response = await fetch(
-        `${this.API_BASE_URL}/schedule/my-schedule`,
-        {
-          method: "GET",
-          headers: this.getAuthHeaders(),
-        },
-      );
+      // Try to fetch real schedule data from students endpoint
+      const response = await fetch(`${this.API_BASE_URL}/students/schedule`, {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      });
 
       if (!response.ok) {
+        console.warn(
+          `Schedule API response not ok: ${response.status} ${response.statusText}`,
+        );
         // If schedule endpoint doesn't exist, return demo schedule
         if (response.status === 404) {
+          console.log("Schedule endpoint not found, using demo schedule");
           return this.getDemoSchedule();
         }
         throw new Error(`Failed to fetch schedule: ${response.statusText}`);
       }
 
       const data = await response.json();
-      return this.normalizeScheduleData(data);
+      console.log("Raw schedule API response:", data);
+      // Extract schedule array from response
+      const scheduleArray = data.schedule || data;
+      console.log("Extracted schedule array:", scheduleArray);
+      return this.normalizeScheduleData(scheduleArray);
     } catch (error) {
       console.warn("Schedule fetch failed, using demo schedule:", error);
       return this.getDemoSchedule();
@@ -236,6 +243,9 @@ class UserProfileServiceClass {
    * Normalize profile data from different API formats
    */
   private normalizeProfileData(data: any): UserProfile {
+    // Handle nested parent contact information
+    const parentContact = data.parentContact || {};
+
     return {
       id: data.id || data._id || "unknown",
       firstName: data.firstName || data.first_name || "",
@@ -253,11 +263,25 @@ class UserProfileServiceClass {
       position: data.position || data.designation || "",
       experience: data.experience || "",
       subjects: data.subjects || data.teachingSubjects || "",
+      // Handle parent information from multiple possible sources
       parentName:
-        data.parentName || data.parent_name || data.guardianName || "",
+        data.parentName ||
+        data.parent_name ||
+        data.guardianName ||
+        parentContact.fatherName ||
+        parentContact.motherName ||
+        "",
       parentPhone:
-        data.parentPhone || data.parent_phone || data.guardianPhone || "",
-      emergencyContact: data.emergencyContact || data.emergency_contact || "",
+        data.parentPhone ||
+        data.parent_phone ||
+        data.guardianPhone ||
+        parentContact.guardianPhone ||
+        "",
+      emergencyContact:
+        data.emergencyContact ||
+        data.emergency_contact ||
+        parentContact.emergencyContact ||
+        "",
       admissionDate: data.admissionDate || data.admission_date || "",
       joiningDate: data.joiningDate || data.joining_date || "",
       role: data.role || "student",

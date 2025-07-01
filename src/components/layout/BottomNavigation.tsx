@@ -32,8 +32,8 @@ const studentNavItems: NavItem[] = [
 
 const teacherNavItems: NavItem[] = [
   { icon: Home, label: "Home", path: "/teacher/dashboard" },
+  { icon: Calendar, label: "Schedule", path: "/teacher/schedule" },
   { icon: ClipboardList, label: "Classes", path: "/teacher/classes" },
-  { icon: BarChart3, label: "Results", path: "/teacher/results" },
   { icon: User, label: "Profile", path: "/teacher/profile" },
 ];
 
@@ -57,7 +57,10 @@ export function BottomNavigation() {
   else if (user.role === "admin") navItems = adminNavItems;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 px-4 py-3 pb-8 safe-area-pb shadow-lg">
+    <div
+      className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 px-4 py-3 pb-6 shadow-lg z-50"
+      style={{ paddingBottom: "max(24px, env(safe-area-inset-bottom))" }}
+    >
       <div className="flex justify-around items-center max-w-md mx-auto">
         {navItems.map((item) => {
           const IconComponent = item.icon;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   Search,
@@ -6,6 +6,9 @@ import {
   Users,
   Clock,
   CheckCircle,
+  RefreshCw,
+  UserCheck,
+  X,
 } from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
@@ -20,59 +23,212 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
-const teacherAttendanceData = [
-  {
-    id: 1,
-    name: "Maria Johnson",
-    employeeId: "TCH001",
-    department: "Mathematics",
-    date: "2024-06-21",
-    checkIn: "08:30 AM",
-    checkOut: "04:30 PM",
-    status: "present",
-    hours: "8.0",
-  },
-  {
-    id: 2,
-    name: "John Smith",
-    employeeId: "TCH002",
-    department: "English",
-    date: "2024-06-21",
-    checkIn: "08:45 AM",
-    checkOut: "04:45 PM",
-    status: "late",
-    hours: "8.0",
-  },
-  {
-    id: 3,
-    name: "Sarah Davis",
-    employeeId: "TCH003",
-    department: "Science",
-    date: "2024-06-21",
-    checkIn: "-",
-    checkOut: "-",
-    status: "absent",
-    hours: "0.0",
-  },
-  {
-    id: 4,
-    name: "Robert Wilson",
-    employeeId: "TCH004",
-    department: "Social Studies",
-    date: "2024-06-21",
-    checkIn: "08:20 AM",
-    checkOut: "04:20 PM",
-    status: "present",
-    hours: "8.0",
-  },
-];
+interface Teacher {
+  _id: string;
+  user?: {
+    profile?: {
+      firstName?: string;
+      lastName?: string;
+    };
+    email?: string;
+  };
+  profile?: {
+    firstName?: string;
+    lastName?: string;
+  };
+  teacherId?: string;
+  department?: string;
+  name?: string;
+  email?: string;
+}
+
+interface TeacherAttendance {
+  id: string;
+  teacherId: string;
+  name: string;
+  employeeId: string;
+  department: string;
+  date: string;
+  checkIn: string;
+  checkOut: string;
+  status: "present" | "absent" | "late";
+  hours: string;
+}
 
 export default function AdminTeacherAttendance() {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [attendance, setAttendance] = useState<TeacherAttendance[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMarkingAttendance, setIsMarkingAttendance] = useState(false);
+
+  useEffect(() => {
+    loadTeachers();
+  }, []);
+
+  useEffect(() => {
+    if (teachers.length > 0) {
+      loadAttendance();
+    }
+  }, [selectedDate, teachers]);
+
+  const loadTeachers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        "https://shkva-backend-new.onrender.com/api/admin/users",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const teachersData =
+          data.users?.filter((user: any) => user.role === "teacher") || [];
+        setTeachers(teachersData);
+
+        // Generate attendance records for today if they don't exist
+        generateAttendanceForDate(teachersData, selectedDate);
+      } else if (response.status === 403 || response.status === 401) {
+        console.error("Access denied to admin users endpoint");
+        setTeachers([]);
+        toast({
+          title: "Access Denied",
+          description:
+            "You don't have permission to view teacher data. Please contact system administrator.",
+          variant: "destructive",
+        });
+      } else {
+        console.error("Failed to load teachers:", response.statusText);
+        setTeachers([]);
+        toast({
+          title: "Failed to Load Teachers",
+          description: "Unable to load teacher list. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading teachers:", error);
+      toast({
+        title: "Error Loading Teachers",
+        description: "Failed to load teacher list. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateAttendanceForDate = (teachersData: Teacher[], date: string) => {
+    // First, try to load from localStorage
+    const attendanceKey = `teacher_attendance_${date}`;
+    const savedAttendance = localStorage.getItem(attendanceKey);
+
+    if (savedAttendance) {
+      try {
+        const parsedAttendance = JSON.parse(savedAttendance);
+        setAttendance(parsedAttendance);
+        return;
+      } catch (error) {
+        console.error("Error parsing saved attendance:", error);
+      }
+    }
+
+    // If no saved data, generate fresh attendance records
+    const attendanceRecords: TeacherAttendance[] = teachersData.map(
+      (teacher) => {
+        // Handle different possible data structures
+        let teacherName = "Unknown Teacher";
+
+        if (
+          teacher.user?.profile?.firstName &&
+          teacher.user?.profile?.lastName
+        ) {
+          teacherName = `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`;
+        } else if (teacher.profile?.firstName && teacher.profile?.lastName) {
+          // Direct profile structure
+          teacherName = `${teacher.profile.firstName} ${teacher.profile.lastName}`;
+        } else if (teacher.user?.email) {
+          teacherName = teacher.user.email.split("@")[0];
+        } else if (teacher.email) {
+          teacherName = teacher.email.split("@")[0];
+        } else if (teacher.name) {
+          teacherName = teacher.name;
+        } else if (teacher.teacherId) {
+          teacherName = `Teacher ${teacher.teacherId}`;
+        }
+
+        console.log("Teacher data:", teacher, "Generated name:", teacherName);
+
+        return {
+          id: `${teacher._id}-${date}`,
+          teacherId: teacher._id,
+          name: teacherName,
+          employeeId: teacher.teacherId || "N/A",
+          department: teacher.department || "General",
+          date: date,
+          checkIn: "-",
+          checkOut: "-",
+          status: "absent" as const,
+          hours: "0.0",
+        };
+      },
+    );
+
+    setAttendance(attendanceRecords);
+  };
+
+  const loadAttendance = () => {
+    // For now, we'll generate attendance records since there's no backend endpoint yet
+    // In a real app, this would fetch from an attendance API
+    generateAttendanceForDate(teachers, selectedDate);
+  };
+
+  const markAttendance = (
+    teacherId: string,
+    status: "present" | "absent" | "late",
+  ) => {
+    const updatedAttendance = attendance.map((record) => {
+      if (record.teacherId === teacherId) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+
+        return {
+          ...record,
+          status,
+          checkIn: status !== "absent" ? timeString : "-",
+          checkOut: status !== "absent" ? "-" : "-",
+          hours: status !== "absent" ? "8.0" : "0.0",
+        };
+      }
+      return record;
+    });
+
+    setAttendance(updatedAttendance);
+
+    // Save to localStorage for persistence
+    const attendanceKey = `teacher_attendance_${selectedDate}`;
+    localStorage.setItem(attendanceKey, JSON.stringify(updatedAttendance));
+
+    toast({
+      title: "Attendance Saved",
+      description: `Marked ${status} for the selected teacher. Data saved locally.`,
+    });
+  };
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -98,7 +254,15 @@ export default function AdminTeacherAttendance() {
     }
   };
 
-  const filteredAttendance = teacherAttendanceData.filter((record) => {
+  // Calculate stats from real attendance data
+  const stats = {
+    total: attendance.length,
+    present: attendance.filter((r) => r.status === "present").length,
+    absent: attendance.filter((r) => r.status === "absent").length,
+    late: attendance.filter((r) => r.status === "late").length,
+  };
+
+  const filteredAttendance = attendance.filter((record) => {
     const matchesSearch =
       record.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       record.employeeId.toLowerCase().includes(searchQuery.toLowerCase());
@@ -110,13 +274,6 @@ export default function AdminTeacherAttendance() {
     return matchesSearch && matchesDepartment && matchesStatus;
   });
 
-  const stats = {
-    total: teacherAttendanceData.length,
-    present: teacherAttendanceData.filter((r) => r.status === "present").length,
-    absent: teacherAttendanceData.filter((r) => r.status === "absent").length,
-    late: teacherAttendanceData.filter((r) => r.status === "late").length,
-  };
-
   return (
     <>
       <MobileLayout
@@ -125,6 +282,34 @@ export default function AdminTeacherAttendance() {
         className="pb-20"
       >
         <div className="px-6 py-6">
+          {/* Header with Refresh */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Attendance for{" "}
+                {new Date(selectedDate).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </h2>
+              {isLoading && (
+                <p className="text-sm text-blue-600">Loading teachers...</p>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadTeachers}
+              disabled={isLoading}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-1 ${isLoading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+          </div>
           <div className="space-y-6">
             {/* Stats Overview */}
             <div className="grid grid-cols-4 gap-3">
@@ -285,6 +470,46 @@ export default function AdminTeacherAttendance() {
                         <div className="font-medium">{record.hours}h</div>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Attendance Marking Buttons */}
+                  <div className="flex gap-2 mt-3 pt-3 border-t">
+                    <Button
+                      size="sm"
+                      variant={
+                        record.status === "present" ? "default" : "outline"
+                      }
+                      className={`flex-1 ${record.status === "present" ? "bg-green-600 hover:bg-green-700" : ""}`}
+                      onClick={() =>
+                        markAttendance(record.teacherId, "present")
+                      }
+                      disabled={isMarkingAttendance}
+                    >
+                      <UserCheck className="h-4 w-4 mr-1" />
+                      Present
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={record.status === "late" ? "default" : "outline"}
+                      className={`flex-1 ${record.status === "late" ? "bg-yellow-600 hover:bg-yellow-700" : ""}`}
+                      onClick={() => markAttendance(record.teacherId, "late")}
+                      disabled={isMarkingAttendance}
+                    >
+                      <Clock className="h-4 w-4 mr-1" />
+                      Late
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={
+                        record.status === "absent" ? "default" : "outline"
+                      }
+                      className={`flex-1 ${record.status === "absent" ? "bg-red-600 hover:bg-red-700" : ""}`}
+                      onClick={() => markAttendance(record.teacherId, "absent")}
+                      disabled={isMarkingAttendance}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Absent
+                    </Button>
                   </div>
                 </div>
               ))}

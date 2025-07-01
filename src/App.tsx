@@ -16,19 +16,17 @@ import StudentDashboard from "./pages/student/Dashboard";
 import StudentSchedule from "./pages/student/Schedule";
 import StudentAttendance from "./pages/student/Attendance";
 import StudentProfile from "./pages/student/Profile";
-import StudentAssignments from "./pages/student/Assignments";
 import StudentNotices from "./pages/student/Notices";
 import StudentResults from "./pages/student/Results";
 import StudentChat from "./pages/student/Chat";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/Dashboard";
+import TeacherSchedule from "./pages/teacher/Schedule";
 import TeacherClasses from "./pages/teacher/Classes";
 import TeacherAttendance from "./pages/teacher/Attendance";
-import TeacherAssignments from "./pages/teacher/Assignments";
 import TeacherProfile from "./pages/teacher/Profile";
 import TeacherNotices from "./pages/teacher/Notices";
-import CreateAssignment from "./pages/teacher/CreateAssignment";
 import TeacherResultsManagement from "./pages/teacher/ResultsManagement";
 import TeacherChat from "./pages/teacher/Chat";
 
@@ -44,9 +42,9 @@ import AdminSuccessStories from "./pages/admin/SuccessStories";
 import AdminSendNotice from "./pages/admin/SendNotice";
 import AdminTestButtons from "./pages/admin/TestButtons";
 import AdminTeacherAttendance from "./pages/admin/TeacherAttendance";
+import AdminChat from "./pages/admin/Chat";
 
 // Teacher Upload Components
-import TeacherUploadAssignment from "./pages/teacher/UploadAssignment";
 import TeacherUploadResults from "./pages/teacher/UploadResults";
 import TeacherMarkAttendance from "./pages/teacher/MarkAttendance";
 
@@ -91,26 +89,17 @@ const AppRoutes = () => {
         <Route path="/student/schedule" element={<StudentSchedule />} />
         <Route path="/student/attendance" element={<StudentAttendance />} />
         <Route path="/student/profile" element={<StudentProfile />} />
-        <Route path="/student/assignments" element={<StudentAssignments />} />
         <Route path="/student/notices" element={<StudentNotices />} />
         <Route path="/student/results" element={<StudentResults />} />
         <Route path="/student/chat" element={<StudentChat />} />
 
         {/* Teacher Routes */}
         <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+        <Route path="/teacher/schedule" element={<TeacherSchedule />} />
         <Route path="/teacher/classes" element={<TeacherClasses />} />
         <Route path="/teacher/attendance" element={<TeacherAttendance />} />
-        <Route path="/teacher/assignments" element={<TeacherAssignments />} />
         <Route path="/teacher/profile" element={<TeacherProfile />} />
         <Route path="/teacher/notices" element={<TeacherNotices />} />
-        <Route
-          path="/teacher/create-assignment"
-          element={<CreateAssignment />}
-        />
-        <Route
-          path="/teacher/upload-assignment"
-          element={<TeacherUploadAssignment />}
-        />
         <Route
           path="/teacher/upload-results"
           element={<TeacherUploadResults />}
@@ -140,6 +129,7 @@ const AppRoutes = () => {
           path="/admin/teacher-attendance"
           element={<AdminTeacherAttendance />}
         />
+        <Route path="/admin/chat" element={<AdminChat />} />
 
         {/* Catch-all route */}
         <Route path="*" element={<NotFound />} />

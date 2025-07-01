@@ -1,5 +1,13 @@
-import React, { useState } from "react";
-import { Send, Search, Users, MessageCircle, Phone, Video } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Send,
+  Search,
+  Users,
+  MessageCircle,
+  Phone,
+  Video,
+  RefreshCw,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
@@ -14,6 +22,34 @@ export default function StudentChat() {
   const { toast } = useToast();
   const [selectedTeacher, setSelectedTeacher] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Real-time message polling
+  useEffect(() => {
+    if (selectedTeacher) {
+      loadMessages();
+      // Poll for new messages every 3 seconds
+      const messageInterval = setInterval(loadMessages, 3000);
+      return () => clearInterval(messageInterval);
+    }
+  }, [selectedTeacher]);
+
+  const loadMessages = async () => {
+    if (!selectedTeacher) return;
+
+    try {
+      // Simulate loading from API - replace with real endpoint
+      const savedMessages = localStorage.getItem(`chat_${selectedTeacher}`);
+      if (savedMessages) {
+        setMessages(JSON.parse(savedMessages));
+      } else {
+        setMessages(chatHistory); // fallback to demo data
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
+  };
 
   const teachers = [
     {
@@ -92,7 +128,29 @@ export default function StudentChat() {
   ];
 
   const sendMessage = () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !selectedTeacher) return;
+
+    const newMessage = {
+      id: Date.now(),
+      sender: "student",
+      message: message.trim(),
+      time: new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      isMe: true,
+      timestamp: Date.now(),
+    };
+
+    // Add to current messages
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
+
+    // Save to localStorage for persistence
+    localStorage.setItem(
+      `chat_${selectedTeacher}`,
+      JSON.stringify(updatedMessages),
+    );
 
     toast({
       title: "Message Sent",
@@ -100,6 +158,43 @@ export default function StudentChat() {
     });
 
     setMessage("");
+
+    // Simulate teacher response after 2-5 seconds
+    setTimeout(
+      () => {
+        const teacherResponse = {
+          id: Date.now() + 1,
+          sender: "teacher",
+          message: getAutoResponse(message.trim()),
+          time: new Date().toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          isMe: false,
+          timestamp: Date.now() + 1000,
+        };
+
+        const finalMessages = [...updatedMessages, teacherResponse];
+        setMessages(finalMessages);
+        localStorage.setItem(
+          `chat_${selectedTeacher}`,
+          JSON.stringify(finalMessages),
+        );
+      },
+      Math.random() * 3000 + 2000,
+    );
+  };
+
+  const getAutoResponse = (studentMessage: string) => {
+    const responses = [
+      "Thank you for your question! Let me help you with that.",
+      "Great question! I'll explain this step by step.",
+      "I understand your concern. Here's how to approach this problem.",
+      "That's a very good observation! Let me clarify this for you.",
+      "I'm here to help! Can you be more specific about what you need?",
+      "Excellent question! This is important to understand.",
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
   };
 
   const getAvatarColor = (initials: string) => {
@@ -171,7 +266,7 @@ export default function StudentChat() {
 
             {/* Chat Messages */}
             <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-              {chatHistory.map((chat) => (
+              {messages.map((chat) => (
                 <div
                   key={chat.id}
                   className={`flex ${chat.isMe ? "justify-end" : "justify-start"}`}
