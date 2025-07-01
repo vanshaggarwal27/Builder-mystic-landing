@@ -131,11 +131,190 @@ router.get(
               .map((s) => s.subject),
           ),
         ],
+        students: cls.students.map((student) => ({
+          _id: student._id,
+          name: student.user?.profile
+            ? `${student.user.profile.firstName} ${student.user.profile.lastName}`
+            : "Unknown Student",
+          rollNumber: student.rollNumber,
+          studentId: student.studentId,
+        })),
       }));
 
       res.json({ classes: teacherClasses });
     } catch (error) {
       console.error("Get teacher classes error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
+// Upload results for a class
+router.post(
+  "/results/upload",
+  [auth, auth.requireRole(["teacher"])],
+  async (req, res) => {
+    try {
+      const teacher = await Teacher.findOne({ user: req.userId });
+      if (!teacher) {
+        return res.status(404).json({ error: "Teacher profile not found" });
+      }
+
+      const {
+        examName,
+        examType,
+        subject,
+        classId,
+        examDate,
+        totalMarks,
+        passingMarks,
+        studentResults,
+      } = req.body;
+
+      // Validate required fields
+      if (
+        !examName ||
+        !examType ||
+        !subject ||
+        !classId ||
+        !examDate ||
+        !totalMarks ||
+        !passingMarks ||
+        !studentResults
+      ) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
+      // Verify teacher is assigned to this class
+      const Class = require("../models/Class");
+      const teacherName = `${teacher.user.profile.firstName} ${teacher.user.profile.lastName}`;
+      const classObj = await Class.findOne({
+        _id: classId,
+        $or: [
+          { "schedule.teacher": teacher._id },
+          { "schedule.teacher": teacherName },
+        ],
+      });
+
+      if (!classObj) {
+        return res
+          .status(403)
+          .json({ error: "You are not assigned to teach this class" });
+      }
+
+      const Result = require("../models/Result");
+
+      // Process student results
+      const processedResults = studentResults.map((result) => {
+        const percentage = (result.marksObtained / totalMarks) * 100;
+        const grade = Result.calculateGrade(result.marksObtained, totalMarks);
+        const status = Result.getStatus(result.marksObtained, passingMarks);
+
+        return {
+          student: result.studentId,
+          marksObtained: result.marksObtained,
+          grade: grade,
+          percentage: Math.round(percentage * 100) / 100,
+          status: status,
+          remarks: result.remarks || "",
+        };
+      });
+
+      // Create new result entry
+      const newResult = new Result({
+        examName,
+        examType,
+        subject,
+        class: classId,
+        teacher: teacher._id,
+        examDate: new Date(examDate),
+        totalMarks: Number(totalMarks),
+        passingMarks: Number(passingMarks),
+        studentResults: processedResults,
+        status: "published",
+        publishedAt: new Date(),
+      });
+
+      await newResult.save();
+
+      res.status(201).json({
+        message: "Results uploaded successfully",
+        resultId: newResult._id,
+        analytics: newResult.analytics,
+      });
+    } catch (error) {
+      console.error("Upload results error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
+// Get teacher's uploaded results
+router.get(
+  "/results",
+  [auth, auth.requireRole(["teacher"])],
+  async (req, res) => {
+    try {
+      const teacher = await Teacher.findOne({ user: req.userId });
+      if (!teacher) {
+        return res.status(404).json({ error: "Teacher profile not found" });
+      }
+
+      const Result = require("../models/Result");
+
+      const results = await Result.find({ teacher: teacher._id })
+        .populate("class", "name grade section")
+        .sort({ createdAt: -1 })
+        .limit(20);
+
+      const formattedResults = results.map((result) => ({
+        _id: result._id,
+        examName: result.examName,
+        examType: result.examType,
+        subject: result.subject,
+        class: result.class?.name || "Unknown Class",
+        examDate: result.examDate,
+        totalMarks: result.totalMarks,
+        analytics: result.analytics,
+        status: result.status,
+        createdAt: result.createdAt,
+      }));
+
+      res.json({ results: formattedResults });
+    } catch (error) {
+      console.error("Get teacher results error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
+// Get specific result details
+router.get(
+  "/results/:id",
+  [auth, auth.requireRole(["teacher"])],
+  async (req, res) => {
+    try {
+      const teacher = await Teacher.findOne({ user: req.userId });
+      if (!teacher) {
+        return res.status(404).json({ error: "Teacher profile not found" });
+      }
+
+      const Result = require("../models/Result");
+
+      const result = await Result.findOne({
+        _id: req.params.id,
+        teacher: teacher._id,
+      })
+        .populate("class", "name grade section")
+        .populate("studentResults.student", "user rollNumber studentId");
+
+      if (!result) {
+        return res.status(404).json({ error: "Result not found" });
+      }
+
+      res.json({ result });
+    } catch (error) {
+      console.error("Get result details error:", error);
       res.status(500).json({ error: "Server error" });
     }
   },
