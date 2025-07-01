@@ -37,13 +37,6 @@ export default function TeacherDashboard() {
 
   const quickActions = [
     {
-      title: "Upload Assignment",
-      description: "Create & assign homework",
-      icon: Upload,
-      color: "from-green-500 to-emerald-500",
-      route: "/teacher/upload-assignment",
-    },
-    {
       title: "Upload Results",
       description: "Enter exam marks & grades",
       icon: Award,
@@ -63,6 +56,13 @@ export default function TeacherDashboard() {
       icon: Calendar,
       color: "from-orange-500 to-red-500",
       route: "/teacher/schedule",
+    },
+    {
+      title: "My Classes",
+      description: "Manage class information",
+      icon: BookOpen,
+      color: "from-green-500 to-emerald-500",
+      route: "/teacher/classes",
     },
   ];
 
