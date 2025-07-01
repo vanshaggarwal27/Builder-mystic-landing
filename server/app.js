@@ -203,6 +203,7 @@ async function createInitialData() {
     }
 
     // Assign teachers to classes and subjects
+    const { Teacher } = require("./models/User");
     const classes = await Class.find();
     const teachers = await Teacher.find().populate("user");
 
