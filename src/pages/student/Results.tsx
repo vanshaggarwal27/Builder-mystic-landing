@@ -53,7 +53,7 @@ export default function StudentResults() {
   const loadResults = async () => {
     try {
       setIsLoading(true);
-      // Try to fetch real results from backend
+      // Fetch real results from backend only
       const response = await fetch(
         "https://shkva-backend-new.onrender.com/api/students/results",
         {
@@ -66,30 +66,32 @@ export default function StudentResults() {
 
       if (response.ok) {
         const data = await response.json();
-        setResults(data.results || []);
+        // Only show actual results, no fallback dummy data
+        const actualResults = data.results || [];
+        setResults(actualResults);
 
-        if (data.results?.length > 0) {
+        if (actualResults.length > 0) {
           toast({
             title: "Results Loaded",
-            description: `Found ${data.results.length} exam results.`,
+            description: `Found ${actualResults.length} exam results uploaded by teachers.`,
           });
         }
+      } else if (response.status === 404) {
+        // No results endpoint or no results found
+        setResults([]);
       } else {
-        // If API fails, show message about no results
+        // Other API errors
         setResults([]);
         toast({
-          title: "No Results Available",
-          description: "No exam results have been uploaded by teachers yet.",
+          title: "Failed to Load Results",
+          description: "Unable to connect to results service.",
+          variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Error loading results:", error);
       setResults([]);
-      toast({
-        title: "Unable to Load Results",
-        description: "Contact your teacher or admin for exam results.",
-        variant: "destructive",
-      });
+      // No error toast for connection issues - just empty state
     } finally {
       setIsLoading(false);
     }
