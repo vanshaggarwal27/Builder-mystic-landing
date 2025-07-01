@@ -245,10 +245,7 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
     }
 
     const errorMessage =
-      data.error ||
-      data.message ||
-      responseText ||
-      `API call failed: ${response.status}`;
+      data.error || data.message || `API call failed: ${response.status}`;
     throw new Error(errorMessage);
   }
 
