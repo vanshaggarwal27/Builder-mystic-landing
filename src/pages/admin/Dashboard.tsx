@@ -158,6 +158,15 @@ export default function AdminDashboard() {
           </div>
         </div>
       </MobileLayout>
+
+      {/* Floating Chat Button */}
+      <Button
+        onClick={() => navigate("/admin/chat")}
+        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg btn-animate z-10"
+      >
+        <MessageCircle className="h-6 w-6 text-white" />
+      </Button>
+
       <BottomNavigation />
     </>
   );
