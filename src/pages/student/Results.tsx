@@ -120,57 +120,6 @@ export default function StudentResults() {
 
   const overallPercentage = calculateOverallPercentage();
   const examHistoryArray = Object.values(groupedResults);
-      },
-      {
-        id: "third-2023",
-        name: "Third Term Examination",
-        type: "Third Term",
-        date: "December 2023",
-        percentage: 85.8,
-        rank: 7,
-        grade: "A",
-        subjects: [
-          { name: "Mathematics", marks: 88, total: 100 },
-          { name: "Physics", marks: 82, total: 100 },
-          { name: "Chemistry", marks: 90, total: 100 },
-          { name: "English", marks: 85, total: 100 },
-          { name: "Biology", marks: 84, total: 100 },
-        ],
-      },
-      {
-        id: "second-2023",
-        name: "Second Term Examination",
-        type: "Second Term",
-        date: "September 2023",
-        percentage: 83.4,
-        rank: 8,
-        grade: "A",
-        subjects: [
-          { name: "Mathematics", marks: 85, total: 100 },
-          { name: "Physics", marks: 80, total: 100 },
-          { name: "Chemistry", marks: 88, total: 100 },
-          { name: "English", marks: 82, total: 100 },
-          { name: "Biology", marks: 82, total: 100 },
-        ],
-      },
-      {
-        id: "first-2023",
-        name: "First Term Examination",
-        type: "First Term",
-        date: "June 2023",
-        percentage: 81.2,
-        rank: 12,
-        grade: "A",
-        subjects: [
-          { name: "Mathematics", marks: 82, total: 100 },
-          { name: "Physics", marks: 78, total: 100 },
-          { name: "Chemistry", marks: 85, total: 100 },
-          { name: "English", marks: 80, total: 100 },
-          { name: "Biology", marks: 81, total: 100 },
-        ],
-      },
-    ],
-  };
 
   const getGradeColor = (grade: string) => {
     switch (grade) {
