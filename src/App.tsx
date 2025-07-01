@@ -129,6 +129,7 @@ const AppRoutes = () => {
           path="/admin/teacher-attendance"
           element={<AdminTeacherAttendance />}
         />
+        <Route path="/admin/chat" element={<AdminChat />} />
 
         {/* Catch-all route */}
         <Route path="*" element={<NotFound />} />
