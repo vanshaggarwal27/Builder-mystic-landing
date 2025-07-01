@@ -233,14 +233,16 @@ const connectDB = async () => {
     }
   } catch (error) {
     console.error("❌ MongoDB connection error:", error.message);
-    throw error; // Don't continue without database
+    console.log("⚠️ Running without database - using mock data");
+    // Don't exit, continue with mock data
+    return false;
   }
 };
 
 // Connect to database
 connectDB().catch((error) => {
   console.error("Failed to connect to database:", error);
-  process.exit(1);
+  console.log("⚠️ Continuing without database connection");
 });
 
 const db = mongoose.connection;
