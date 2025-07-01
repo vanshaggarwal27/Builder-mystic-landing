@@ -115,12 +115,12 @@ export default function TeacherDashboard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case "important":
+        return "bg-red-100 text-red-700";
+      case "info":
+        return "bg-blue-100 text-blue-700";
       case "completed":
         return "bg-green-100 text-green-700";
-      case "pending":
-        return "bg-orange-100 text-orange-700";
-      case "overdue":
-        return "bg-red-100 text-red-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
