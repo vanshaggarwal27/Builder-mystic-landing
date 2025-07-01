@@ -57,7 +57,7 @@ export default function TeacherClasses() {
 
   const loadTodaysClasses = async () => {
     try {
-      // Try to get classes from API
+      // Try to get classes from API - only show what's actually assigned
       const response = await fetch(
         "https://shkva-backend-new.onrender.com/api/classes",
         {
@@ -76,9 +76,10 @@ export default function TeacherClasses() {
         });
         const teacherName = user?.name || "";
 
-        // Extract today's schedules for current teacher
+        // Extract ONLY today's schedules for current teacher - no fake data
         data.classes?.forEach((classData: any) => {
           classData.schedule?.forEach((scheduleItem: any) => {
+            // Match exactly by teacher name
             if (
               scheduleItem.teacher === teacherName &&
               scheduleItem.day === today
@@ -86,7 +87,7 @@ export default function TeacherClasses() {
               todaySchedules.push({
                 id:
                   scheduleItem._id || `${classData._id}-${scheduleItem.period}`,
-                name: `${classData.name} ${scheduleItem.subject}`,
+                name: `${classData.name} - ${scheduleItem.subject}`,
                 time:
                   scheduleItem.startTime && scheduleItem.endTime
                     ? `${scheduleItem.startTime} - ${scheduleItem.endTime}`
@@ -102,46 +103,15 @@ export default function TeacherClasses() {
 
         setClasses(todaySchedules);
       } else if (response.status === 403 || response.status === 401) {
-        // Handle permission denied - teachers don't have access to this endpoint
-        console.log(
-          "Access denied to classes endpoint - showing message to contact admin",
-        );
+        // No access - teacher not assigned any classes
         setClasses([]);
-        toast({
-          title: "Schedule Access Required",
-          description:
-            "Contact admin to get your teaching schedule assignments.",
-          variant: "destructive",
-        });
       } else {
-        // Other errors
+        // Other API errors
         setClasses([]);
-        toast({
-          title: "Failed to Load Classes",
-          description: "Unable to load your class schedule. Please try again.",
-          variant: "destructive",
-        });
       }
     } catch (error) {
       console.error("Error loading classes:", error);
       setClasses([]);
-
-      // Check if it's a permission error
-      if (error instanceof Error && error.message.includes("Access denied")) {
-        toast({
-          title: "Schedule Access Required",
-          description:
-            "Contact admin to get your teaching schedule assignments.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Connection Error",
-          description:
-            "Failed to connect to server. Please check your connection.",
-          variant: "destructive",
-        });
-      }
     }
   };
 
