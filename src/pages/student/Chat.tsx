@@ -1,5 +1,13 @@
-import React, { useState } from "react";
-import { Send, Search, Users, MessageCircle, Phone, Video } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Send,
+  Search,
+  Users,
+  MessageCircle,
+  Phone,
+  Video,
+  RefreshCw,
+} from "lucide-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Card } from "@/components/ui/card";
