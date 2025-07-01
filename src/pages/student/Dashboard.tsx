@@ -396,51 +396,110 @@ export default function StudentDashboard() {
               </Button>
             </div>
 
-            <div className="space-y-3">
-              <Card className="p-4 bg-gradient-to-r from-red-50 to-orange-50 border-red-200">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm">🚨</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900 mb-1">
-                      School Closure Notice
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-2">
-                      School will remain closed tomorrow due to weather
-                      conditions. Online classes will continue as scheduled.
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <Badge className="bg-red-100 text-red-800">Urgent</Badge>
-                      <span className="text-xs text-gray-500">2 hours ago</span>
+            {isLoadingNotices ? (
+              <div className="space-y-3">
+                {[1, 2].map((i) => (
+                  <Card key={i} className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded animate-pulse mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </Card>
+                  </Card>
+                ))}
+              </div>
+            ) : notices.length > 0 ? (
+              <div className="space-y-3">
+                {notices.map((notice) => {
+                  const getPriorityColor = (priority: string) => {
+                    switch (priority) {
+                      case "urgent":
+                        return "from-red-50 to-orange-50 border-red-200";
+                      case "high":
+                        return "from-orange-50 to-yellow-50 border-orange-200";
+                      case "normal":
+                        return "from-blue-50 to-cyan-50 border-blue-200";
+                      default:
+                        return "from-gray-50 to-gray-100 border-gray-200";
+                    }
+                  };
 
-              <Card className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm">📚</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900 mb-1">
-                      Exam Schedule Released
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-2">
-                      Final examination schedule for all grades has been
-                      published. Check your grade section for details.
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <Badge className="bg-blue-100 text-blue-800">
-                        Important
-                      </Badge>
-                      <span className="text-xs text-gray-500">1 day ago</span>
-                    </div>
-                  </div>
-                </div>
+                  const getPriorityBadge = (priority: string) => {
+                    switch (priority) {
+                      case "urgent":
+                        return "bg-red-100 text-red-800";
+                      case "high":
+                        return "bg-orange-100 text-orange-800";
+                      case "normal":
+                        return "bg-blue-100 text-blue-800";
+                      default:
+                        return "bg-gray-100 text-gray-800";
+                    }
+                  };
+
+                  const formatDate = (dateString: string) => {
+                    const date = new Date(dateString);
+                    const now = new Date();
+                    const diffTime = Math.abs(now.getTime() - date.getTime());
+                    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+                    const diffDays = Math.floor(diffHours / 24);
+
+                    if (diffHours < 1) return "Just now";
+                    if (diffHours < 24) return `${diffHours} hours ago`;
+                    if (diffDays === 1) return "1 day ago";
+                    return `${diffDays} days ago`;
+                  };
+
+                  return (
+                    <Card
+                      key={notice._id}
+                      className={`p-4 bg-gradient-to-r ${getPriorityColor(notice.priority)}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-white/50 rounded-full flex items-center justify-center">
+                          <span className="text-sm">
+                            {notice.priority === "urgent"
+                              ? "🚨"
+                              : notice.priority === "high"
+                                ? "⚠️"
+                                : "📢"}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 mb-1">
+                            {notice.title}
+                          </h4>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                            {notice.message}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <Badge
+                              className={getPriorityBadge(notice.priority)}
+                            >
+                              {notice.priority}
+                            </Badge>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(notice.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <Card className="p-6 text-center">
+                <AlertTriangle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600 mb-1">No Recent Notices</p>
+                <p className="text-sm text-gray-500">
+                  Check back later for school announcements
+                </p>
               </Card>
-            </div>
+            )}
           </div>
         </div>
       </MobileLayout>
