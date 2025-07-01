@@ -179,7 +179,9 @@ export default function TeacherClasses() {
                   onClick={loadTeacherData}
                   disabled={isLoading}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`h-4 w-4 mr-1 ${isLoading ? "animate-spin" : ""}`}
+                  />
                   Refresh
                 </Button>
               </div>
@@ -201,90 +203,101 @@ export default function TeacherClasses() {
                 </div>
               ) : classes.length > 0 ? (
                 classes.map((classItem) => (
-                <Card
-                  key={classItem.id}
-                  className={`p-4 ${
-                    classItem.status === "current"
-                      ? "bg-green-50 border-green-200"
-                      : ""
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`w-3 h-3 rounded-full mt-2 ${
-                        classItem.status === "current"
-                          ? "bg-green-500"
-                          : classItem.status === "next"
-                            ? "bg-blue-500"
-                            : "bg-gray-300"
-                      }`}
-                    ></div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="text-sm text-gray-600">
-                          {classItem.time}
-                        </div>
-                        {classItem.status === "current" && (
-                          <Badge
-                            variant="secondary"
-                            className="bg-green-100 text-green-700"
-                          >
-                            Current
-                          </Badge>
-                        )}
-                        {classItem.status === "next" && (
-                          <Badge
-                            variant="secondary"
-                            className="bg-blue-100 text-blue-700"
-                          >
-                            Next
-                          </Badge>
-                        )}
-                      </div>
-                      <h3 className="font-semibold text-gray-900 mb-1">
-                        {classItem.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {classItem.room} • {classItem.students} Students
-                      </p>
-                      <p className="text-sm text-blue-600 mb-3">
-                        Topic: {classItem.topic}
-                      </p>
-                      <div className="flex gap-2">
-                        {classItem.status === "current" && (
-                          <>
-                            <Button
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700"
-                              onClick={() => navigate("/teacher/attendance")}
+                  <Card
+                    key={classItem.id}
+                    className={`p-4 ${
+                      classItem.status === "current"
+                        ? "bg-green-50 border-green-200"
+                        : ""
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`w-3 h-3 rounded-full mt-2 ${
+                          classItem.status === "current"
+                            ? "bg-green-500"
+                            : classItem.status === "next"
+                              ? "bg-blue-500"
+                              : "bg-gray-300"
+                        }`}
+                      ></div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-sm text-gray-600">
+                            {classItem.time}
+                          </div>
+                          {classItem.status === "current" && (
+                            <Badge
+                              variant="secondary"
+                              className="bg-green-100 text-green-700"
                             >
-                              Mark Attendance
-                            </Button>
+                              Current
+                            </Badge>
+                          )}
+                          {classItem.status === "next" && (
+                            <Badge
+                              variant="secondary"
+                              className="bg-blue-100 text-blue-700"
+                            >
+                              Next
+                            </Badge>
+                          )}
+                        </div>
+                        <h3 className="font-semibold text-gray-900 mb-1">
+                          {classItem.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {classItem.room} • {classItem.students} Students
+                        </p>
+                        <p className="text-sm text-blue-600 mb-3">
+                          Topic: {classItem.topic}
+                        </p>
+                        <div className="flex gap-2">
+                          {classItem.status === "current" && (
+                            <>
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={() => navigate("/teacher/attendance")}
+                              >
+                                Mark Attendance
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                View Students
+                              </Button>
+                            </>
+                          )}
+                          {classItem.status === "next" && (
+                            <>
+                              <Button size="sm" variant="outline">
+                                Prepare
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                View Students
+                              </Button>
+                            </>
+                          )}
+                          {classItem.status === "upcoming" && (
                             <Button size="sm" variant="outline">
-                              View Students
+                              View Details
                             </Button>
-                          </>
-                        )}
-                        {classItem.status === "next" && (
-                          <>
-                            <Button size="sm" variant="outline">
-                              Prepare
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              View Students
-                            </Button>
-                          </>
-                        )}
-                        {classItem.status === "upcoming" && (
-                          <Button size="sm" variant="outline">
-                            View Details
-                          </Button>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Card>
+                ))
+              ) : (
+                <Card className="p-6 text-center">
+                  <Calendar className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-600 mb-1">
+                    No classes scheduled for today
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Contact admin to get class assignments for your schedule.
+                  </p>
                 </Card>
-              ))}
+              )}
             </TabsContent>
 
             <TabsContent value="today" className="space-y-4">
