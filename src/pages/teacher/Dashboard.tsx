@@ -18,8 +18,54 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { apiCall } from "@/contexts/AuthContext";
 
+interface Notice {
+  _id: string;
+  title: string;
+  message: string;
+  priority: "low" | "normal" | "high" | "urgent";
+  createdAt: string;
+  target: "all" | "students" | "teachers" | "admin";
+  targetGrade?: string;
+  readBy: string[];
+  createdBy: {
+    name: string;
+    role: string;
+  };
+}
+
 export default function TeacherDashboard() {
   const navigate = useNavigate();
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [isLoadingNotices, setIsLoadingNotices] = useState(true);
+
+  // Load notices on component mount and set up real-time updates
+  useEffect(() => {
+    loadNotices();
+
+    // Set up polling for real-time updates every 30 seconds
+    const noticesInterval = setInterval(() => {
+      loadNotices();
+    }, 30000);
+
+    return () => clearInterval(noticesInterval);
+  }, []);
+
+  const loadNotices = async () => {
+    try {
+      setIsLoadingNotices(true);
+      const data = await apiCall("/teachers/notices");
+      const latestNotices = data.notices || [];
+
+      // Only show the 3 most recent notices on dashboard
+      setNotices(latestNotices.slice(0, 3));
+    } catch (error: any) {
+      console.error("Error loading notices:", error);
+      // Don't show error for notices - just use empty array
+      setNotices([]);
+    } finally {
+      setIsLoadingNotices(false);
+    }
+  };
 
   const quickStats = [
     { label: "My Classes", value: "5", icon: BookOpen, color: "text-blue-600" },
