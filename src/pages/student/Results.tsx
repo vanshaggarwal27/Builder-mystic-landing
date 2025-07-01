@@ -193,60 +193,64 @@ export default function StudentResults() {
             </div>
           )}
 
-          {/* Subject-wise Current Progress */}
-          <Card className="p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Subject Performance
-            </h3>
+          {/* Results Display */}
+          {isLoading ? (
             <div className="space-y-4">
-              {examResults.currentProgress.subjects.map((subject, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-900">
-                      {subject.name}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">
-                        {subject.marks}/{subject.total}
-                      </span>
-                      <Badge
-                        variant="secondary"
-                        className={getGradeColor(subject.grade)}
-                      >
-                        {subject.grade}
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="p-4">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded animate-pulse mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                </Card>
+              ))}
+            </div>
+          ) : results.length > 0 ? (
+            <div className="space-y-4">
+              {results.map((result) => (
+                <Card key={result._id} className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{result.subject}</h4>
+                      <p className="text-sm text-gray-600">{result.examName}</p>
+                      <p className="text-xs text-gray-500">Teacher: {result.teacher}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-gray-900">
+                        {result.marks}/{result.totalMarks}
+                      </div>
+                      <Badge className={getGradeColor(result.grade)}>
+                        {result.grade}
                       </Badge>
                     </div>
                   </div>
-                  <Progress
-                    value={(subject.marks / subject.total) * 100}
-                    className="h-2"
-                  />
-                </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Performance</span>
+                      <span>{Math.round((result.marks / result.totalMarks) * 100)}%</span>
+                    </div>
+                    <Progress
+                      value={(result.marks / result.totalMarks) * 100}
+                      className="h-2"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+                    <span>Exam Date: {new Date(result.examDate).toLocaleDateString()}</span>
+                    <span>Class: {result.class}</span>
+                  </div>
+                </Card>
               ))}
             </div>
-          </Card>
-
-          {/* Examination History */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Examination History
-            </h3>
-
-            <Tabs defaultValue="all" className="mb-4">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="final">Final</TabsTrigger>
-                <TabsTrigger value="term">Terms</TabsTrigger>
-                <TabsTrigger value="monthly">Monthly</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="all" className="space-y-4">
-                {examResults.examHistory.map((exam) => (
-                  <Card key={exam.id} className="p-4 card-hover">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">
+          ) : (
+            <Card className="p-6 text-center">
+              <Trophy className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-600 mb-1">No Results Available</p>
+              <p className="text-sm text-gray-500">
+                Your teachers haven't uploaded any exam results yet. Check back later or contact your teachers.
+              </p>
+            </Card>
+          )}
                             {exam.name}
                           </h4>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
