@@ -312,20 +312,20 @@ export default function TeacherUploadResults() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="subject">Subject *</Label>
+                    <Label htmlFor="examType">Exam Type *</Label>
                     <Select
-                      value={examDetails.subject}
+                      value={examDetails.examType}
                       onValueChange={(value) =>
-                        setExamDetails({ ...examDetails, subject: value })
+                        setExamDetails({ ...examDetails, examType: value })
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select subject" />
+                        <SelectValue placeholder="Select exam type" />
                       </SelectTrigger>
                       <SelectContent>
-                        {subjects.map((subject) => (
-                          <SelectItem key={subject} value={subject}>
-                            {subject}
+                        {examTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -334,23 +334,54 @@ export default function TeacherUploadResults() {
                   <div>
                     <Label htmlFor="class">Class *</Label>
                     <Select
-                      value={examDetails.class}
-                      onValueChange={(value) =>
-                        setExamDetails({ ...examDetails, class: value })
-                      }
+                      value={examDetails.classId}
+                      onValueChange={handleClassChange}
+                      disabled={isLoadingClasses}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select class" />
+                        <SelectValue
+                          placeholder={
+                            isLoadingClasses ? "Loading..." : "Select class"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        {classes.map((cls) => (
-                          <SelectItem key={cls} value={cls}>
-                            {cls}
+                        {teacherClasses.map((cls) => (
+                          <SelectItem key={cls._id} value={cls._id}>
+                            {cls.name} ({cls.studentCount} students)
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="subject">Subject *</Label>
+                  <Select
+                    value={examDetails.subject}
+                    onValueChange={(value) =>
+                      setExamDetails({ ...examDetails, subject: value })
+                    }
+                    disabled={!selectedClass}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          !selectedClass
+                            ? "Select class first"
+                            : "Select subject"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedClass?.subjects.map((subject) => (
+                        <SelectItem key={subject} value={subject}>
+                          {subject}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
@@ -453,71 +484,81 @@ export default function TeacherUploadResults() {
                   </div>
 
                   <div className="space-y-1">
-                    {students.map((student) => (
-                      <div
-                        key={student.id}
-                        className="p-4 border-b last:border-b-0"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <div className="font-medium">{student.name}</div>
-                            <div className="text-sm text-gray-500">
-                              Roll No: {student.rollNumber}
-                            </div>
-                          </div>
-                          {student.grade && (
-                            <div
-                              className={`px-2 py-1 rounded text-sm font-semibold ${
-                                student.grade === "A+" || student.grade === "A"
-                                  ? "bg-green-100 text-green-700"
-                                  : student.grade === "B+" ||
-                                      student.grade === "B"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : student.grade === "C"
-                                      ? "bg-yellow-100 text-yellow-700"
-                                      : "bg-red-100 text-red-700"
-                              }`}
-                            >
-                              {student.grade}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label className="text-xs">Marks</Label>
-                            <Input
-                              type="number"
-                              value={student.marks}
-                              onChange={(e) =>
-                                updateStudentResult(
-                                  student.id,
-                                  "marks",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="0"
-                              className="h-8"
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-xs">Remarks</Label>
-                            <Input
-                              value={student.remarks}
-                              onChange={(e) =>
-                                updateStudentResult(
-                                  student.id,
-                                  "remarks",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Optional"
-                              className="h-8"
-                            />
-                          </div>
-                        </div>
+                    {students.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500">
+                        <Users className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                        <p>Please select a class to see students</p>
                       </div>
-                    ))}
+                    ) : (
+                      students.map((student) => (
+                        <div
+                          key={student._id}
+                          className="p-4 border-b last:border-b-0"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <div className="font-medium">{student.name}</div>
+                              <div className="text-sm text-gray-500">
+                                Roll No: {student.rollNumber}
+                              </div>
+                            </div>
+                            {student.grade && (
+                              <div
+                                className={`px-2 py-1 rounded text-sm font-semibold ${
+                                  student.grade === "A+" ||
+                                  student.grade === "A"
+                                    ? "bg-green-100 text-green-700"
+                                    : student.grade === "B+" ||
+                                        student.grade === "B"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : student.grade === "C"
+                                        ? "bg-yellow-100 text-yellow-700"
+                                        : "bg-red-100 text-red-700"
+                                }`}
+                              >
+                                {student.grade}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs">Marks</Label>
+                              <Input
+                                type="number"
+                                min="0"
+                                max={examDetails.totalMarks || 100}
+                                value={student.marksObtained}
+                                onChange={(e) =>
+                                  updateStudentResult(
+                                    student._id,
+                                    "marksObtained",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="0"
+                                className="h-8"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Remarks</Label>
+                              <Input
+                                value={student.remarks}
+                                onChange={(e) =>
+                                  updateStudentResult(
+                                    student._id,
+                                    "remarks",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="Optional"
+                                className="h-8"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </TabsContent>
