@@ -130,7 +130,29 @@ export default function TeacherChat() {
   ];
 
   const sendMessage = () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !selectedStudent) return;
+
+    const newMessage = {
+      id: Date.now(),
+      sender: "teacher",
+      message: message.trim(),
+      time: new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      isMe: true,
+      timestamp: Date.now(),
+    };
+
+    // Add to current messages
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
+
+    // Save to localStorage for persistence
+    localStorage.setItem(
+      `chat_teacher_${selectedStudent}`,
+      JSON.stringify(updatedMessages),
+    );
 
     toast({
       title: "Message Sent",
